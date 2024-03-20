@@ -1,0 +1,479 @@
+version: '3'
+
+env:
+  ROOT: '{{.PWD}}'
+  RESULTS: '{{.ROOT}}/results'
+  ##################################
+  # Pin/libdft vars
+  PIN_VERSION: 'pin-3.28-98749-g6643ecee5-gcc-linux'
+  PIN_ROOT: '{{.ROOT}}/src/misc/{{.PIN_VERSION}}'
+  PIN: '{{.PIN_ROOT}}/pin'
+  LIBDFT: '{{.ROOT}}/src/libdft64-ng'
+  PIN_ARCH: 'intel64'
+  ##################################
+  # Build vars
+  INSTALL_DIR: '{{.ROOT}}/build'
+  CC: 'gcc-9'
+  CXX: 'g++-9'
+  AR: 'ar'
+  CFLAGS: '-fPIC -fPIE -Og -g'
+  AR_FLAGS: '-cru'
+  LDFLAGS: '-z max-page-size=0x1000'
+  HAVE_LIBDFT: 1
+  ##################################
+  # Misc vars
+  ### We have to do this janky PREFIX thing before some commands because go-task cannot override env vars
+  DEFAULT_CORES: '{{.ROOT}}/results/misc/default-cores/'
+  APACHE_APR_URL: "https://dlcdn.apache.org//apr/apr-1.7.4.tar.gz"
+  APACHE_UTIL_URL: "https://dlcdn.apache.org//apr/apr-util-1.6.3.tar.gz"
+
+vars:
+  NPROC:
+    sh: nproc
+
+tasks:
+
+  ##############################################################################
+  ## Setup tasks ###############################################################
+
+  init:
+    desc: Initializes repo
+    cmds:
+      - task init-submodule init-pkgs init-env init-getpin init-misc einstein-default-config apache-setup db-init
+
+  init-pkgs:
+    cmds:
+      - sudo apt-get update && sudo apt-get -y upgrade
+      - sudo apt-get install -y cpanminus libpq-dev miller libldap2-dev libpam0g-dev libzstd-dev libbz2-dev libxxhash-dev libmaxminddb-dev liblua5.4-dev lldb gcovr smem gcc-9 g++-9 python3-pip postgresql prelink libpcre3-dev libxslt-dev libgeoip-dev libgd-dev libperl-dev libipc-run-perl bison flex libmemcached-tools libevent-dev gdb net-tools
+      - pip install django tqdm pygdbmi psycopg2
+      - cpanm -S IPC::Run Time::Stopwatch Bundle::ApacheTest HTTP::DAV DateTime Time::HiRes Test::Harness Crypt::SSLeay Net::SSLeay IO::Socket::SSL IO::Socket::IP IO::Select LWP::Protocol::https AnyEvent AnyEvent::WebSocket::Client LWP::Protocol::AnyEvent::http FCGI || true
+
+  init-submodule:
+    cmds:
+      - git submodule update --init --progress
+
+  init-getpin:
+    cmds:
+      - cd src/misc && wget https://software.intel.com/sites/landingpage/pintool/downloads/${PIN_VERSION}.tar.gz && tar -xf ${PIN_VERSION}.tar.gz && rm ${PIN_VERSION}.tar.gz
+
+  init-misc:
+    cmds:
+      # Prepare default directory for core dumps
+      - mkdir -p ${DEFAULT_CORES}
+
+  init-env:
+    cmds:
+      # Set gcc-9 as the default
+      - sudo update-alternatives --remove-all gcc || true
+      - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 110 --slave /usr/bin/g++ g++ /usr/bin/g++-9 --slave /usr/bin/gcov gcov /usr/bin/gcov-9
+      # Enable userfaultfd (for libdft) and disable ptrace_scope (as advised by Pin's documentation)
+      - sudo sysctl -w vm.unprivileged_userfaultfd=1 kernel.yama.ptrace_scope=0
+
+  ##############################################################################
+  ## cmdsvr tasks ##############################################################
+
+  cmdsvr-build:
+    desc: Build command server
+    cmds:
+      - cd src/cmdsvr && make -j${NPROC} -s
+
+  cmdsvr-clean:
+    desc: Clean command server
+    cmds:
+      - cd src/cmdsvr && make clean -j${NPROC} -s
+
+  ##############################################################################
+  ## libdft tasks ##############################################################
+
+  libdft-build:
+    desc: Build libdft64-ng
+    cmds:
+      # Can add -DDEBUG_MEMTAINT and -DDEBUG_INFO here
+      - cd ${LIBDFT} && CPPFLAGS="-g -DLIBDFT_TAG_PTR -DLIBDFT_PTR_32 -DLIBDFT_TAG_SSET_MAX=16" make all -j${NPROC} -s
+
+  libdft-build-1tagperset:
+    desc: Build libdft64-ng, but use 1 tag per tagset
+    cmds:
+      # Can add -DDEBUG_MEMTAINT and -DDEBUG_INFO here
+      - cd ${LIBDFT} && CPPFLAGS="-g -DLIBDFT_TAG_PTR -DLIBDFT_PTR_32 -DLIBDFT_TAG_SSET_MAX=1" make all -j${NPROC} -s
+
+  libdft-clean:
+    desc: Clean libdft64-ng
+    cmds:
+      - cd ${LIBDFT} && make clean -j${NPROC} -s
+
+  libdft-test-all:
+    desc: Run libdft64-ng tests
+    cmds:
+      - cd ${LIBDFT}/tests && make run-all
+
+  libdft-test:
+    desc: Run a specific libdft64-ng test
+    cmds:
+      - cd ${LIBDFT}/tests && make {{.CLI_ARGS}}.run
+
+  ##############################################################################
+  ## Einstein tasks ############################################################
+
+  einstein-build:
+    desc: Build the Einstein tool
+    cmds:
+      - cd src/einstein && CPPFLAGS='-DROOT=\"{{.ROOT}}\" -g -DLIBDFT_TAG_PTR -DLIBDFT_PTR_32 -DLIBDFT_TAG_SSET_MAX=16' make obj-intel64/einstein.so -j${NPROC} -s
+
+  einstein-build-1tagperset:
+    desc: Build the Einstein tool, but use 1 tag per tagset
+    cmds:
+      - cd src/einstein && CPPFLAGS='-DROOT=\"{{.ROOT}}\" -g -DLIBDFT_TAG_PTR -DLIBDFT_PTR_32 -DLIBDFT_TAG_SSET_MAX=1' make obj-intel64/einstein.so -j${NPROC} -s
+
+  einstein-build-rop:
+    desc: Build Newton, reimplemented via the Einstein tool
+    cmds:
+      - cd src/einstein && CPPFLAGS='-DROOT=\"{{.ROOT}}\" -g -DLIBDFT_TAG_PTR -DLIBDFT_PTR_32 -DLIBDFT_TAG_SSET_MAX=16 -DDFTROP' make obj-intel64/einstein.so -j${NPROC} -s
+
+  einstein-clean:
+    desc: Clean the Einstein tool
+    cmds:
+      - cd src/einstein && make clean -j${NPROC} -s
+
+  einstein-test:
+    desc: Build/run Einstein tests, and parse into reports file
+    cmds:
+      - rm -rf apps/tests/.tmp/*
+      - task einstein-default-config
+      - cd apps/tests && make clean -j${NPROC} && make all -j${NPROC} && make run-all
+      - task db-add-reports-test db-analyze-reports
+
+  einstein-test-minimal:
+    cmds:
+      # Build/run Einstein tests, and nothing else
+      - rm -rf apps/tests/.tmp/*
+      - task einstein-default-config
+      - cd apps/tests && make clean -j${NPROC} && make all -j${NPROC} && make run-minimal
+
+  einstein-default-config:
+    desc: Initialize Einstein config
+    cmds:
+      - cp build/einstein-config.default.json build/einstein-config.json
+
+  einstein-nowrite-config:
+    desc: Initialize Einstein config
+    cmds:
+      - cp build/einstein-config.no-write.json build/einstein-config.json
+
+  ##############################################################################
+  ## Post-processing tasks #####################################################
+
+  ################################
+  #### Parsing
+
+  parse-tests:
+    cmds:
+      - cd apps && ./parse-reports.sh tests > {{.RESULTS}}/reports/dtest.json
+
+  parse-app:
+    cmds:
+      # Parse reports for the app in CLI_ARGS
+      - cd apps && ./parse-reports.sh {{.CLI_ARGS}} > {{.RESULTS}}/reports/dcurrent.json
+
+  parse-all:
+    cmds:
+      # Parse all logs
+      - cd apps && ./parse-reports.sh ALL > {{.RESULTS}}/reports/{{.TIME}}_all.json
+      - cd {{.RESULTS}}/reports/ && rm -f dcurrent.json && ln -s {{.TIME}}_all.json dcurrent.json
+    vars:
+      TIME:
+        sh: date +"%Y-%m-%d-%H:%M:%S"
+
+  ################################
+  #### DB: Init/uninit
+
+  db-init:
+    cmds:
+      # Create DB user with roles, etc.
+      - sudo -u postgres psql -c "CREATE USER einstein_user WITH PASSWORD 'einstein_password'"
+      - sudo -u postgres psql -c "ALTER ROLE einstein_user SET client_encoding TO 'utf8'"
+      - sudo -u postgres psql -c "ALTER ROLE einstein_user SET default_transaction_isolation TO 'read committed'"
+      - sudo -u postgres psql -c "ALTER ROLE einstein_user SET timezone TO 'UTC'"
+      - task db-create
+
+  db-uninit:
+    cmds:
+      # Undo db-init
+      - task db-clean
+      - sudo -u postgres psql -c "DROP USER einstein_user"
+
+  ################################
+  #### DB: Create/clean
+
+  db-create:
+    cmds:
+      # Create DB
+      - sudo -u postgres psql -c "CREATE DATABASE einstein_db"
+      - sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE einstein_db TO einstein_user"
+      - cd {{.RESULTS}} && ./db_manage.py makemigrations db && ./db_manage.py migrate
+
+  db-clean:
+    cmds:
+      # Remove DB
+      - cd {{.RESULTS}} && rm -rf db/migrations __pycache__ db/__pycache__ reports/reports.db
+      - task db-revoke-connections
+      - sudo -u postgres psql -c "DROP DATABASE einstein_db"
+
+  ################################
+  #### DB: Save/revert
+
+  db-save:
+    desc: Renames DB from einstein_db to saved_einstein_db
+    cmds:
+      - task db-revoke-connections
+      - sudo -u postgres psql -c "ALTER DATABASE einstein_db RENAME TO saved_einstein_db;"
+
+  db-revert:
+    desc: Renames DB from saved_einstein_db to einstein_db
+    cmds:
+      - task db-revoke-connections db-backup-revoke-connections
+      - sudo -u postgres psql -c "ALTER DATABASE saved_einstein_db RENAME TO einstein_db;"
+
+  ################################
+  #### DB: Add reports
+
+  _db-add-reports:
+    cmds:
+      - cd {{.RESULTS}} && ./db_main.py add_reports --json_path={{.CLI_ARGS}}
+
+  db-add-reports:
+    desc: Add reports to the database
+    cmds:
+      - task parse-all db-clean db-create
+      - task _db-add-reports -- reports/dcurrent.json
+
+  db-add-reports-test:
+    cmds:
+      # Add reports from test to the the database
+      - task parse-tests
+      - task db-clean db-create
+      - task _db-add-reports -- reports/dtest.json
+
+  db-add-rop-reports:
+    desc: Add ROP reports to the database
+    cmds:
+      - cd apps && ./parse-rop-reports.sh ALL > {{.RESULTS}}/reports/{{.TIME}}_ROP_all.json
+      - cd {{.RESULTS}}/reports/ && rm -f dcurrent_ROP.json && ln -s {{.TIME}}_ROP_all.json dcurrent_ROP.json
+      - task db-clean db-create
+      - cd {{.RESULTS}} && ./db_main.py add_rop_reports --json_path=reports/dcurrent_ROP.json && ./db_main.py analyze_rop_reports --nproc {{.NPROC}} && ./db_main.py print_rop_candidates
+
+  ################################
+  #### DB: Analysis, printing
+
+  db-analyze-reports:
+    desc: Analyze reports find candidate exploits
+    cmds:
+      - cd {{.RESULTS}} && ./db_main.py analyze_reports --nproc {{.NPROC}}
+
+  db-analyze-reports-singleproc:
+    cmds:
+      - cd {{.RESULTS}} && ./db_main.py analyze_reports --nproc 1
+
+  db-analyze-candidates:
+    desc: Analyze candidate exploits to determine which are confirmed exploits
+    cmds:
+      - cd {{.RESULTS}} && ./db_main.py analyze_candidates --root_path {{.ROOT}}
+
+  db-print-candidates:
+    cmds:
+      - cd {{.RESULTS}} && ./db_main.py print_candidates
+
+  db-print-exploits:
+    cmds:
+      - cd {{.RESULTS}} && ./db_main.py print_exploits
+
+  ################################
+  #### DB: Internal helpers
+
+  db-revoke-connections:
+    cmds:
+      # Revoke any connections to einstein_db
+      - sudo -u postgres psql -c "REVOKE CONNECT ON DATABASE einstein_db FROM public"
+      - sudo -u postgres psql -c "SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = 'einstein_db';"
+
+  db-backup-revoke-connections:
+    cmds:
+      # Revoke any connections to backup_einstein_db
+      - sudo -u postgres psql -c "REVOKE CONNECT ON DATABASE saved_einstein_db FROM public"
+      - sudo -u postgres psql -c "SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = 'saved_einstein_db';"
+
+  db-list:
+    cmds:
+      - sudo -u postgres psql -c "\l"
+
+  ##############################################################################
+  ## App tasks #################################################################
+
+  app-build:
+    cmds:
+      - cd apps/{{.CLI_ARGS}} && ./build.inst
+
+  app-test:
+    cmds:
+      - task einstein-default-config apps-stop
+      - cd apps && ./simple-test.sh {{.CLI_ARGS}}
+
+  app-eval:
+    cmds:
+      - task einstein-default-config apps-stop
+      - time ( cd apps/{{.CLI_ARGS}} && BENCH_TYPE=2 ./clientctl bench || true )
+
+  app-eval-brief:
+    cmds:
+      - timeout --preserve-status 5m task app-eval -- {{.CLI_ARGS}}
+
+  app-eval-custom:
+    cmds:
+      - task apps-stop
+      - time ( cd apps/{{.CLI_ARGS}} && BENCH_TYPE=3 ./clientctl bench || true )
+
+  app-eval-tmp:
+    cmds:
+      - task apps-stop
+      - time ( cd apps/{{.CLI_ARGS}} && BENCH_TYPE=4 ./clientctl bench || true )
+
+  ################################
+  #### nginx
+  nginx-build:         {cmds: [task app-build       -- nginx-1.23.0]}
+  nginx-test:          {cmds: [task app-test        -- nginx-1.23.0]}
+  nginx-eval:          {cmds: [task app-eval        -- nginx-1.23.0]}
+  nginx-eval-brief:    {cmds: [task app-eval-brief  -- nginx-1.23.0]}
+  nginx-eval-custom:   {cmds: [task app-eval-custom -- nginx-1.23.0]}
+  nginx-eval-tmp:      {cmds: [task app-eval-tmp    -- nginx-1.23.0]}
+  nginx-parse-reports: {cmds: [task parse-app       -- nginx-1.23.0]}
+
+  ################################
+  #### lighttpd
+  lighttpd-build:         {cmds: [task app-build       -- lighttpd-1.4.65]}
+  lighttpd-test:          {cmds: [task app-test        -- lighttpd-1.4.65 -f install/etc/lighttpd.conf]}
+  lighttpd-eval:          {cmds: [task app-eval        -- lighttpd-1.4.65]}
+  lighttpd-eval-brief:    {cmds: [task app-eval-brief  -- lighttpd-1.4.65]}
+  lighttpd-eval-custom:   {cmds: [task app-eval-custom -- lighttpd-1.4.65]}
+  lighttpd-eval-tmp:      {cmds: [task app-eval-tmp    -- lighttpd-1.4.65]}
+  lighttpd-parse-reports: {cmds: [task parse-app       -- lighttpd-1.4.65]}
+
+  ################################
+  #### apache
+  apache-setup:
+    cmds:
+      - cd apps/apache-2.4.54/srclib && wget -qO- {{.APACHE_APR_URL}} | tar xvz && mv apr-*.*.* apr
+      - cd apps/apache-2.4.54/srclib && wget -qO- {{.APACHE_UTIL_URL}} | tar xvz && mv apr-util-*.*.* apr-util
+  apache-build:         {cmds: [task app-build       -- apache-2.4.54]}
+  apache-test:          {cmds: [task app-test        -- apache-2.4.54 -f $ROOT/apps/apache-2.4.54/myhttpd.conf -k start]}
+  # If 'bench' or 'custom' doesn't work the first time, try running the commands under 'Configuring Apache test suite' in apps/apache-2.4.54/runbench
+  apache-eval:          {cmds: [task app-eval        -- apache-2.4.54]}
+  apache-eval-brief:    {cmds: [task app-eval-brief  -- apache-2.4.54]}
+  apache-eval-custom:   {cmds: [task app-eval-custom -- apache-2.4.54]}
+  apache-eval-tmp:      {cmds: [task app-eval-tmp    -- apache-2.4.54]}
+  apache-parse-reports: {cmds: [task parse-app       -- apache-2.4.54]}
+
+  ################################
+  #### postgres
+  postgres-build:         {cmds: [task app-build       -- postgresql-15.1]}
+  postgres-test:          {cmds: [task app-test        -- postgresql-15.1]}
+  postgres-eval:          {cmds: [task app-eval        -- postgresql-15.1]}
+  postgres-eval-brief:    {cmds: [task app-eval-brief  -- postgresql-15.1]}
+  postgres-eval-custom:   {cmds: [task app-eval-custom -- postgresql-15.1]}
+  postgres-eval-tmp:      {cmds: [task app-eval-tmp    -- postgresql-15.1]}
+  postgres-parse-reports: {cmds: [task parse-app       -- postgresql-15.1]}
+
+  ################################
+  #### redis
+  redis-build:         {cmds: [task app-build       -- redis-7.0.5]}
+  redis-test:          {cmds: [task app-test        -- redis-7.0.5]}
+  redis-eval:          {cmds: [task app-eval        -- redis-7.0.5]}
+  redis-eval-brief:    {cmds: [task app-eval-brief  -- redis-7.0.5]}
+  redis-eval-custom:   {cmds: [task app-eval-custom -- redis-7.0.5]}
+  redis-eval-tmp:      {cmds: [task app-eval-tmp    -- redis-7.0.5]}
+  redis-parse-reports: {cmds: [task parse-app       -- redis-7.0.5]}
+
+  ################################
+  #### memcached
+  memcached-build:         {cmds: [task app-build       -- memcached-1.6.17]}
+  memcached-test:          {cmds: [task app-test        -- memcached-1.6.17 -p 1080 -U 1080]}
+  memcached-eval:          {cmds: [task app-eval        -- memcached-1.6.17]}
+  memcached-eval-brief:    {cmds: [task app-eval-brief  -- memcached-1.6.17]}
+  memcached-eval-custom:   {cmds: [task app-eval-custom -- memcached-1.6.17]}
+  memcached-eval-tmp:      {cmds: [task app-eval-tmp    -- memcached-1.6.17]}
+  memcached-parse-reports: {cmds: [task parse-app       -- memcached-1.6.17]}
+
+  ################################
+  #### All apps
+
+  apps-stop:
+    cmds:
+      - cd apps && ./stop-all-servers.sh
+
+  apps-build:
+    desc: Build all the apps
+    cmds:
+      - time ( task nginx-build lighttpd-build apache-build postgres-build redis-build memcached-build )
+
+  apps-test:
+    desc: Run all the apps with a simple workload
+    cmds:
+      - task nginx-test lighttpd-test apache-test postgres-test redis-test memcached-test
+
+  apps-eval:
+    desc: Run all the apps with their test suites
+    cmds:
+      - task einstein-default-config nginx-eval lighttpd-eval apache-eval postgres-eval redis-eval memcached-eval
+
+  apps-eval-brief:
+    desc: Run all the apps with their test suites until some timeout
+    cmds:
+      - task einstein-default-config nginx-eval-brief lighttpd-eval-brief apache-eval-brief postgres-eval-brief redis-eval-brief memcached-eval-brief
+
+  ##############################################################################
+  # Report management
+
+  reports-clean:
+    desc: Delete old reports in .tmp directories
+    cmds:
+      - rm -rf apps/*/.tmp/* {{.DEFAULT_CORES}}/*
+
+  reports-save:
+    cmds:
+      # Move current reports from .tmp directory into a .tmp-old subdirectory
+      - cd apps/nginx-1.23.0     && mkdir -p .tmp-old && touch .tmp/x && mv .tmp/* .tmp-old/ && rm .tmp-old/x
+      - cd apps/lighttpd-1.4.65  && mkdir -p .tmp-old && touch .tmp/x && mv .tmp/* .tmp-old/ && rm .tmp-old/x
+      - cd apps/apache-2.4.54    && mkdir -p .tmp-old && touch .tmp/x && mv .tmp/* .tmp-old/ && rm .tmp-old/x
+      - cd apps/postgresql-15.1  && mkdir -p .tmp-old && touch .tmp/x && mv .tmp/* .tmp-old/ && rm .tmp-old/x
+      - cd apps/redis-7.0.5      && mkdir -p .tmp-old && touch .tmp/x && mv .tmp/* .tmp-old/ && rm .tmp-old/x
+      - cd apps/memcached-1.6.17 && mkdir -p .tmp-old && touch .tmp/x && mv .tmp/* .tmp-old/ && rm .tmp-old/x
+
+  rop-reports-save:
+    cmds:
+      # Move current reports from .tmp directory into a .tmp-old-rop subdirectory
+      - cd apps/nginx-1.23.0     && mkdir -p .tmp-old-rop && touch .tmp/x && mv .tmp/* .tmp-old-rop/ && rm .tmp-old-rop/x
+      - cd apps/lighttpd-1.4.65  && mkdir -p .tmp-old-rop && touch .tmp/x && mv .tmp/* .tmp-old-rop/ && rm .tmp-old-rop/x
+      - cd apps/apache-2.4.54    && mkdir -p .tmp-old-rop && touch .tmp/x && mv .tmp/* .tmp-old-rop/ && rm .tmp-old-rop/x
+      - cd apps/postgresql-15.1  && mkdir -p .tmp-old-rop && touch .tmp/x && mv .tmp/* .tmp-old-rop/ && rm .tmp-old-rop/x
+      - cd apps/redis-7.0.5      && mkdir -p .tmp-old-rop && touch .tmp/x && mv .tmp/* .tmp-old-rop/ && rm .tmp-old-rop/x
+      - cd apps/memcached-1.6.17 && mkdir -p .tmp-old-rop && touch .tmp/x && mv .tmp/* .tmp-old-rop/ && rm .tmp-old-rop/x
+
+  reports-revert:
+    cmds:
+      # Delete current reports and move old reports from .tmp-old directory into .tmp subdirectory
+      - task reports-clean
+      - cd apps/nginx-1.23.0     && touch .tmp-old/x && mv .tmp-old/* .tmp/ && rm .tmp/x
+      - cd apps/lighttpd-1.4.65  && touch .tmp-old/x && mv .tmp-old/* .tmp/ && rm .tmp/x
+      - cd apps/apache-2.4.54    && touch .tmp-old/x && mv .tmp-old/* .tmp/ && rm .tmp/x
+      - cd apps/postgresql-15.1  && touch .tmp-old/x && mv .tmp-old/* .tmp/ && rm .tmp/x
+      - cd apps/redis-7.0.5      && touch .tmp-old/x && mv .tmp-old/* .tmp/ && rm .tmp/x
+      - cd apps/memcached-1.6.17 && touch .tmp-old/x && mv .tmp-old/* .tmp/ && rm .tmp/x
+
+  rop-reports-revert:
+    cmds:
+      # Delete current reports and move old reports from .tmp-old-rop directory into .tmp subdirectory
+      - task reports-clean
+      - cd apps/nginx-1.23.0     && touch .tmp-old-rop/x && mv .tmp-old-rop/* .tmp/ && rm .tmp/x
+      - cd apps/lighttpd-1.4.65  && touch .tmp-old-rop/x && mv .tmp-old-rop/* .tmp/ && rm .tmp/x
+      - cd apps/apache-2.4.54    && touch .tmp-old-rop/x && mv .tmp-old-rop/* .tmp/ && rm .tmp/x
+      - cd apps/postgresql-15.1  && touch .tmp-old-rop/x && mv .tmp-old-rop/* .tmp/ && rm .tmp/x
+      - cd apps/redis-7.0.5      && touch .tmp-old-rop/x && mv .tmp-old-rop/* .tmp/ && rm .tmp/x
