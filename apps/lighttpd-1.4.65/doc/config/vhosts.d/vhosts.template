@@ -1,0 +1,26 @@
+#######################################################################
+##
+## For more examples check:
+##
+## https://redmine.lighttpd.net/projects/lighttpd/wiki/Docs_Configuration
+##
+$HTTP["host"] == "download.example.com" {
+  var.server_name = "download.example.com"
+  server.name = server_name
+  server.document-root = vhosts_dir + "/web/" + server_name + "/htdocs"
+
+  ## TLS certificate per vhost
+  ##
+  #ssl.pemfile = vhosts_dir + "/web/" + server_name + "/certs/fullchain.pem"
+  #ssl.privkey = vhosts_dir + "/web/" + server_name + "/certs/privkey.pem"
+  #ssl.stapling-file = vhosts_dir + "/web/" + server_name + "/certs/staple.der"
+
+  ## use separate access/error log files
+  ## (since lighttpd 1.4.56, server.errorlog can also be used in virtual hosts)
+  ##
+  #accesslog.filename          = log_root + "/" + server_name + "/access.log"
+  #server.errorlog             = log_root + "/" + server_name + "/error.log"
+}
+
+##
+#######################################################################

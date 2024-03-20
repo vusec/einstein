@@ -1,0 +1,29 @@
+
+# Copyright (C) Igor Sysoev
+# Copyright (C) NGINX, Inc.
+
+
+case "$NJS_CC_NAME" in
+
+    SunC):
+        njs_gen_dep_flags() {
+            echo "-xMMD -xMF $NJS_BUILD_DIR/$1.tmp"
+        }
+
+        njs_gen_dep_post() {
+            printf "@sed -e 's#^.*:#$NJS_BUILD_DIR/$2:#' "
+            printf "$NJS_BUILD_DIR/$1.tmp > $NJS_BUILD_DIR/$1"
+            echo " && rm -f $NJS_BUILD_DIR/$1.tmp"
+        }
+    ;;
+
+    *)
+        njs_gen_dep_flags() {
+            echo "-MMD -MF $NJS_BUILD_DIR/$1 -MT $NJS_BUILD_DIR/$2"
+        }
+
+        njs_gen_dep_post() {
+            echo ""
+        }
+    ;;
+esac

@@ -1,0 +1,73 @@
+This test suite tests various Apache-Test setups (i.e. whether the
+configuration works correctly), something that can't be tested with
+the normal run-time test suite.
+
+1) first of all move into Apache-TestItSelf
+
+  % chdir Apache-TestItSelf
+
+
+
+2) now choose which test suite to run again, to test whether some
+  changes in A-T break its config, run 2a. But if the config testing
+  coverage is not complete, try other test suites and then try to
+  re-create this problem in 2a.
+
+  You will need to adjust config files under sample/ to reflect the
+  location of your preinstalled httpd and mod_perl files.
+
+  a. Apache-Test config test suite
+
+  % t/TEST -config sample/testitself_conf_apache_test_core.pl
+
+  this runs against the test suite under:
+
+  Apache-Test/Apache-TestItSelf/Apache-TestMe/t
+
+  it's the same as calling:
+
+  % t/TEST -base ~/apache.org/Apache-Test/Apache-TestItSelf/Apache-TestMe \
+  -config sample/testitself_conf_apache_test_core.pl
+
+
+
+  b. Apache-Test
+
+  assuming that Apache-Test is checked out under
+  ~/apache.org/Apache-Test, the following will run the tests against the
+  Apache-Test test suite
+
+  % t/TEST -base ~/apache.org/Apache-Test \
+  -config sample/testitself_conf_apache_test_core.pl
+
+
+
+  c. modperl-2.0
+
+  assuming that modperl-2.0 is checked out under
+  ~/apache.org/modperl-2.0, the following will run the tests against the
+  modperl-2.0 test suite
+
+  % t/TEST -base ~/apache.org/modperl-2.0 \
+  -config sample/testitself_conf_mp2_core.pl t/httpd_arg.t t/interactive.t
+
+
+
+  d. 3rd party modules ###
+
+  assuming that Apache-VMonitor-2.0 is checked out under
+  ~/work/modules/Apache-VMonitor-2.0, the following will run the tests
+  against the Apache-VMonitor-2.0 test suite. of course any other 3rd
+  party module should do.
+
+
+  % t/TEST -base ~/work/modules/Apache-VMonitor-2.0 \
+  -config sample/testitself_conf_mp2_modules.pl
+
+
+-----------------------------
+
+DEBUGGING:
+
+env IPCRUNDEBUG=data t/TEST t/interactive.t
+(for more options see IPC::Run / IPC::Run3 manpages)

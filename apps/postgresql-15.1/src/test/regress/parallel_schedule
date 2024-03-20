@@ -1,0 +1,529 @@
+# ----------
+# src/test/regress/parallel_schedule
+#
+# Most test scripts can be run after running just test_setup and possibly
+# create_index.  Exceptions to this rule are documented below.
+#
+# By convention, we put no more than twenty tests in any one parallel group;
+# this limits the number of connections needed to run the tests.
+# ----------
+
+# required setup steps
+test: test_setup
+
+# run tablespace by itself, and early, because it forces a checkpoint;
+# we'd prefer not to have checkpoints later in the tests because that
+# interferes with crash-recovery testing.
+taint-all-mem
+test: tablespace
+
+# ----------
+# The first group of parallel tests
+# ----------
+taint-all-mem
+test: boolean
+taint-all-mem
+test: char
+taint-all-mem
+test: name
+taint-all-mem
+test: varchar
+taint-all-mem
+test: text
+taint-all-mem
+test: int2
+taint-all-mem
+test: int4
+taint-all-mem
+test: int8
+taint-all-mem
+test: oid
+taint-all-mem
+test: float4
+taint-all-mem
+test: float8
+taint-all-mem
+test: bit
+taint-all-mem
+test: numeric
+taint-all-mem
+test: txid
+taint-all-mem
+test: uuid
+taint-all-mem
+test: enum
+taint-all-mem
+test: money
+taint-all-mem
+test: rangetypes
+taint-all-mem
+test: pg_lsn
+taint-all-mem
+test: regproc
+
+# ----------
+# The second group of parallel tests
+# multirangetypes depends on rangetypes
+# multirangetypes shouldn't run concurrently with type_sanity
+# ----------
+taint-all-mem
+test: strings
+taint-all-mem
+test: numerology
+taint-all-mem
+test: point
+taint-all-mem
+test: lseg
+taint-all-mem
+test: line
+taint-all-mem
+test: box
+taint-all-mem
+test: path
+taint-all-mem
+test: polygon
+taint-all-mem
+test: circle
+taint-all-mem
+test: date
+taint-all-mem
+test: time
+taint-all-mem
+test: timetz
+taint-all-mem
+test: timestamp
+taint-all-mem
+test: timestamptz
+taint-all-mem
+test: interval
+taint-all-mem
+test: inet
+taint-all-mem
+test: macaddr
+taint-all-mem
+test: macaddr8
+taint-all-mem
+test: multirangetypes
+
+# ----------
+# Another group of parallel tests
+# geometry depends on point, lseg, line, box, path, polygon, circle
+# horology depends on date, time, timetz, timestamp, timestamptz, interval
+# ----------
+taint-all-mem
+test: geometry
+taint-all-mem
+test: horology
+taint-all-mem
+test: tstypes
+taint-all-mem
+test: regex
+taint-all-mem
+test: type_sanity
+taint-all-mem
+test: opr_sanity
+taint-all-mem
+test: misc_sanity
+taint-all-mem
+test: comments
+taint-all-mem
+test: expressions
+taint-all-mem
+test: unicode
+taint-all-mem
+test: xid
+taint-all-mem
+test: mvcc
+
+# ----------
+# Load huge amounts of data
+# We should split the data files into single files and then
+# execute two copy tests in parallel, to check that copy itself
+# is concurrent safe.
+# ----------
+taint-all-mem
+test: copy
+taint-all-mem
+test: copyselect
+taint-all-mem
+test: copydml
+taint-all-mem
+test: insert
+taint-all-mem
+test: insert_conflict
+
+# ----------
+# More groups of parallel tests
+# Note: many of the tests in later groups depend on create_index
+# ----------
+taint-all-mem
+test: create_function_c
+taint-all-mem
+test: create_misc
+taint-all-mem
+test: create_operator
+taint-all-mem
+test: create_procedure
+taint-all-mem
+test: create_table
+taint-all-mem
+test: create_type
+taint-all-mem
+test: create_index
+taint-all-mem
+test: create_index_spgist
+taint-all-mem
+test: create_view
+taint-all-mem
+test: index_including
+taint-all-mem
+test: index_including_gist
+
+# ----------
+# Another group of parallel tests
+# ----------
+taint-all-mem
+test: create_aggregate
+taint-all-mem
+test: create_function_sql
+taint-all-mem
+test: create_cast
+taint-all-mem
+test: constraints
+taint-all-mem
+test: triggers
+taint-all-mem
+test: select
+taint-all-mem
+test: inherit
+taint-all-mem
+test: typed_table
+taint-all-mem
+test: vacuum
+taint-all-mem
+test: drop_if_exists
+taint-all-mem
+test: updatable_views
+taint-all-mem
+test: roleattributes
+taint-all-mem
+test: create_am
+taint-all-mem
+test: hash_func
+taint-all-mem
+test: errors
+taint-all-mem
+test: infinite_recurse
+
+# ----------
+# sanity_check does a vacuum, affecting the sort order of SELECT *
+# results. So it should not run parallel to other tests.
+# ----------
+taint-all-mem
+test: sanity_check
+
+# Note: the ignore: line does not skip random, just mark it as ignorable
+ignore: random
+
+# ----------
+# Another group of parallel tests
+# aggregates depends on create_aggregate
+# join depends on create_misc
+# ----------
+taint-all-mem
+test: select_into
+taint-all-mem
+test: select_distinct
+taint-all-mem
+test: select_distinct_on
+taint-all-mem
+test: select_implicit
+taint-all-mem
+test: select_having
+taint-all-mem
+test: subselect
+taint-all-mem
+test: union
+taint-all-mem
+test: case
+taint-all-mem
+test: join
+taint-all-mem
+test: aggregates
+taint-all-mem
+test: transactions
+taint-all-mem
+test: random
+taint-all-mem
+test: portals
+taint-all-mem
+test: arrays
+taint-all-mem
+test: btree_index
+taint-all-mem
+test: hash_index
+taint-all-mem
+test: update
+taint-all-mem
+test: delete
+taint-all-mem
+test: namespace
+taint-all-mem
+test: prepared_xacts
+
+# ----------
+# Another group of parallel tests
+# ----------
+taint-all-mem
+test: brin
+taint-all-mem
+test: gin
+taint-all-mem
+test: gist
+taint-all-mem
+test: spgist
+taint-all-mem
+test: privileges
+taint-all-mem
+test: init_privs
+taint-all-mem
+test: security_label
+taint-all-mem
+test: collate
+taint-all-mem
+test: matview
+taint-all-mem
+test: lock
+taint-all-mem
+test: replica_identity
+taint-all-mem
+test: rowsecurity
+taint-all-mem
+test: object_address
+taint-all-mem
+test: tablesample
+taint-all-mem
+test: groupingsets
+taint-all-mem
+test: drop_operator
+taint-all-mem
+test: password
+taint-all-mem
+test: identity
+taint-all-mem
+test: generated
+taint-all-mem
+test: join_hash
+
+# ----------
+# Additional BRIN tests
+# ----------
+taint-all-mem
+test: brin_bloom
+taint-all-mem
+test: brin_multi
+
+# ----------
+# Another group of parallel tests
+# psql depends on create_am
+# amutils depends on geometry, create_index_spgist, hash_index, brin
+# ----------
+taint-all-mem
+test: create_table_like
+taint-all-mem
+test: alter_generic
+taint-all-mem
+test: alter_operator
+taint-all-mem
+test: misc
+taint-all-mem
+test: async
+taint-all-mem
+test: dbsize
+taint-all-mem
+test: merge
+taint-all-mem
+test: misc_functions
+taint-all-mem
+test: sysviews
+taint-all-mem
+test: tsrf
+taint-all-mem
+test: tid
+taint-all-mem
+test: tidscan
+taint-all-mem
+test: tidrangescan
+taint-all-mem
+test: collate.icu.utf8 incremental_sort create_role
+
+# collate.*.utf8 tests cannot be run in parallel with each other
+taint-all-mem
+test: rules
+taint-all-mem
+test: psql
+taint-all-mem
+test: psql_crosstab
+taint-all-mem
+test: amutils
+taint-all-mem
+test: stats_ext
+taint-all-mem
+test: collate.linux.utf8
+
+# ----------
+# Run these alone so they don't run out of parallel workers
+# select_parallel depends on create_misc
+# ----------
+taint-all-mem
+test: select_parallel
+taint-all-mem
+test: write_parallel
+taint-all-mem
+test: vacuum_parallel
+
+# no relation related tests can be put in this group
+taint-all-mem
+test: publication
+taint-all-mem
+test: subscription
+
+# ----------
+# Another group of parallel tests
+# select_views depends on create_view
+# ----------
+taint-all-mem
+test: select_views
+taint-all-mem
+test: portals_p2
+taint-all-mem
+test: foreign_key
+taint-all-mem
+test: cluster
+taint-all-mem
+test: dependency
+taint-all-mem
+test: guc
+taint-all-mem
+test: bitmapops
+taint-all-mem
+test: combocid
+taint-all-mem
+test: tsearch
+taint-all-mem
+test: tsdicts
+taint-all-mem
+test: foreign_data
+taint-all-mem
+test: window
+taint-all-mem
+test: xmlmap
+taint-all-mem
+test: functional_deps
+taint-all-mem
+test: advisory_lock
+taint-all-mem
+test: indirect_toast
+taint-all-mem
+test: equivclass
+
+# ----------
+# Another group of parallel tests (JSON related)
+# ----------
+taint-all-mem
+test: json
+taint-all-mem
+test: jsonb
+taint-all-mem
+test: json_encoding
+taint-all-mem
+test: jsonpath
+taint-all-mem
+test: jsonpath_encoding
+taint-all-mem
+test: jsonb_jsonpath
+
+# ----------
+# Another group of parallel tests
+# with depends on create_misc
+# NB: temp.sql does a reconnect which transiently uses 2 connections,
+# so keep this parallel group to at most 19 tests
+# ----------
+taint-all-mem
+test: plancache
+taint-all-mem
+test: limit
+taint-all-mem
+test: plpgsql
+taint-all-mem
+test: copy2
+taint-all-mem
+test: temp
+taint-all-mem
+test: domain
+taint-all-mem
+test: rangefuncs
+taint-all-mem
+test: prepare
+taint-all-mem
+test: conversion
+taint-all-mem
+test: truncate
+taint-all-mem
+test: alter_table
+taint-all-mem
+test: sequence
+taint-all-mem
+test: polymorphism
+taint-all-mem
+test: rowtypes
+taint-all-mem
+test: returning
+taint-all-mem
+test: largeobject
+taint-all-mem
+test: with
+taint-all-mem
+test: xml
+
+# ----------
+# Another group of parallel tests
+#
+# The stats test resets stats, so nothing else needing stats access can be in
+# this group.
+# ----------
+taint-all-mem
+test: partition_join
+taint-all-mem
+test: partition_prune
+taint-all-mem
+test: reloptions
+taint-all-mem
+test: hash_part
+taint-all-mem
+test: indexing
+taint-all-mem
+test: partition_aggregate
+taint-all-mem
+test: partition_info
+taint-all-mem
+test: tuplesort
+taint-all-mem
+test: explain
+taint-all-mem
+test: compression
+taint-all-mem
+test: memoize
+taint-all-mem
+test: stats
+
+# event_trigger cannot run concurrently with any test that runs DDL
+# oidjoins is read-only, though, and should run late for best coverage
+taint-all-mem
+test: event_trigger
+taint-all-mem
+test: oidjoins
+
+# this test also uses event triggers, so likewise run it by itself
+taint-all-mem
+test: fast_default

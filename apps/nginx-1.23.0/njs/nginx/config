@@ -1,0 +1,34 @@
+ngx_addon_name="ngx_js_module"
+
+NJS_DEPS="$ngx_addon_dir/ngx_js.h \
+    $ngx_addon_dir/ngx_js_fetch.h"
+NJS_SRCS="$ngx_addon_dir/ngx_js.c \
+    $ngx_addon_dir/ngx_js_fetch.c \
+    $ngx_addon_dir/ngx_js_regex.c \
+    $ngx_addon_dir/../external/njs_webcrypto_module.c"
+
+if [ $HTTP != NO ]; then
+    ngx_module_type=HTTP_AUX_FILTER
+    ngx_module_name=ngx_http_js_module
+    ngx_module_incs="$ngx_addon_dir/../src $ngx_addon_dir/../build"
+    ngx_module_deps="$ngx_addon_dir/../build/libnjs.a $NJS_DEPS"
+    ngx_module_srcs="$ngx_addon_dir/ngx_http_js_module.c $NJS_SRCS"
+    ngx_module_libs="PCRE OPENSSL $ngx_addon_dir/../build/libnjs.a -lm"
+
+    . auto/module
+
+    if [ "$ngx_module_link" != DYNAMIC ]; then
+        NJS_SRCS=
+    fi
+fi
+
+if [ $STREAM != NO ]; then
+    ngx_module_type=STREAM
+    ngx_module_name=ngx_stream_js_module
+    ngx_module_incs="$ngx_addon_dir/../src $ngx_addon_dir/../build"
+    ngx_module_deps="$ngx_addon_dir/../build/libnjs.a $NJS_DEPS"
+    ngx_module_srcs="$ngx_addon_dir/ngx_stream_js_module.c $NJS_SRCS"
+    ngx_module_libs="PCRE OPENSSL $ngx_addon_dir/../build/libnjs.a -lm"
+
+    . auto/module
+fi

@@ -1,0 +1,16 @@
+#!/bin/bash
+
+set -o errexit
+
+RUNCLIENT_CONNECT=${RUNCLIENT_CONNECT:-0}
+PORT=1080
+
+if [ "$RUNCLIENT_CONNECT" != "0" ]; then
+    nc localhost $PORT
+    exit 0
+fi
+
+CLIENT_REQ=${CLIENT_REQ:-"SELECT datname FROM pg_database"}
+
+install/bin/psql -p $PORT test -c "$CLIENT_REQ"
+

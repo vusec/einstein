@@ -1,0 +1,24 @@
+#!/bin/bash
+
+MYPWD=`pwd`
+ROOT=../..
+
+. $MYPWD/../scripts/include/configure.inst.inc
+
+if ! which memcslap &> /dev/null; then
+    echo "Please install libmemcached-tools (i.e., memcslap) first, e.g., sudo apt-get install libmemcached-tools"
+    exit 1
+fi
+
+if ! dpkg -s libevent-dev &> /dev/null; then
+    echo "Please install libevent-dev first, e.g., sudo apt-get install libevent-dev"
+    exit 1
+fi
+
+./configure --disable-docs --disable-coverage --prefix=$MYPWD/install \
+   --enable-64bit \
+   CC="$CC" \
+   CXX="$CXX" \
+   CFLAGS="$CFLAGS -Og -g" \
+   LDFLAGS="$LDFLAGS"
+

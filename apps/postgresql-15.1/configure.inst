@@ -1,0 +1,24 @@
+#!/bin/bash
+
+MYPWD=`pwd`
+ROOT=`readlink -f ../..`
+
+. ${ROOT}/apps/scripts/include/configure.inst.inc
+
+mkdir -p $MYPWD/install
+rm -rf $MYPWD/install
+
+MYPERL5=${ROOT}/out/perl5
+
+./configure --prefix=$MYPWD/install --datarootdir=$MYPWD/datadir \
+   --without-readline \
+   --with-pgport=1080 \
+   --enable-debug \
+   --enable-tap-tests \
+   PATH=${MYPERL5}/bin:${PATH} PERL5LIB=${MYPERL5}/lib/perl5 PERL_LOCAL_LIB_ROOT=${MYPERL5} PERL_MB_OPT="--install_base ${MYPERL5}" PERL_MM_OPT="INSTALL_BASE=${MYPERL5}" \
+   CC="$CC" \
+   CXX="$CXX" \
+   CFLAGS="$CFLAGS -Og -g" \
+   CXXFLAGS="$CXXFLAGS" \
+   LDFLAGS="$LDFLAGS"
+

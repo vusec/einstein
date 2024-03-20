@@ -1,0 +1,13 @@
+!*
+.tmp*
+*.tmp
+*.log
+.vscode
+
+Makefile
+objs
+install
+Makefile.configure
+objs.configure
+tests/nginx-tests/runbench.ini
+runbench.tests.custom

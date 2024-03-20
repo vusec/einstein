@@ -1,0 +1,23 @@
+#!/bin/bash
+
+MYPWD=`pwd`
+ROOT=${ROOT-../..}
+. ${ROOT}/apps/scripts/include/build.inst.inc
+
+PROG=redis-server
+INPUT=src/${PROG}
+OUTPUT=install/bin/${PROG}
+LIBS="deps/hiredis/libhiredis.a deps/lua/src/liblua.a -lm deps/jemalloc/lib/libjemalloc.a"
+LINKER="$CC"
+
+make clean distclean
+rm -rf install/*
+rm -f src/redis-server
+
+make -j `grep -c ^processor /proc/cpuinfo` PREFIX=$MYPWD/install install
+
+if [ $HAVE_LIBDFT -eq 1 ]; then
+    ${LIBDFT}/utils/relink.py install/bin/redis-server
+    ${LIBDFT}/utils/relink.py install/bin/redis-cli
+    ${LIBDFT}/utils/relink.py install/bin/redis-benchmark
+fi

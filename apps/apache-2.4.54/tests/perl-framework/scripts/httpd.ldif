@@ -1,0 +1,56 @@
+dn: cn=httpd,dc=example,dc=com
+objectClass: applicationProcess
+objectClass: simpleSecurityObject
+cn: httpd
+description: Service Account for httpd
+userPassword: mod_authnz_ldap
+
+dn: uid=alpha,dc=example,dc=com
+objectClass: inetOrgPerson
+cn: Alpha Person
+givenName: Alpha
+sn: Person
+uid: alpha
+roomnumber: 42
+userPassword: Alpha
+
+dn: uid=beta,dc=example,dc=com
+objectClass: inetOrgPerson
+cn: Beta Person
+givenName: Beta
+sn: Person
+uid: beta
+roomnumber: 41
+userPassword: Beta
+
+dn: uid=gamma,dc=example,dc=com
+objectClass: inetOrgPerson
+cn: Gamma Person
+givenName: Gamma
+sn: Person
+uid: gamma
+roomnumber: 101
+userPassword: Gamma
+
+dn: uid=delta,dc=example,dc=com
+objectClass: inetOrgPerson
+cn: Delta Person
+givenName: Delta
+sn: Person
+uid: delta
+roomnumber: 43
+userPassword: Delta
+
+# Group
+dn: cn=Group One, dc=example,dc=com
+objectClass: groupOfUniqueNames
+uniqueMember: uid=alpha,dc=example,dc=com
+uniqueMember: uid=beta,dc=example,dc=com
+uniqueMember: uid=delta,dc=example,dc=com
+
+# Referral
+dn: ou=dept,dc=example,dc=com
+objectClass: referral
+objectClass: extensibleObject
+ou: dept
+ref: ldap://localhost:8390/ou=dept,dc=example,dc=com

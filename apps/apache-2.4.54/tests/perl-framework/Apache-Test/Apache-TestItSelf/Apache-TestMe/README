@@ -1,0 +1,5 @@
+This package contains an Apache-Test test suite used by
+Apache-TestItSelf. We use a dedicated test suite, so we can re-create
+cases which normally won't fit into the core Apache-Test test suite.
+This is the test suite that should be run from Apache-TestTestItSelf
+as explained in Apache-TestItSelf/README

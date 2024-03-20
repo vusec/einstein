@@ -1,0 +1,16 @@
+#!/bin/bash
+
+set -e
+./configure.inst
+set +e
+
+ROOT=${ROOT-../..}
+. ${ROOT}/apps/scripts/include/build.inst.inc
+
+rm -f objs/nginx
+make -j `grep -c ^processor /proc/cpuinfo`
+make -j `grep -c ^processor /proc/cpuinfo` install
+
+if [ $HAVE_LIBDFT -eq 1 ]; then
+    ${LIBDFT}/utils/relink.py install/sbin/nginx
+fi

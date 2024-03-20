@@ -1,0 +1,14 @@
+#!/bin/bash
+
+set -o errexit
+
+RUNCLIENT_CONNECT=${RUNCLIENT_CONNECT:-0}
+PORT=$(./serverctl port)
+
+if [ "$RUNCLIENT_CONNECT" != "0" ]; then
+    nc localhost $PORT
+    exit 0
+fi
+
+wget --no-hsts localhost:$PORT/index.html
+rm -f index.html

@@ -1,0 +1,155 @@
+
+========
+lighttpd
+========
+
+-------------
+a light httpd
+-------------
+
+:abstract:
+  lighttpd a secure, fast, compliant and very flexible web-server
+  which has been optimized for high-performance environments. It has a very
+  low memory footprint compared to other webservers and takes care of cpu-load.
+  Its advanced feature-set (FastCGI, CGI, Auth, Output-Compression,
+  URL-Rewriting and many more) make lighttpd the perfect webserver-software
+  for every server that is suffering load problems.
+
+:documentation:
+  https://redmine.lighttpd.net/projects/lighttpd/wiki/
+
+the naming
+----------
+
+lighttpd is a __httpd__ which is
+
+- fast as __light__ning and
+- __light__ when it comes to memory consumption and system requirements
+
+Features
+--------
+
+Network
+```````
+
+- IPv4, IPv6
+
+Protocols
+`````````
+
+- HTTP/2   (https://tools.ietf.org/rfc/rfc7540.txt)
+- HTTP/1.1 (https://tools.ietf.org/rfc/rfc2616.txt)
+- HTTP/1.0 (https://tools.ietf.org/rfc/rfc1945.txt)
+- HTTPS (via one of openssl, BoringSSL, LibreSSL, mbedTLS, wolfSSL, GnuTLS, NSS)
+- CGI/1.1 (https://tools.ietf.org/html/rfc3875.txt)
+- FastCGI (http://www.fastcgi.com/devkit/doc/fcgi-spec.html)
+
+Advanced Features
+`````````````````
+
+- load-balanced FastCGI, SCGI, reverse-proxy, socket proxy, websocket tunnel
+  (one webserver distributes requests to multiple PHP-servers via FastCGI)
+- streaming FastCGI, SCGI, reverse-proxy, socket proxy, websocket tunnel
+- custom error pages (for Response-Code 400-599)
+- virtual hosts
+- directory listings
+- URL-Rewriting
+- HTTP-Redirection
+- output-compression with transparent caching
+
+FastCGI-Support
+```````````````
+
+- parses the Response-header and completes the HTTP-header accordingly
+- Keep-Alive handling based on Content-Length header
+
+PHP-Support
+```````````
+
+- same speed as or faster than apache + mod_php4
+- handles various PHP bugs in the FastCGI SAPI
+- includes a utility to spawn FastCGI processes (necessary for PHP 4.3.x)
+
+Security features
+`````````````````
+
+- chroot(), set UID, set GID
+- protecting docroot
+
+HTTP/1.1 features
+`````````````````
+
+- Ranges (start-end, start-, -end, multiple ranges)
+- HTTP/1.0 Keep-Alive + HTTP/1.1 persistent Connections
+- methods: GET, HEAD, POST
+- Last-Modified + If-Modified handling
+- sends Content-Length if possible
+- sends Transfer-Encoding: chunk, if Content-Length is not possible
+- sends Content-Type
+- on-the-fly output compression (deflate, gzip)
+- authentication: basic and digest
+  (http://www.ietf.org/rfc/rfc2617.txt)
+
+HTTP/1.1 compliance
+```````````````````
+
+- Sends 206 for Range Requests
+- Sends 304 for If-Modified Requests
+- Sends 400 for missing Host on HTTP/1.1 requests
+- Sends 400 for broken Request-Line
+- Sends 411 for missing Content-Length on POST requests
+- Sends 416 for "out-of-range" on Range: Header
+- Sends 501 for request-method != (GET|POST|HEAD)
+- Sends 505 for protocol != HTTP/1.0 or HTTP/1.1
+- Sends Date: on every requests
+
+Intended Audience
+-----------------
+
+- Ad-Server Front-Ends ("Banner-Schleuder")
+  - delivering small files rapidly
+- php-servers under high load
+  (load-balancing the php-request over multiple PHP-servers)
+
+Works with
+----------
+
+It has been tested to work with
+
+- IE 6.0
+- Mozilla 1.x
+- Konqueror 3.1
+  (for Keep-Alive/Persistent Connections, Accept-Encoding for PHP + gzip)
+- wget
+  (for Resuming)
+- acrobat plugin
+  (for multiple ranges)
+
+
+Works on
+--------
+
+lighttpd has been verified to compile and work on
+
+- Linux
+- FreeBSD
+- NetBSD
+- OpenBSD
+- Solaris 8 + 9
+- SGI IRIX 6.5
+- Windows (when compiled under cygwin)
+(and will likely compile and run on most unix-like systems with C99 compiler)
+
+-----------------
+Starting lighttpd
+-----------------
+
+As daemon in the background: ::
+
+  $ lighttpd -f <configfile>
+
+or without detaching from the console: ::
+
+  $ lighttpd -D -f <configfile>
+
+

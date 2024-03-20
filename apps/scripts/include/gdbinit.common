@@ -1,0 +1,21 @@
+set follow-fork-mode child
+set history save
+set print inferior-events on
+set debug-file-directory /usr/lib/debug
+
+catch fork
+catch vfork
+catch exec
+
+define segv_info
+    print $_siginfo._sifields._sigfault
+end
+define dump_sentries
+    echo Calling magic_print_sentries...\n
+    call magic_print_sentries()\n
+end
+define dump_dsentries
+    echo Calling magic_print_dsentries...\n
+    call magic_print_dsentries()\n
+end
+

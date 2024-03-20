@@ -1,0 +1,47 @@
+THE SHORT VERSION
+-----------------
+
+On non-Windows machines, you can execute the testing process
+described below by running the following command in this directory:
+	make check
+
+This will run the TAP tests to run pg_upgrade, performing an upgrade
+from the version in this source tree to a new instance of the same
+version.
+
+Testing an upgrade from a different version requires a dump to set up
+the contents of this instance, with its set of binaries.  The following
+variables are available to control the test (see DETAILS below about
+the creation of the dump):
+export olddump=...somewhere/dump.sql	(old version's dump)
+export oldinstall=...otherversion/	(old version's install base path)
+
+Finally, the tests can be done by running
+	make check
+
+DETAILS
+-------
+
+The most effective way to test pg_upgrade, aside from testing on user
+data, is by upgrading the PostgreSQL regression database.
+
+This testing process first requires the creation of a valid regression
+database dump that can be then used for $olddump.  Such files contain
+most database features and are specific to each major version of Postgres.
+
+Here are the steps needed to create a dump file:
+
+1)  Create and populate the regression database in the old cluster.
+    This database can be created by running 'make installcheck' from
+    src/test/regress using its source code tree.
+
+2)  Use pg_dumpall to dump out the contents of the instance, including the
+    regression database, in the shape of a SQL file.  This requires the *old*
+    cluster's pg_dumpall so as the dump created is compatible with the
+    version of the cluster it is dumped into.
+
+Once the dump is created, it can be repeatedly used with $olddump and
+`make check`, that automates the dump of the old database, its upgrade,
+the dump out of the new database and the comparison of the dumps between
+the old and new databases.  The contents of the dumps can also be manually
+compared.

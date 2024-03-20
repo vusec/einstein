@@ -1,0 +1,200 @@
+
+============
+Installation
+============
+
+
+Quick Installation
+------------------
+
+Get lighttpd source from
+
+https://www.lighttpd.net/download/
+
+unpack it by ::
+
+  $ tar xvJf lighttpd-1.4.xx.tar.xz
+
+compile and install it with ::
+
+  $ cd lighttpd-1.4.xx
+  $ ./autogen.sh
+  $ ./configure -C
+  $ make check
+  $ /usr/bin/sudo make install
+
+take look at the configfile in ./doc/lighttpd.conf,
+make your own copy of that file and modify it for your needs.
+
+
+Online documentation
+--------------------
+https://redmine.lighttpd.net/projects/lighttpd/wiki/Devel
+https://redmine.lighttpd.net/projects/lighttpd/wiki/DevelSubversion
+https://redmine.lighttpd.net/projects/lighttpd/wiki/InstallFromSource
+
+
+Custom Installation
+-------------------
+
+required packages ::
+
+  autoconf
+  automake
+  libtool
+  m4
+  pkg-config
+
+recommended additional packages ::
+
+  pcre2
+  pcre2-devel
+  lua
+  lua-devel
+  nettle
+  nettle-devel
+
+optional packages for optional features ::
+
+  bzip2-devel         # bzip2      ./configure --with-bzip2
+  bzip2-libs
+  cyrus-sasl          # SASL       ./configure --with-sasl
+  cyrus-sasl-devel
+  gnutls              # GnuTLS     ./configure --with-gnutls
+  gnutls-devel
+  krb5-devel          # Kerberos5  ./configure --with-krb5
+  krb5-libs
+  libbrotli           # brotli     ./configure --with-brotli
+  brotli-devel
+  libdbi              # DBI        ./configure --with-dbi
+  libdbi-devel
+  libdbi-dbd-mysql
+  libdbi-dbd-pgsql
+  libdbi-dbd-sqlite
+  libmaxminddb        # MaxMindDB  ./configure --with-maxminddb
+  libmaxminddb-devel
+  libpq               # Postgresql ./configure --with-pgsql
+  libpq-devel
+  libunwind-devel     # libunwind  ./configure --with-libunwind
+  libuuid             # libuuid    ./configure --with-webdav-locks
+  libuuid-devel
+  libxml2             # libxml2    ./configure --with-webdav-props
+  libxml2-devel
+  libxml2-static
+  lua                 # Lua        ./configure --with-lua
+  lua-devel
+  mariadb-devel       # MariaDB    ./configure --with-mysql
+  mariadb-libs
+  mbedtls             # mbedTLS    ./configure --with-mbedtls
+  mbedtls-devel
+  nettle              # Nettle     ./configure --with-nettle
+  nettle-devel
+  nss                 # NSS        ./configure --with-nss
+  nss-devel
+  openldap            # OpenLDAP   ./configure --with-ldap
+  openldap-devel
+  openssl-devel       # OpenSSL    ./configure --with-openssl
+  openssl-libs
+  pam                 # PAM        ./configure --with-pam
+  pam-devel
+  pcre                # PCRE       ./configure --with-pcre
+  pcre-devel
+  pcre2               # PCRE       ./configure --with-pcre2     # (default)
+  pcre2-devel
+  sqlite              # SQLite     ./configure --with-webdav-props
+  sqlite-devel
+  valgrind            # valgrind   ./configure --with-valgrind
+  valgrind-devel
+  wolfssl             # wolfSSL    ./configure --with-wolfssl
+  wolfssl-devel
+  zlib                # zlib       ./configure --with-zlib      # (default)
+  zlib-devel
+  libzstd             # zstd       ./configure --with-zstd
+  libzstd-devel
+
+more options: ./configure --help
+
+re-run ./configure after installing packages
+
+compile and install it with ::
+
+  $ cd lighttpd-1.4.xx
+  $ ./autogen.sh        # detect/use newer versions of autotools (if present)
+  $ ./configure -C      # add --with-xxxxx custom flags
+  $ make
+  # sudo make install
+
+
+Running Tests
+-------------
+
+required packages to run test harness ::
+
+  (e.g. on Fedora 22, sudo dnf install ...)
+  (e.g. on Arch Linux, sudo pacman ... (with lowercased package names))
+
+  perl-Digest
+  perl-Digest-MD5
+  perl-Encode-Locale
+  perl-HTML-Entities-Interpolate
+  perl-HTML-Parser
+  perl-HTML-Tagset
+  perl-HTTP-Date
+  perl-HTTP-Message
+  perl-IO-HTML
+  perl-LWP-MediaTypes
+  perl-Test-Harness
+  perl-Test-Simple
+  perl-Tie-Function
+  perl-TimeDate
+
+run test harness
+
+  $ make check
+
+
+static build using SCons
+------------------------
+
+  $ scons -j 4 build_static=1 build_dynamic=0 prefix=/custom/inst/path install
+
+build_dynamic is enabled by default in SConstruct and needs to be disabled for
+the static build.  See also the BoolVariable() settings in SConstruct for other
+configurable variables that might be set in a customized build.  build_static=1
+can be replaced with build_fullstatic=1 to perform lighttpd static build with
+modules *and* to link statically against external dependencies.
+
+
+static build using make
+-----------------------
+
+* edit src/Makefile.am and, in the section under 'if LIGHTTPD_STATIC',
+  update lighttpd_SOURCES with each module to be included in the static build
+* create src/plugin-static.h with list of modules as PLUGIN_INIT(mod_foo)
+  for each module 'mod_foo' to be included in the static build
+
+  $ LIGHTTPD_STATIC=yes ./configure -C --enable-static=yes
+  $ make
+  $ sudo make install
+
+build using CMake and Xcode on Mac OS X with MacPorts
+-----------------------------------------------------
+* upgrade to latest Mac OS X
+* install Xcode from Apple Store (requires latest Mac OS X)
+* install MacPorts from https://www.macports.org/install.php
+
+  $ xcodebuild --license
+  $ xcode-select --install
+  $ sudo port selfupdate
+  $ sudo port install autoconf automake cmake libtool m4 pcre2 pkgconfig zlib zstd brotli openssl libxml sqlite3 openldap libunwind libunwind-headers mysql57 openldap ossp-uuid
+  # Note: some of the above require more fiddling to configure with CMake...
+
+  # cmake and build
+  # (all -DWITH_... flags below are optional)
+  $ cmake -Wno-dev -DWITH_PCRE2=1 -DWITH_OPENSSL=1 -DWITH_LUA=1 -DWITH_ZLIB=1 -DWITH_ZSTD=1 -DWITH_BROTLI=1 -DWITH_WEBDAV_PROPS=1 .
+  $ make -j 4
+  $ make test
+
+  # Note: many tests fail if not built with openssl
+  # lighttpd will not start up with tests/lighttpd.conf
+  #   (mod_secdownload fails to configure hmac-sha1 and hmac-sha256)

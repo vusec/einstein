@@ -1,0 +1,23 @@
+#!/bin/sh
+
+set -o errexit
+
+BINDIR=`pwd`/install/bin
+DATADIR=`pwd`/data
+
+if [ ! -e "$DATADIR" ]; then
+    mkdir $DATADIR
+else
+    rm -rf $DATADIR/*
+fi
+
+$BINDIR/initdb -D $DATADIR
+$BINDIR/postgres -D $DATADIR >postgres.log 2>&1 &
+sleep 5
+$BINDIR/dropdb test || true
+$BINDIR/createdb test
+kill `cat $DATADIR/postmaster.pid | head -1`
+sleep 3
+
+touch postgresql.init.done
+

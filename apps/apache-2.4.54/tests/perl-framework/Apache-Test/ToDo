@@ -1,0 +1,111 @@
+- on linux most symbols are resolved on demand, but this is not the
+  case with certain other platforms. so testing on linux may not
+  detect some problems, exposed on other platforms. env var
+  PERL_DL_NONLAZY=1 tries to resolve all symbols at load time. we
+  could always enforce that with this patch:
+
+--- Apache-Test/lib/Apache/TestRun.pm   16 Apr 2004 20:29:23 -0000      1.166
++++ Apache-Test/lib/Apache/TestRun.pm   6 May 2004 04:43:01 -0000
+@@ -643,7 +643,7 @@
+     }
+     close $sh;
+
+-    $original_command = "ulimit -c unlimited; $original_command";
++    $original_command = "ulimit -c unlimited; PERL_DL_NONLAZY=1 $original_comma
+nd";
+
+- general config: adjust Apache/TestConfig.pm not to write irrelevant
+  httpd.conf sections (e.g. <IfModule prefork.c> for win32, and vice
+  versa, A-T knows exactly what mpm it needs to write the config for).
+  Thus reducing the clutter.
+
+- winnt case: Apache/TestConfig.pm config for <IfModule mpm_winnt.c>
+  before Apache-2.0.50 ThreadsPerChild had to be at least as big as
+  the number of Vhosts. This was fixed in 2.0.50. Since A-T knows the
+  httpd version, it shouldn't start so many threads for httpd >=
+  2.0.50, but @MinClients@. Also add BACK_COMPAT_MARKER in the logic
+  so when no longer support httpd < 2.0.50, this logic could be removed.
+
+- sometimes the server aborts completely after the test suite has run
+  some of the tests (e.g. win32's server has crashed and no
+  replacement is available), but the client part continues to run
+  tests unaware of that problem. what would be nice to be able to
+  detect that the server is gone and somehow abort the test suite
+
+- Custom sticky config: invalidate invalid bits of the saved config,
+  e.g. if apxs is saved but can't be found on the filesystem. So if
+  someone installs Apache in one location, runs A-T which saves that
+  location, and then nukes Apache and reinstalls it into a different
+  location we should drop the previously saved config since the path
+  to apxs and/or httpd is now invalid.
+
+- Apache-Test doesn't run on IPv6 systems, need to change the
+  autogeneration of httpd.conf to support IPv6. It requires a
+  replacement of 'Listen 80' with 'Listen servername:80'
+  Philippe posted patch here:
+  http://marc.theaimsgroup.com/?l=apache-modperl-dev&m=105514290024419&w=2
+
+  For now, 127.0.0.1 will be hardcoded in the Listen directive, but a better
+  method would use this table:
+
+  Apache  \   OS      | IPV4         |  IPV6
+  --------------------------------------------
+  --enable-v4-mapped  |      80      |  80
+  --disable-v4-mapped | can't happen |  127.0.0.1:80
+
+  To more correctly pick the right Listen flavor.
+
+- Apache-Test assumes that any core file found under t/ was generated
+  by httpd, (and suggests the gdb invoking command) which is incorrect
+  in some cases. For example t/TEST -config, which is run by bin/perl,
+  may dump core as well.
+
+- consider not using the __DIE__ sighandler, but instead wrap the
+  potentially failing code in the eval trap blocks.
+
+- print STDERR is buffered in test handlers, whereas warn() works
+  normally. select() helps, but STDERR should be unbuffered in first
+  place.
+
+- If something goes wrong during the ./t/TEST's phase when all the
+  configuration files httpd.conf, etc. are generated,
+  t/conf/apache_test_config.pm now gets written, so t/TEST -clean can work
+  However if the problem happens during 'make test'  for 
+  some reason Makefile doesn't abort on exit from test_clean target, no 
+  matter if I put exit -1, 0 or 1, and proceeds with run_tests target. 
+  probably, since __DIE__ will stop the server.
+
+  to reproduce the problem during configure() apply this patch:
+
+Index: Apache-Test/lib/Apache/TestConfigPerl.pm
+===================================================================
+RCS file: /home/cvs/httpd-test/perl-framework/Apache-Test/lib/Apache/TestConfigPerl.pm,v
+retrieving revision 1.38
+diff -u -r1.38 TestConfigPerl.pm
+--- Apache-Test/lib/Apache/TestConfigPerl.pm    2001/10/18 04:18:16     1.38
++++ Apache-Test/lib/Apache/TestConfigPerl.pm    2001/10/19 02:14:56
+@@ -347,6 +347,7 @@
+     if (open $fh, $file) {
+         my $content = <$fh>;
+         close $fh;
++        require $file;
+         if ($content =~ /APACHE_TEST_CONFIGURE/m) {
+             eval { require $file };
+             warn $@ if $@; 
+
+- segfaults should be trapped and:
+  * the test routine should be aborted, since it's possible that some
+    other test will segfault too and overwrite the core file
+
+  * it'd be cool to automatically generate the backtrace with help of
+    Devel::CoreStack and save it in the file
+
+  * once we add the backtrace feature, we don't have to abort the rest
+    of the tests, but to save each bt as "backtrace.$test_path".
+    => this should be very useful in smoke testing
+
+  * later, it'd be nice to integrate this with build/bugreport.pl, so
+    the bug report with the backtrace and everything we want to know
+    from user's machine, including their /etc/shadow (:-) will be
+    automatically posted to the list.
+

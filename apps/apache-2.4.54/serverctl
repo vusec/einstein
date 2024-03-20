@@ -1,0 +1,28 @@
+#!/bin/bash
+
+PROC_NAME="httpd"
+BIN_PATH=`pwd`/install/bin/httpd
+
+ROOT=${ROOT-../..}
+
+. ${ROOT}/apps/scripts/include/cmdctl.inc
+
+SERVER_CONFIG_FILE=`pwd`/myhttpd.conf
+mode=$1
+shift || mode="no_action"
+
+case "$mode" in
+  'start')
+    echo "***** Starting $PROC_NAME server..."
+    echo "== TODO: Add 'ustart' cmd to httpd? =="
+    eval $CMD_PREFIX $BIN_PATH $*
+    ;;
+  'cleanup')
+    cmdctl_server_cleanup
+    rm -f install/logs/*
+    ;;
+  *)
+    cmdctl_server_action $mode $*
+    ;;
+esac
+

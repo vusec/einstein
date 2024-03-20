@@ -1,0 +1,70 @@
+Import('env')
+
+tests = Split('prepare.sh \
+	run-tests.pl \
+	cleanup.sh')
+
+extra_dist = Split(' \
+	condition.conf \
+	core-condition.t \
+	fastcgi-responder.conf \
+	LightyTest.pm \
+	lighttpd.conf \
+	lighttpd.htpasswd \
+	lighttpd.user \
+	mod-fastcgi.t \
+	mod-scgi.t \
+	proxy.conf \
+	request.t \
+	scgi-responder.conf \
+	var-include-sub.conf \
+	wrapper.sh \
+	')
+
+fcgi_responder = env.Program("fcgi-responder", "fcgi-responder.c")
+scgi_responder = env.Program("scgi-responder", "scgi-responder.c")
+
+def CopyTestBinary(env, binary):
+	return env.Command(target = env['ENV']['top_builddir'] + '/tests/' + binary, source = binary, action = Copy("$TARGET", "$SOURCE"))
+
+def BuildTestEnv(env, build_type):
+	builddir = build_type
+	dependencies = [build_type]
+	if build_type == 'dynamic':
+		builddir = '.'
+		dependencies += ['modules']
+
+	testenv = env.Clone()
+	testenv['ENV']['srcdir']='tests'
+	testenv['ENV']['top_builddir']='sconsbuild/' + builddir
+	prepare = testenv.AlwaysBuild(testenv.Command(build_type + '/prepare', 'prepare.sh', 'tests/prepare.sh'))
+	runtests = testenv.AlwaysBuild(testenv.Command(build_type + '/run-tests', 'run-tests.pl', 'tests/run-tests.pl'))
+	cleanup = testenv.AlwaysBuild(testenv.Command(build_type + '/cleanup', 'cleanup.sh', 'tests/cleanup.sh'))
+	testenv.Depends(runtests, prepare)
+	testenv.Depends(cleanup, runtests)
+	SideEffect('dummy-file-prevent-running-tests-in-parallel', runtests)
+
+	testenv.Depends(runtests, dependencies)
+
+	fcgis = [CopyTestBinary(testenv, 'fcgi-responder'), CopyTestBinary(testenv, 'scgi-responder')]
+	testenv.Depends(runtests, fcgis)
+
+	return [prepare, runtests, cleanup]
+
+check_dynamic = env.Alias('check_dynamic', BuildTestEnv(env, 'dynamic'))
+env.Depends(check_dynamic, 'modules')
+check_static = env.Alias('check_static', BuildTestEnv(env, 'static'))
+check_fullstatic = env.Alias('check_fullstatic', BuildTestEnv(env, 'fullstatic'))
+
+checks = []
+
+if env['build_dynamic']:
+	checks += check_dynamic
+
+if env['build_static']:
+	checks += check_static
+
+if env['build_fullstatic']:
+	checks += check_fullstatic
+
+env.Alias('check', checks)

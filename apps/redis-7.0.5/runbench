@@ -1,0 +1,34 @@
+#!/bin/bash
+
+ROOT=`readlink -f ../..`
+
+BENCH_TYPE=${BENCH_TYPE:-1}
+
+. ../scripts/include/cmdctl.inc
+
+# Run all tests
+if [ $BENCH_TYPE -eq 2 ]; then
+    RUN_EINSTEIN=1 USE_LOG_DIR=1 V=1 LOG_SUB_DIR=bench ./serverctl restart
+    sleep 10
+    echo "Running tests..."
+    ./runtest --port 1080 --host 127.0.0.1 --verbose
+    ./serverctl stop
+    exit 0
+
+# Run execve tests
+elif [ $BENCH_TYPE -eq 3 ]; then
+    echo "TODO"
+    exit 0
+
+# Run benchmarking suite
+elif [ $BENCH_TYPE -eq 4 ]; then
+    echo "TODO: Test this since its migration from llvm-apps"
+    RUNBENCH_WORKLOAD=${RUNBENCH_WORKLOAD:-GET,SET}
+    RUNBENCH_THREADS=${RUNBENCH_THREADS:-50}
+    RUNBENCH_REQUESTS=${RUNBENCH_REQUESTS:-500000}
+    SERVER_PORT=1080
+    RBENCH="install/bin/redis-benchmark -p $SERVER_PORT -q"
+    RUNBENCH_CMD="$RBENCH -n $RUNBENCH_REQUESTS -c $RUNBENCH_THREADS -t $RUNBENCH_WORKLOAD" cmdctl_runbench \
+        "^SET:.*$::::num_threads=$RUNBENCH_THREADS" \
+        "^GET:.\([0-9.]*\).*$::::requests_per_sec=\1"
+fi

@@ -1,0 +1,21 @@
+diff --git a/apps/nginx-1.23.0/tests/nginx-tests/lib/Test/Nginx.pm b/apps/nginx-1.23.0/tests/nginx-tests/lib/Test/Nginx.pm
+index d1b5b84c..bb7c8fb5 100644
+--- a/apps/nginx-1.23.0/tests/nginx-tests/lib/Test/Nginx.pm
++++ b/apps/nginx-1.23.0/tests/nginx-tests/lib/Test/Nginx.pm
+@@ -356,7 +356,7 @@ sub run(;$) {
+ 		my @error = $self->has_version('1.19.5') ?
+ 			('-e', 'error.log') : ();
+ 		my $testname = (split(/\./, $0))[0];
+-		exec('env', '-C', '../..', 'RUN_EINSTEIN=1', 'USE_LOG_DIR=1', "LOG_SUB_DIR=$testname", './serverctl', 'restart', '-p', "$testdir/", '-c', 'nginx.conf',
++		exec('env', '-C', '../..', './serverctl', 'restart', '-p', "$testdir/", '-c', 'nginx.conf',
+ 			@error, @globals)
+ 			or die "Unable to exec(): $!\n";
+ 	}
+@@ -374,7 +374,6 @@ sub run(;$) {
+ 	sleep(3);
+ 	#print(STDERR "Done! Sending taintall cmd to nginx...\n");
+ 	EinsteinTests::send_test_info('../..');
+-	system('env', '-C', '../..', './serverctl', 'udscmd', 'pids', 'dbt', 'taintall');
+ 	sleep(3);
+ 	#print(STDERR "Done! Running test.\n");
+ 

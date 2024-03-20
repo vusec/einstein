@@ -1,0 +1,27 @@
+#!/bin/bash
+
+PROC_NAME="redis-server"
+BIN_PATH=`pwd`/install/bin/redis-server
+
+. ../scripts/include/cmdctl.inc
+
+SERVER_CONF=`pwd`/einstein-redis.conf
+SERVER_PORT=1080
+
+mode=$1
+shift || mode="no_action"
+
+case "$mode" in
+  'start')
+    echo "***** Starting $PROC_NAME server..."
+    cmdctl_server_check_not_running
+    eval $CMD_PREFIX $BIN_PATH $SERVER_CONF $* &> __serverctl.tmp &
+    cmdctl_server_wait_for_listen_port $SERVER_PORT
+    cat __serverctl.tmp 1>&2
+    rm -f __serverctl.tmp
+    ;;
+  *)
+    cmdctl_server_action $mode $*
+    ;;
+esac
+

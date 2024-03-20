@@ -1,0 +1,19 @@
+to install this module simply follow the canonical procedure
+for installing any perl module
+
+  $ tar zxvf Apache-Test-1.XX.tar.gz
+  $ cd Apache-Test-1.XX
+
+  $ perl Makefile.PL
+  $ make
+  $ sudo make install
+
+if you want to run the tests contained within the distribution
+you can point to a suitable Apache distribution via
+
+  $ perl Makefile.PL -httpd /path/to/your/apache/bin/httpd
+  $ make
+  $ make test
+  $ sudo make install
+
+for further directions, see the README.

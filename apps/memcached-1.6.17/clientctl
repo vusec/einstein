@@ -1,0 +1,17 @@
+#!/bin/bash
+
+PROC_NAME=memcached
+BIN_PATH=`pwd`/install/bin/memcached
+RUN_DEPS="memcslap"
+
+. ../scripts/include/cmdctl.inc
+
+mode=$1
+shift || mode="no_action"
+
+case "$mode" in
+  *)
+    cmdctl_client_action $mode $*
+    ;;
+esac
+

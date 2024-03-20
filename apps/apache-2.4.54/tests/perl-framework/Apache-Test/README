@@ -1,0 +1,225 @@
+#########
+# About #
+#########
+
+Apache::Test is a test toolkit for testing an Apache server with any
+configuration. It works with Apache 1.3 and Apache 2.0/2.2/2.4 and any
+of its modules, including mod_perl 1.0 and 2.0. It was originally developed
+for testing mod_perl 2.0.
+
+#################
+# Documentation #
+#################
+
+For an extensive documentation see the tutorial:
+
+  http://perl.apache.org/docs/general/testing/testing.html
+
+and the documentation of the specific Apache::Test modules, which can
+be read using 'perldoc', for example:
+
+  % perldoc Apache::TestUtil
+
+and the 'Testing mod_perl 2.0' article:
+http://www.perl.com/pub/a/2003/05/22/testing.html
+
+###################
+# Got a question? #
+###################
+
+Post it to the test-dev <at> httpd.apache.org list. The list is
+moderated, so unless you are subscribed to it it may take some time
+for your post to make it to the list.
+
+For more information see: http://perl.apache.org/projects/Apache-Test/index.html
+
+List Archives:
+# www.apachelabs.org
+
+http://www.apachelabs.org/test-dev/
+# marc.theaimsgroup.com
+
+http://marc.theaimsgroup.com/?l=apache-modperl-test-dev
+# Mbox file
+
+http://perl.apache.org/mail/test-dev/
+
+##############
+# Cheat List #
+##############
+
+see Makefile.PL for howto enable 'make test'
+
+see t/TEST as an example test harness
+
+see t/*.t for example tests
+
+if the file t/conf/httpd.conf.in exists, it will be used instead of
+the default template (in Apache/TestConfig.pm);
+
+if the file t/conf/extra.conf.in exists, it will be used to generate
+t/conf/extra.conf with @variable@ substitutions
+
+if the file t/conf/extra.conf exists, it will be included by
+httpd.conf
+
+if the file t/conf/modperl_extra.pl exists, it will be included by
+httpd.conf as a mod_perl file (PerlRequire)
+
+
+
+##################
+# Handy examples #
+##################
+
+some examples of what i find handy:
+see TEST -help for more options
+
+test verbosely
+% t/TEST -verbose
+
+start the server
+% t/TEST -start
+
+run just this test (if server is running, will not be re-started)
+% t/TEST t/apr/table
+
+run just the apr tests
+% t/TEST t/apr
+
+run all tests without start/stop of server (e.g. server was started with -d)
+% t/TEST -run
+
+stop the server
+% t/TEST -stop
+
+ping the server to see whether it runs
+% t/TEST -ping
+
+ping the server and wait until the server starts, report waiting time
+% t/TEST -ping=block
+
+reconfigure the server, do not run tests
+% t/TEST -configure
+
+run as user nobody:
+% t/TEST -User nobody
+
+run on a different port:
+% t/TEST -Port 8799
+
+let the program pick the next available port (useful when running a
+few test sessions on parallel)
+% t/TEST -Port select
+
+run on a different server:
+% t/TEST -servername example.com
+
+configure an httpd other than the default (that apxs figures out)
+% t/TEST -httpd ~/ap/httpd-2.0/httpd
+
+configure a DSO mod_perl object other than the default (that stored in
+Apache::BuildConfig)
+% t/TEST -libmodperl ~/ap/httpd-2.0/modules/mod_perl-5.8.0.so
+or one that can be found relative to LIBEXECDIR
+% t/TEST -libmodperl mod_perl-5.6.1.so
+
+switch to another apxs
+% t/TEST -apxs ~/ap/httpd-2.0-prefork/bin/apxs
+
+turn on tracing
+% t/TEST -preamble "PerlTrace all"
+
+GET url
+% t/TEST -get /server-info
+
+HEAD url
+% t/TEST -head /server-info
+
+HEAD (no url defaults to /)
+% t/TEST -head
+
+GET url with authentication credentials
+% t/TEST -get /server-info -username dougm -password foo
+
+POST url (read content from string)
+% t/TEST -post /TestApache::post -content 'name=dougm&company=covalent'
+
+POST url (read content from stdin)
+% t/TEST -post /TestApache::post -content - < foo.txt
+
+POST url (generate a body of data 1024 bytes in length)
+% t/TEST -post /TestApache::post -content x1024
+
+POST url (only print headers, e.g. useful to just check Content-length)
+% t/TEST -post -head /TestApache::post -content x100000
+
+GET url (only print headers, e.g. useful to just check Content-length)
+% t/TEST -get -head /foo
+
+start server under gdb
+% t/TEST -debug
+
+start server under strace (outputs to t/logs/strace.log)
+% t/TEST -d strace
+
+run .t test under the perl debugger
+% t/TEST -d perl t/modules/access.t
+
+run .t test under the perl debugger (nonstop mode, output to t/logs/perldb.out)
+% t/TEST -d perl=nostop t/modules/access.t
+
+control how much noise Apache::Test should produce. to print all the
+debug messages: 
+% t/TEST -trace=debug
+to print only warnings and higher trace levels:
+% t/TEST -trace=warning
+the available modes are:
+  emerg alert crit error warning notice info debug
+
+turn on -v and LWP trace (1 is the default) mode in Apache::TestRequest
+% t/TEST -d lwp t/modules/access.t
+
+turn on -v and LWP trace mode (level 2) in Apache::TestRequest
+% t/TEST -d lwp=2 t/modules/access.t
+
+run all tests through mod_ssl
+% t/TEST -ssl
+
+run all tests with HTTP/1.1 (keep alive) requests
+% t/TEST -http11 -ssl
+
+run all tests with HTTP/1.1 (keep alive) requests through mod_ssl
+% t/TEST -http11
+
+run all tests through mod_proxy
+% t/TEST -proxy
+
+
+
+##################
+# Stress testing #
+##################
+
+run all tests 10 times in a random order (the seed is autogenerated
+and reported) 
+% t/SMOKE -times=10 -order=random
+
+run all tests 10 times in a random order using the seed obtained from
+the previous random run (e.g. 2352211):
+% t/SMOKE -times=10 -order=2352211
+
+repeat all tests 10 times (a, b, c, a, b, c)
+% t/SMOKE -times=10 -order=repeat
+
+When certain tests fail when running with -times option, you want to
+find out the minimal sequence of tests that lead to the
+failure. Apache::TestSmoke helps to ease this task, simply run:
+% t/SMOKE
+
+which tries various sequences of tests and at the end reports the
+shortest sequences found that lead to the same failure.
+
+for more options do:
+% t/SMOKE -help
+

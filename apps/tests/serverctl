@@ -1,0 +1,37 @@
+#!/bin/bash
+
+if [ -z "$PROC_NAME" ]; then
+    echo "PROC_NAME should be set to the program to run!"
+    exit 1
+fi
+
+BIN_PATH=`pwd`/build/${PROC_NAME}
+
+ROOT=${ROOT-../..}
+
+. ${ROOT}/apps/scripts/include/cmdctl.inc
+
+mode=$1
+shift || mode="no_action"
+
+function cmdctl_server_ps {
+    FIRST_PID=`ps --sort=start_time -eo comm,pid,args | grep -e "^$PROC_NAME " | head -1 | awk '{ print $2; }'`
+    ps --sort=start_time ${2} -eo comm,${1},ppid,pid,args | grep " $FIRST_PID " | grep -v grep
+}
+
+case "$mode" in
+  'start')
+    echo "***** Starting $PROC_NAME server..."
+    eval $CMD_PREFIX $BIN_PATH $*
+    ;;
+  'cleanup')
+    cmdctl_server_cleanup
+    ;;
+  'sigusr1')
+    cmdctl_server_killall "-SIGUSR1"
+    ;;
+  *)
+    cmdctl_server_action $mode $*
+    ;;
+esac
+

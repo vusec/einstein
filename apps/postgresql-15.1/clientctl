@@ -1,0 +1,20 @@
+#!/bin/bash
+
+PROC_NAME=postgres
+BIN_PATH=`pwd`/install/bin/psql
+RUN_DEPS=""
+ST_IPC=4
+ST_TIMEOUT=10
+ROOT=`pwd`/../..
+
+. ${ROOT}/apps/scripts/include/cmdctl.inc
+
+mode=$1
+shift || mode="no_action"
+
+case "$mode" in
+  *)
+    cmdctl_client_action $mode $*
+    ;;
+esac
+

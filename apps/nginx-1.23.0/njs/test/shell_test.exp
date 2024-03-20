@@ -1,0 +1,598 @@
+#
+# Copyright (C) Dmitry Volyntsev
+# Copyright (C) NGINX, Inc.
+#
+
+proc njs_test {body {opts ""}} {
+
+    if {$opts eq ""} {
+        spawn  -nottycopy njs
+
+    } else {
+        eval spawn  -nottycopy njs $opts
+    }
+
+    # TODO:
+    # SIGINT handling race condition
+    #   deb9-amd64-generic-njs-try
+    #   ub1404-armv7-generic-njs-try
+    #   ub1804-arm64-generic-njs-try
+    # UTF8 terminal support issue
+    #   sol11-amd64-sunpro-njs-try
+    #   ub1604-arm64-generic-njs-try
+
+    # set timeout 30
+    # expect_before timeout { exit 1 }
+
+    expect -re "interactive njs \\d+\.\\d+\.\\d+\r\n\r"
+    expect "v.<Tab> -> the properties and prototype methods of v.\r
+\r
+>> "
+
+    set len [llength $body]
+    for {set i 0} {$i < $len} {incr i} {
+        set pair [lindex $body $i]
+        send [lindex $pair 0]
+        expect [lindex $pair 1]
+    }
+
+    # Ctrl-C
+    send \x03
+    expect eof
+}
+
+proc njs_run {opts expected_re} {
+    catch {exec njs {*}$opts} out
+    if {[regexp $expected_re $out match] == 0} {
+        return -code error "njs_run: unexpected output '$out' vs '$expected_re'"
+    }
+}
+
+njs_test {
+    {"njs.version\r\n"
+     "njs.version\r\n\*\.\*\.\*"}
+}
+
+# simple multi line interaction
+njs_test {
+    {"var a = 1\r\n"
+     "var a = 1\r\nundefined\r\n>> "}
+    {"a *= 2\r\n"
+     "a *= 2\r\n2\r\n>> "}
+}
+
+# Global completions, no
+njs_test {
+    {"\t\tn"
+     "\a\r\nDisplay all*possibilities? (y or n)*>> "}
+}
+
+# Global completions, yes
+njs_test {
+    {"\t\ty"
+     "\a\r\nDisplay all*possibilities? (y or n)*Array"}
+}
+
+# Global completions, single partial match
+
+# \a* is WORKAROUND for libedit-20170329.3.1-r3
+# which inserts '\rESC[6G' after '\a'.
+njs_test {
+    {"O\t"
+     "O\a*bject"}
+}
+
+njs_test {
+    {"Ma\t"
+     "Ma\a*th"}
+}
+
+# FIXME: completions for external objects
+# are not supported
+
+# njs_test {
+#     {"conso\t"
+#     "conso\a*le"}
+# }
+
+# Global completions, multiple partial match
+njs_test {
+    {"cons\t\t"
+     "console*const"}
+}
+
+njs_test {
+    {"O\t"
+     "O\a*bject"}
+    {"\t\t"
+     "Object.create*Object.isSealed"}
+}
+
+njs_test {
+    {"Object.\t\t"
+     "Object.create*Object.isSealed"}
+}
+
+njs_test {
+    {"Object.g\t"
+     "Object.g\a*et"}
+    {"\t\t"
+     "Object.getOwnPropertyDescriptor*Object.getPrototypeOf"}
+}
+
+njs_test {
+    {"JS\t"
+     "JS\a*ON"}
+    {"\t\t"
+     "JSON.parse*JSON.stringify"}
+}
+
+# Global completions, no matches
+njs_test {
+    {"1.\t\t"
+     "1."}
+}
+
+njs_test {
+    {"1..\t\t"
+     "1.."}
+}
+
+njs_test {
+    {"'abc'.\t\t"
+     "'abc'."}
+}
+
+# Global completions, global vars
+njs_test {
+    {"var a = 1; var aa = 2\r\n"
+     "var a = 1; var aa = 2\r\nundefined\r\n>> "}
+    {"a\t\t"
+     "a*aa*arguments*await"}
+}
+
+# z*z is WORKAROUND for libedit-20170329.3.1-r3
+# which inserts bogus '\a' between 'z'
+njs_test {
+    {"var zz = 1\r\n"
+     "var zz = 1\r\nundefined\r\n>> "}
+    {"1 + z\t\r\n"
+     "1 + z*z*\r\n2"}
+}
+
+njs_test {
+    {"unknown_var\t\t"
+     "unknown_var"}
+}
+
+njs_test {
+    {"unknown_var.\t\t"
+     "unknown_var."}
+}
+
+# An object's level completions
+njs_test {
+    {"var o = {zz:1, zb:2}\r\n"
+     "var o = {zz:1, zb:2}\r\nundefined\r\n>> "}
+    {"o.z\t\t"
+     "o.zb*o.zz"}
+}
+
+njs_test {
+    {"var d = new Date()\r\n"
+     "var d = new Date()\r\nundefined\r\n>> "}
+    {"d.to\t\t"
+     "d.toDateString*d.toLocaleDateString*d.toString"}
+}
+
+njs_test {
+    {"var o = {a:new Date()}\r\n"
+     "var o = {a:new Date()}\r\nundefined\r\n>> "}
+    {"o.a.to\t\t"
+     "o.a.toDateString*o.a.toLocaleDateString*o.a.toString"}
+}
+
+njs_test {
+    {"var o = {a:1,b:2,333:'t'}\r\n"
+     "var o = {a:1,b:2,333:'t'}\r\nundefined\r\n>> "}
+    {"o.3\t\t"
+     "o.3"}
+}
+
+njs_test {
+    {"var a = Array(5000000); a.aab = 1; a.aac = 2\r\n"
+     "var a = Array(5000000); a.aab = 1; a.aac = 2\r\n2\r\n>> "}
+    {"a.\t\t"
+     "a.aab*"}
+}
+
+njs_test {
+    {"var a = new Uint8Array([5,6,7,8,8]); a.aab = 1; a.aac = 2\r\n"
+     "var a = new Uint8Array(\\\[5,6,7,8,8]); a.aab = 1; a.aac = 2\r\n2\r\n>> "}
+    {"a.\t\t"
+     "a.aab*"}
+}
+
+# function declarations in interactive mode
+njs_test {
+    {"function a() { return 1; }\r\n"
+     "undefined\r\n>> "}
+    {"a();\r\n"
+     "1\r\n>> "}
+    {"function a() { return 2; }\r\n"
+     "undefined\r\n>> "}
+    {"a();\r\n"
+     "2\r\n>> "}
+}
+
+# console object
+njs_test {
+    {"console[Symbol.toStringTag]\r\n"
+     "console\\\[Symbol.toStringTag]\r\n'Console'\r\n>> "}
+    {"Object.prototype.toString.call(console)\r\n"
+     "Object.prototype.toString.call(console)\r\n'\\\[object Console]'\r\n>> "}
+    {"console.toString()\r\n"
+     "console.toString()\r\n'\\\[object Console]'\r\n>> "}
+    {"console\r\n"
+     "console\r\nConsole *>> "}
+    {"delete console.log\r\n"
+     "delete console.log\r\ntrue\r\n>>"}
+    {"console\r\n"
+     "console\r\nConsole *>> "}
+}
+
+# console log functions
+njs_test {
+    {"console[Symbol.toStringTag]\r\n"
+     "console\\\[Symbol.toStringTag]\r\n'Console'\r\n>> "}
+    {"console\r\n"
+     "console\r\nConsole *>> "}
+    {"console.log()\r\n"
+     "console.log()\r\nundefined\r\n>> "}
+    {"console.log('')\r\n"
+     "console.log('')\r\n\r\nundefined\r\n>> "}
+    {"console.log(1)\r\n"
+     "console.log(1)\r\n1\r\nundefined\r\n>> "}
+    {"console.log(1, 'a')\r\n"
+     "console.log(1, 'a')\r\n1 a\r\nundefined\r\n>> "}
+    {"print(1, 'a')\r\n"
+     "print(1, 'a')\r\n1 a\r\nundefined\r\n>> "}
+    {"console.log('\\tабв\\nгд')\r\n"
+     "console.log('\\\\tабв\\\\nгд')\r\n\tабв\r\nгд\r\nundefined\r\n>> "}
+    {"console.dump()\r\n"
+     "console.dump()\r\nundefined\r\n>> "}
+    {"console.dump(1)\r\n"
+     "console.dump(1)\r\n1\r\nundefined\r\n>> "}
+    {"console.dump(1, 'a')\r\n"
+     "console.dump(1, 'a')\r\n1 a\r\nundefined\r\n>> "}
+}
+
+# console.time* functions
+njs_test {
+    {"console.time()\r\n"
+     "console.time()\r\nundefined\r\n>> "}
+    {"console.timeEnd()\r\n"
+     "console.timeEnd()\r\ndefault: *.*ms\r\nundefined\r\n>> "}
+    {"console.time(undefined)\r\n"
+     "console.time(undefined)\r\nundefined\r\n>> "}
+    {"console.timeEnd(undefined)\r\n"
+     "console.timeEnd(undefined)\r\ndefault: *.*ms\r\nundefined\r\n>> "}
+    {"console.time('abc')\r\n"
+     "console.time('abc')\r\nundefined\r\n>> "}
+    {"console.time('abc')\r\n"
+     "console.time('abc')\r\nTimer \"abc\" already exists.\r\nundefined\r\n>> "}
+    {"console.timeEnd('abc')\r\n"
+     "console.timeEnd('abc')\r\nabc: *.*ms\r\nundefined\r\n>> "}
+    {"console.time(true)\r\n"
+     "console.time(true)\r\nundefined\r\n>> "}
+    {"console.timeEnd(true)\r\n"
+     "console.timeEnd(true)\r\ntrue: *.*ms\r\nundefined\r\n>> "}
+    {"console.time(42)\r\n"
+     "console.time(42)\r\nundefined\r\n>> "}
+    {"console.timeEnd(42)\r\n"
+     "console.timeEnd(42)\r\n42: *.*ms\r\nundefined\r\n>> "}
+    {"console.timeEnd()\r\n"
+     "console.timeEnd()\r\nTimer \"default\" doesn’t exist."}
+    {"console.timeEnd('abc')\r\n"
+     "console.timeEnd('abc')\r\nTimer \"abc\" doesn’t exist."}
+}
+
+njs_test {
+    {"console.ll()\r\n"
+     "console.ll()\r\nThrown:\r\nTypeError: (intermediate value)\\\[\"ll\"] is not a function"}
+}
+
+njs_test {
+    {"console.log.length\r\n"
+     "console.log.length\r\n0"}
+}
+
+njs_test {
+    {"var print = console.log.bind(console); print(1, 'a', [1, 2])\r\n"
+     "1 a \\\[1,2]\r\nundefined\r\n>> "}
+    {"var print = console.dump.bind(console); print(1, 'a', [1, 2])\r\n"
+     "1 a \\\[\r\n 1,\r\n 2\r\n]\r\nundefined\r\n>> "}
+    {"var print = console.log.bind(console); print(console.a.a)\r\n"
+     "TypeError: cannot get property \"a\" of undefined*at console.log"}
+    {"print(console.a.a)\r\n"
+     "TypeError: cannot get property \"a\" of undefined*at console.log"}
+}
+
+# Backtraces for external objects
+njs_test {
+    {"console.log(console.a.a)\r\n"
+     "console.log(console.a.a)\r\nThrown:\r\nTypeError:*at console.log (native)"}
+}
+
+# dumper
+njs_test {
+    {"var o = {toString: function(){}, log: console.log}\r\n"
+     "undefined\r\n>> "}
+    {"o\r\n"
+     "o\r\n{\r\n toString: \\\[Function],\r\n log: \\\[Function: log]\r\n}"}
+}
+
+njs_test {
+    {"[1, new Number(2), 'a', new String('αβZγ'), true, new Boolean(false)]\r\n"
+     "\\\[\r\n 1,\r\n \\\[Number: 2],\r\n 'a',\r\n \\\[String: 'αβZγ'],\r\n true,\r\n \\\[Boolean: false]\r\n]"}
+}
+
+njs_test {
+    {"[undefined,,null]\r\n"
+     "\\\[\r\n undefined,\r\n <empty>,\r\n null\r\n]"}
+}
+
+njs_test {
+    {"[InternalError(),TypeError('msg'), new RegExp(), /^undef$/m, new Date(0)]\r\n"
+     "\\\[\r\n InternalError,\r\n TypeError: msg,\r\n /(?:)/,\r\n /^undef$/m,\r\n 1970-01-01T00:00:00.000Z\r\n]"}
+}
+
+# dumper excapes special characters as JSON.stringify()
+# except '\"'
+njs_test {
+    {"\"\\r\\0\\\"\"\r\n"
+     "\\\\r\\\\u0000\""}
+}
+
+njs_test {
+    {"[{a:1}]\r\n"
+     "\r\n\\\[\r\n {\r\n  a: 1\r\n }\r\n]"}
+}
+
+# Backtraces are reset between invocations
+njs_test {
+    {"JSON.parse(Error())\r\n"
+     "JSON.parse(Error())\r\nThrown:\r\nSyntaxError: Unexpected token at position 0*at JSON.parse (native)"}
+    {"JSON.parse(Error()\r\n"
+     "JSON.parse(Error()\r\nThrown:\r\nSyntaxError: Unexpected end of input in shell:1"}
+}
+
+njs_test {
+    {"try { console.log({ toString: function() { throw 'test'; } }) } catch (e) {}\r\n"
+     "undefined"}
+    {"function f() { throw 't' }; try { console.log({ toString: function() { return f() } }) } catch (e) {}\r\n"
+     "undefined"}
+}
+
+njs_test {
+    {"(function() { throw 'test' })()\r\n"
+     "Thrown:\r\ntest"}
+}
+
+njs_test {
+    {"function f() { return ({}.a.a); }\r\n"
+     "undefined"}
+    {"var e; try {f()} catch (ee) {e = ee}\r\n"
+     "undefined"}
+    {"Object.keys(null)\r\n"
+     "Thrown:\r\nTypeError: cannot convert null argument to object"}
+    {"e\r\n"
+     "TypeError: cannot get property \"a\" of undefined*at f (shell:1)"}
+}
+
+# Non-ASCII characters
+njs_test {
+    {"'絵文字'\r\n"
+     "'絵文字'"}
+    {"var v = 'абвгдеёжзийкл';v[10]\r\n"
+     "'й'"}
+}
+
+# Immediate events
+
+njs_test {
+    {"var t = setImmediate(console.log, 'a', 'aa')\r\n"
+     "undefined\r\na aa"}
+}
+
+njs_test {
+    {"var a = 1 + 1; setTimeout(function (x) {a = x}, 0, 'a'); a\r\n"
+     "2"}
+    {"a\r\n"
+     "a\r\n'a'"}
+}
+
+njs_test {
+    {"setTimeout(function () {}, 1, 'a')\r\n"
+     "njs_console_set_timer(): async timers unsupported"}
+}
+
+njs_test {
+    {"var a = 1 + 1; setTimeout(function (x) { setTimeout(function (y) {a = y}, 0, x)}, 0, 'a'); a\r\n"
+     "2"}
+    {"a\r\n"
+     "a\r\n'a'"}
+}
+
+njs_test {
+    {"var a = 1 + 1; setImmediate(function (x) { setImmediate(function (y) {a = y}, x)}, 'a'); a\r\n"
+     "2"}
+    {"a\r\n"
+     "a\r\n'a'"}
+}
+
+njs_test {
+    {"var i = 0; (function x() { if (i < 10) setImmediate(x); i++; })()\r\n"
+     "undefined"}
+    {"i\r\n"
+     "i\r\n11"}
+}
+
+njs_test {
+    {"var a = 0, t = setImmediate(function() {a = 1}); clearTimeout(t)\r\n"
+     "undefined"}
+    {"a\r\n"
+     "a\r\n0"}
+}
+
+njs_test {
+    {"var i = 0; (function x() { if (i < 3) setImmediate(x); i++; throw 'Oops';})()\r\n"
+     "Oops"}
+    {"i\r\n"
+     "i\r\n4"}
+}
+
+njs_test {
+    {"var i = 0, queue = []; (function x() { if (i < 5) setImmediate(x); queue.push(i++); })()\r\n"
+     "undefined"}
+    {"queue.toString()\r\n"
+     "queue.toString()\r\n'0,1,2,3,4,5'"}
+}
+
+njs_run {"-c" "setTimeout(() => {console.log('A'.repeat(1024))}, 0); ref"} \
+"^Thrown:
+ReferenceError: \"ref\" is not defined
+    at main \\\(string:1\\\)\n$"
+
+njs_run {"-c" "setTimeout(() => {ref}, 0); setTimeout(() => {console.log('A'.repeat(1024))}, 0)"} \
+"^Thrown:
+ReferenceError: \"ref\" is not defined
+    at anonymous \\\(string:1\\\)
+    at main \\\(string:1\\\)\n$"
+
+# CLI OPTIONS
+
+# help
+
+njs_run {"-h"} "Options"
+
+# ast
+
+njs_run {"-a" "-c" "console.log(1*2)"} "{\"name\": \"END\""
+
+# command
+
+njs_run {"-c" "console.log(\"a b c\")"} "a b c"
+
+njs_run {"-c" "console.log("} "SyntaxError: Unexpected end of input in string:1"
+
+
+# process
+
+njs_run {"-c" "console.log(typeof process.argv)"} "object"
+njs_run {"-c" "console.log(process.argv.slice(2))" "AAA"} "AAA"
+
+njs_run {"-c" "console.log(typeof process.env)"} "object"
+njs_run {"-c" "console.log(process.env.HOME != undefined)"} "true"
+njs_run {"-c" "console.log(process.env.___UNDECLARED != undefined)"} "false"
+
+njs_run {"-c" "console.log(process.pid)"} "\\d+"
+
+njs_run {"-c" "console.log(process.ppid)"} "\\d+"
+
+
+# script args
+
+njs_run {"test/script_args.js" "A" "B"} "AB"
+
+# disassemble
+
+njs_test {
+    {"1+1\r\n"
+     "    1 | 00000 ADD*\r\n*2"}
+    {"__unknown\r\n"
+     "    1 | 00000 GLOBAL GET*\r\n*REFERENCE ERROR*"}
+    {"for (var n in [1]) {try {break} finally{}}\r\n"
+     "    1 | 00000 ARRAY*\r\n*TRY BREAK*PROP NEXT*-*\r\n\r\nundefined"}
+    {"(function() {try {return} finally{}})()\r\n"
+     "    1 | 00000 TRY START*\r\n*TRY RETURN*\r\n\r\nundefined"}
+} "-d"
+
+# modules
+
+# FIXME:
+# During import, the variable is declared regardless of the result of the import.
+# Because of this, in the console mode, checking the variable after the import
+# error may give an incorrect result.
+#
+# For example:
+# {"import ref from 'ref_exception.js'\r\n"
+# "ReferenceError: \"undeclared\" is not defined"}
+# {"ref\r\n"
+# "ReferenceError: \"ref\" is not defined\r\n"}
+
+njs_test {
+    {"import lib1 from 'lib1.js'; import lib2 from 'lib1.js'\r\n"
+     "undefined\r\n"}
+    {"lib2.inc()\r\n"
+     "undefined\r\n"}
+    {"lib1.get()\r\n"
+     "1\r\n"}
+    {"import ref from 'ref_exception.js'\r\n"
+     "ReferenceError: \"undeclared\" is not defined"}
+    {"var ref\r\n"
+     "undefined\r\n"}
+    {"import ref from 'ref_exception.js'\r\n"
+     "ReferenceError: \"undeclared\" is not defined"}
+} "-p test/js/module/ -p test/js/module/libs/"
+
+# quiet mode
+
+njs_run {"-q" "test/js/import_relative_path.t.js"} \
+        "SyntaxError: Cannot find module \"name.js\" in 7"
+
+# sandboxing
+
+njs_test {
+    {"var fs = require('fs')\r\n"
+     "Error: Cannot find module \"fs\"\r\n"}
+} "-s"
+
+njs_test {
+    {"var crypto = require('crypto')\r\n"
+     "undefined\r\n"}
+} "-s"
+
+
+# safe mode
+
+njs_test {
+    {"new Function()\r\n"
+     "TypeError: function constructor is disabled in \"safe\" mode\r\n"}
+    {"(new Function('return this'))() === globalThis\r\n"
+     "true\r\n"}
+    {"new Function('return this;')\r\n"
+     "[Function]"}
+    {"new Function('return thi')\r\n"
+     "TypeError: function constructor is disabled in \"safe\" mode\r\n"}
+} "-u"
+
+
+# source type
+
+njs_test {
+    {"this\r\n"
+     "this\r\nundefined"}
+    {"(() => this)()\r\n"
+     "(() => this)()\r\nundefined"}
+} "-t module"
+
+njs_test {
+    {"this.NaN\r\n"
+     "this.NaN\r\nNaN"}
+} "-t script"
+
+
+# version
+
+njs_run {"-v"} "\\d+\.\\d+\.\\d+"

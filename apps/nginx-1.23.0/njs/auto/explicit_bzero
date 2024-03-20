@@ -1,0 +1,40 @@
+
+# Copyright (C) Igor Sysoev
+# Copyright (C) NGINX, Inc.
+
+
+# Linux (glibc and musl from 1.1.20), OpenBSD and FreeBSD.
+
+njs_feature="explicit_bzero()"
+njs_feature_name=NJS_HAVE_EXPLICIT_BZERO
+njs_feature_run=yes
+njs_feature_incs=
+njs_feature_libs=
+njs_feature_test="#include <strings.h>
+                  #include <string.h>
+
+                  int main(void) {
+                      int r;
+
+                      explicit_bzero(&r, sizeof(r));
+                      return 0;
+                  }"
+. auto/feature
+
+
+if [ $njs_found = no ]; then
+
+    # NetBSD has explicit_memset instead.
+
+    njs_feature="explicit_memset()"
+    njs_feature_name=NJS_HAVE_EXPLICIT_MEMSET
+    njs_feature_test="#include <string.h>
+
+                      int main(void) {
+                          int r;
+
+                          explicit_memset(&r, 0, sizeof(r));
+                          return 0;
+                      }"
+    . auto/feature
+fi

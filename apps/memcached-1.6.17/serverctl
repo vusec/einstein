@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# Running memcached-debug because that's what the tests run
+PROC_NAME="memcached-debug"
+BIN_PATH=`pwd`/memcached-debug
+
+. ../scripts/include/cmdctl.inc
+
+mode=$1
+shift || mode="no_action"
+
+case "$mode" in
+  'start')
+    echo "***** Starting $PROC_NAME server..."
+    cmdctl_server_check_not_running
+    eval $CMD_PREFIX $BIN_PATH -d $*
+    ;;
+    *)
+    cmdctl_server_action $mode $*
+    ;;
+esac
+

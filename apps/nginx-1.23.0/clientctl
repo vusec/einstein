@@ -1,0 +1,18 @@
+#!/bin/bash
+
+PROC_NAME=nginx
+BIN_PATH=`pwd`/install/sbin/nginx
+RUN_DEPS="wget"
+ROOT=${ROOT-../..}
+
+. ${ROOT}/apps/scripts/include/cmdctl.inc
+
+mode=$1
+shift || mode="no_action"
+
+case "$mode" in
+  *)
+    cmdctl_client_action $mode $*
+    ;;
+esac
+

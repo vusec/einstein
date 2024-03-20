@@ -1,0 +1,15 @@
+#!/bin/bash
+
+set -o errexit
+
+RUNCLIENT_CONNECT=${RUNCLIENT_CONNECT:-0}
+
+SERVER_PORT=1080
+
+if [ "$RUNCLIENT_CONNECT" != "0" ]; then
+    nc localhost $SERVER_PORT
+    exit 0
+fi
+
+install/bin/redis-cli -p $SERVER_PORT ping
+install/bin/redis-cli -p $SERVER_PORT dbsize

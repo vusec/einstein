@@ -1,0 +1,37 @@
+
+# Copyright (C) Dmitry Volyntsev
+# Copyright (C) NGINX, Inc.
+
+njs_found=no
+printf "checking for expect ..."
+
+if /bin/sh -c "(expect -v)" >> $NJS_AUTOCONF_ERR 2>&1; then
+    njs_found=yes
+fi
+
+if [ $njs_found = yes ]; then
+    echo " found"
+    echo " + Expect version: `expect -v`"
+
+else
+    echo " not found"
+fi
+
+if [ $njs_found = yes -a $NJS_HAVE_READLINE = YES ]; then
+    cat << END >> $NJS_MAKEFILE
+
+shell_test:	njs test/shell_test.exp
+	INPUTRC=test/inputrc PATH=$NJS_BUILD_DIR:\$(PATH) \
+            expect -f test/shell_test.exp
+END
+
+else
+    echo " - expect tests are disabled"
+
+    cat << END >> $NJS_MAKEFILE
+
+shell_test:
+	@echo "Skipping expect tests"
+END
+
+fi

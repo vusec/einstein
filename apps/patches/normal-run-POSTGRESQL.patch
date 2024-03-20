@@ -1,0 +1,97 @@
+diff --git a/apps/postgresql-15.1/build.inst b/apps/postgresql-15.1/build.inst
+index ff4ddb97..1ddbde15 100755
+--- a/apps/postgresql-15.1/build.inst
++++ b/apps/postgresql-15.1/build.inst
+@@ -10,6 +10,7 @@ ROOT=`pwd`/../..
+ . ${ROOT}/apps/scripts/include/build.inst.inc
+ 
+ make clean
++find . -name "*.gcda" -type f -delete ; find . -name "*.gcno" -type f -delete ; find . -name "*.gcov" -type f -delete
+ 
+ make -j `grep -c ^processor /proc/cpuinfo` install
+ 
+diff --git a/apps/postgresql-15.1/configure.inst b/apps/postgresql-15.1/configure.inst
+index d9eb7df2..7e88210e 100755
+--- a/apps/postgresql-15.1/configure.inst
++++ b/apps/postgresql-15.1/configure.inst
+@@ -18,7 +18,7 @@ MYPERL5=${ROOT}/out/perl5
+    PATH=${MYPERL5}/bin:${PATH} PERL5LIB=${MYPERL5}/lib/perl5 PERL_LOCAL_LIB_ROOT=${MYPERL5} PERL_MB_OPT="--install_base ${MYPERL5}" PERL_MM_OPT="INSTALL_BASE=${MYPERL5}" \
+    CC="$CC" \
+    CXX="$CXX" \
+-   CFLAGS="$CFLAGS -Og -g" \
+-   CXXFLAGS="$CXXFLAGS" \
+-   LDFLAGS="$LDFLAGS"
++   CFLAGS="$CFLAGS -Og -g -fprofile-arcs -ftest-coverage -fprofile-abs-path" \
++   CXXFLAGS="$CXXFLAGS -fprofile-arcs -ftest-coverage -fprofile-abs-path" \
++   LDFLAGS="$LDFLAGS -lgcov --coverage"
+ 
+diff --git a/apps/postgresql-15.1/runbench b/apps/postgresql-15.1/runbench
+index 81dbb4ea..9e85f950 100755
+--- a/apps/postgresql-15.1/runbench
++++ b/apps/postgresql-15.1/runbench
+@@ -8,9 +8,10 @@ BENCH_TYPE=${BENCH_TYPE:-1}
+ 
+ # Run all tests
+ if [ $BENCH_TYPE -eq 2 ]; then
+-    RUN_EINSTEIN=1 USE_LOG_DIR=1 V=1 LOG_SUB_DIR=bench ./serverctl restart
++    #RUN_EINSTEIN=1 USE_LOG_DIR=1 V=1 LOG_SUB_DIR=bench ./serverctl restart
++    ./serverctl restart
+     sleep 10
+-    ./serverctl udscmd pids dbt taintall
++    #./serverctl udscmd pids dbt taintall
+     sleep 2
+     echo "Running tests... (TODO: Run _all_ tests with 'make installcheck-world')"
+     PGPORT=1080 PATH=${MYPERL5}/bin:${PATH} PERL5LIB=${MYPERL5}/lib/perl5 PERL_LOCAL_LIB_ROOT=${MYPERL5} PERL_MB_OPT="--install_base ${MYPERL5}" PERL_MM_OPT="INSTALL_BASE=${MYPERL5}" make installcheck PROVE_FLAGS='--timer'
+diff --git a/apps/postgresql-15.1/serverctl b/apps/postgresql-15.1/serverctl
+index cdebe914..6fc89abc 100755
+--- a/apps/postgresql-15.1/serverctl
++++ b/apps/postgresql-15.1/serverctl
+@@ -1,5 +1,7 @@
+ #!/bin/bash
+ 
++unset RUN_EINSTEIN
++
+ PROC_NAME="postgres"
+ BIN_PATH=`pwd`/install/bin/postgres
+ BC_PATH=`pwd`/install/bin/postgres
+diff --git a/apps/postgresql-15.1/src/interfaces/libpq/Makefile b/apps/postgresql-15.1/src/interfaces/libpq/Makefile
+index 8abdb092..0f465955 100644
+--- a/apps/postgresql-15.1/src/interfaces/libpq/Makefile
++++ b/apps/postgresql-15.1/src/interfaces/libpq/Makefile
+@@ -117,11 +117,11 @@ backend_src = $(top_srcdir)/src/backend
+ # coding rule.
+ libpq-refs-stamp: $(shlib)
+ ifneq ($(enable_coverage), yes)
+-ifeq (,$(filter aix solaris,$(PORTNAME)))
+-	@if nm -A -u $< 2>/dev/null | grep -v __cxa_atexit | grep exit; then \
+-		echo 'libpq must not be calling any function which invokes exit'; exit 1; \
+-	fi
+-endif
++#ifeq (,$(filter aix solaris,$(PORTNAME)))
++#	@if nm -A -u $< 2>/dev/null | grep -v __cxa_atexit | grep exit; then \
++#		echo 'libpq must not be calling any function which invokes exit'; exit 1; \
++#	fi
++#endif
+ endif
+ 	touch $@
+ 
+diff --git a/apps/postgresql-15.1/src/test/regress/pg_regress.c b/apps/postgresql-15.1/src/test/regress/pg_regress.c
+index 5e6a5c2e..aaf0f8c3 100644
+--- a/apps/postgresql-15.1/src/test/regress/pg_regress.c
++++ b/apps/postgresql-15.1/src/test/regress/pg_regress.c
+@@ -1599,6 +1599,7 @@ run_schedule(const char *schedule, test_start_function startfunc,
+ 			continue;
+ 		}
+ 		else if (strncmp(scbuf, "taint-all-mem", 13) == 0) {
++#if 0
+ 			char taint_all_cmd[300];
+ 			status("Tainting all memory...\n");
+ 			strcpy(taint_all_cmd, "cd ");
+@@ -1611,6 +1612,7 @@ run_schedule(const char *schedule, test_start_function startfunc,
+ 			}
+ 			status("Done tainting all memory.\n");
+ 			sleep(5);
++#endif
+ 			continue;
+ 		}
+ 		else

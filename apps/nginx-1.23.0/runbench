@@ -1,0 +1,46 @@
+#!/bin/bash
+
+BENCH_TYPE=${BENCH_TYPE:-1}
+
+. ../scripts/include/cmdctl.inc
+
+if [ $BENCH_TYPE -eq 2 ]; then
+    # Run all tests
+    # TODO: Fix (for plain nginx) then add back in: ssl_engine_keys.t uwsgi_body.t uwsgi_ssl.t uwsgi_ssl_verify.t uwsgi.t
+    # TODO: Fix (for Einstein nginx) then add back in: proxy_cache_vary.t
+    # TODO: Add duplicate report filting then add back in: mail_error_log.t stream_error_log.t syslog.t
+    TESTS_FILE=$(readlink -f runbench.tests.all)
+elif [ $BENCH_TYPE -eq 3 ]; then
+    # Run custom tests
+    TESTS_FILE=$(readlink -f runbench.tests.custom)
+elif [ $BENCH_TYPE -eq 4 ]; then
+    # Run custom tests
+    TESTS_FILE=$(readlink -f runbench.tests.tmp)
+else
+    exit 1
+fi
+
+BENCH_PERSISTENT=${BENCH_PERSISTENT:-0}
+NGINX_BIN=$( ./serverctl bin )
+
+rm -rf /tmp/nginx-tests*
+TESTDIR=$(mktemp -d --tmpdir nginx-testsXXXXXX)
+if [ $BENCH_PERSISTENT -eq 1 ]; then
+    cat tests/nginx-tests/all.nginx.conf | sed "s|%%ROOTDIR%%|$TESTDIR|g" > $TESTDIR/all.nginx.conf
+    ./serverctl cleanup
+    ./serverctl start -c $TESTDIR/all.nginx.conf &
+    while ! lsof -ti tcp:8080 &> /dev/null; do sleep 0.2; done
+fi
+
+cd tests/nginx-tests
+trap "echo Exited!; exit;" SIGINT SIGTERM
+cat ${TESTS_FILE} | while read TEST
+do
+    RUNBENCH_CMD="prove ${TEST}"
+    #echo "$0: Running '${RUNBENCH_CMD}'..."
+    set +e
+    TEST_NGINX_PREFIXED=1 TEST_NGINX_TESTDIR=$TESTDIR TEST_NGINX_PERSISTENT=$BENCH_PERSISTENT TEST_NGINX_BINARY=$NGINX_BIN TEST_NGINX_UNSAFE=1 ${RUNBENCH_CMD}
+    set -e
+done
+exit 0
+

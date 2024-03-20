@@ -1,0 +1,43 @@
+#!/bin/bash
+
+BENCH_TYPE=${BENCH_TYPE:-1}
+
+. ../scripts/include/cmdctl.inc
+
+if [ $BENCH_TYPE -eq 2 ]; then
+    # Run all tests
+    TESTS_FILE=$(readlink -f runbench.tests.all)
+elif [ $BENCH_TYPE -eq 3 ]; then
+    # Run custom tests
+    TESTS_FILE=$(readlink -f runbench.tests.custom)
+fi
+
+APACHE_BIN_DIR=$(readlink -f install/bin/)
+
+if [ $BENCH_TYPE -eq 2 ] || [ $BENCH_TYPE -eq 3 ]; then
+    ./serverctl stop
+
+    if [ ! -d tests/perl-framework/t/TEST ]; then
+        (cd tests/perl-framework && perl Makefile.PL -apxs ${APACHE_BIN_DIR}/apxs )
+    fi
+    cd tests/perl-framework
+    mkdir -p t/logs
+
+    if [ $BENCH_TYPE -eq 2 ]; then
+        # Let's clean the tests dir before running all tests, just to be safe
+        t/TEST -clean
+    fi
+
+    trap "echo Exited!; exit;" SIGINT SIGTERM
+    cat ${TESTS_FILE} | while read TEST
+    do
+        RUNBENCH_CMD="t/TEST -one-process -bindir ${APACHE_BIN_DIR} -apxs ${APACHE_BIN_DIR}/apxs ${TEST}"
+        echo "$0: Running '${RUNBENCH_CMD}'..."
+        set +e
+        ${RUNBENCH_CMD}
+        set -e
+    done
+
+    exit 0
+fi
+

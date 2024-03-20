@@ -1,0 +1,21 @@
+EXTRA_DIST=access_log.conf \
+	auth.conf \
+	cgi.conf \
+	debug.conf \
+	deflate.conf \
+	dirlisting.conf \
+	evhost.conf \
+	expire.conf \
+	fastcgi.conf \
+	magnet.conf \
+	mime.conf \
+	mod.template \
+	proxy.conf \
+	rrdtool.conf \
+	scgi.conf \
+	secdownload.conf \
+	simple_vhost.conf \
+	ssi.conf \
+	status.conf \
+	userdir.conf \
+	webdav.conf

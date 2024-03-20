@@ -1,0 +1,18 @@
+=======================================================================
+Candidate exploit tables:
+
+Vulnerable gadgets found per syscall and argument type:
+Syscalls | Total covered |Total found where this arg has a dataflow from attacker data (% that are identity dataflows, if any)
+execve   |      2        |   1 (100%)    |   2 (100%)    |       -       |               |               |              
+execveat |      1        |       -       |   1 (100%)    |   1 (100%)    |       -       |       -       |              
+mmap     |      9        |       -       |       -       |   1 (100%)    |       -       |       -       |       -      
+mprotect |      3        |       -       |       -       |       -       |               |               |              
+write    |      8        |   1 (100%)    |   1 (100%)    |       1       |               |               |              
+* Syscalls not covered: mremap pwrite64 pwritev pwritev2 remap_file_pages sendfile sendmmsg sendmsg sendto writev 
+
+Vulnerable gadgets found per target application:
+- tainted-syscall: 5 gadgets (100% with an iflow)
+* TOTAL: 5 gadgets (100% with an iflow)
+
+=======================================================================
+

@@ -1,0 +1,21 @@
+=head1 NAME
+
+Changes - Apache::TestMe changes logfile
+
+=head1 Changes
+
+=over 4
+
+=item 0.01
+
+new test basic/vhost.t which introduces a vhost entry in .pm. also
+added a dummy vhost entry in t/conf/extra.conf.in, the setup needed by
+t/minmaxclients.t from Apache-TestItSelf [Stas]
+
+write a basic mod_perl test: basic/hello.t  [Stas]
+
+starting the config test suite used by Apache::TestItSelf [Stas]
+
+=back
+
+=cut

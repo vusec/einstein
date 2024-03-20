@@ -1,0 +1,46 @@
+#this file will be Include-d by @ServerRoot@/httpd.conf
+
+#the subclass inside t/TEST added the authname and allowed_users variables
+<IfModule mod_alias.c>
+  Redirect /redirect http://@ServerName@/redirected/
+</IfModule>
+
+<IfModule mod_perl.c>
+
+  <Location /TestMore__testpm>
+    SetHandler perl-script
+    <IfDefine APACHE2>
+      PerlResponseHandler TestMore::testpm
+    </IfDefine>
+    <IfDefine APACHE1>
+      PerlHandler TestMore::testpm
+    </IfDefine>
+  </Location>
+
+  <Location /TestMore__testmorepm>
+    SetHandler perl-script
+    <IfDefine APACHE2>
+      PerlResponseHandler TestMore::testmorepm
+    </IfDefine>
+    <IfDefine APACHE1>
+      PerlHandler TestMore::testmorepm
+    </IfDefine>
+  </Location>
+</IfModule>
+
+
+<IfModule @CGI_MODULE@>
+  ScriptAlias /cgi-bin/ "@ServerRoot@/cgi-bin/"
+
+  <Directory "@ServerRoot@/cgi-bin/">
+    AllowOverride None
+    Options +ExecCGI
+  </Directory>
+
+  # t/next_available_port.t
+  <IfModule mod_env.c>
+    SetEnv NextAvailablePort @NextAvailablePort@
+  </IfModule>
+
+</IfModule>
+

@@ -1,0 +1,84 @@
+NJS_LIB_SRCS=" \
+   src/njs_diyfp.c \
+   src/njs_dtoa.c \
+   src/njs_dtoa_fixed.c \
+   src/njs_str.c \
+   src/njs_strtod.c \
+   src/njs_murmur_hash.c \
+   src/njs_djb_hash.c \
+   src/njs_utf8.c \
+   src/njs_utf16.c \
+   src/njs_arr.c \
+   src/njs_rbtree.c \
+   src/njs_lvlhsh.c \
+   src/njs_trace.c \
+   src/njs_random.c \
+   src/njs_md5.c \
+   src/njs_sha1.c \
+   src/njs_sha2.c \
+   src/njs_time.c \
+   src/njs_file.c \
+   src/njs_malloc.c \
+   src/njs_mp.c \
+   src/njs_sprintf.c \
+   src/njs_utils.c \
+   src/njs_chb.c \
+   src/njs_value.c \
+   src/njs_vm.c \
+   src/njs_vmcode.c \
+   src/njs_boolean.c \
+   src/njs_number.c \
+   src/njs_symbol.c \
+   src/njs_string.c \
+   src/njs_object.c \
+   src/njs_object_prop.c \
+   src/njs_array.c \
+   src/njs_json.c \
+   src/njs_function.c \
+   src/njs_regexp.c \
+   src/njs_date.c \
+   src/njs_error.c \
+   src/njs_math.c \
+   src/njs_timer.c \
+   src/njs_module.c \
+   src/njs_event.c \
+   src/njs_extern.c \
+   src/njs_variable.c \
+   src/njs_builtin.c \
+   src/njs_lexer.c \
+   src/njs_lexer_keyword.c \
+   src/njs_parser.c \
+   src/njs_generator.c \
+   src/njs_disassembler.c \
+   src/njs_array_buffer.c \
+   src/njs_typed_array.c \
+   src/njs_promise.c \
+   src/njs_encoding.c \
+   src/njs_iterator.c \
+   src/njs_scope.c \
+   src/njs_async.c \
+"
+
+NJS_LIB_TEST_SRCS=" \
+   src/test/lvlhsh_unit_test.c \
+   src/test/random_unit_test.c \
+   src/test/rbtree_unit_test.c \
+   src/test/unicode_unit_test.c \
+"
+
+NJS_TEST_SRCS=" \
+   src/test/njs_unit_test.c \
+   src/test/njs_benchmark.c \
+"
+
+if [ "$NJS_PCRE" = "YES" ]; then
+	NJS_LIB_SRCS="$NJS_LIB_SRCS external/njs_regex.c"
+fi
+
+if [ "$NJS_HAVE_LIBBFD" = "YES" -a "$NJS_HAVE_DL_ITERATE_PHDR" = "YES" ]; then
+	NJS_LIB_SRCS="$NJS_LIB_SRCS src/njs_addr2line.c"
+fi
+
+NJS_TS_SRCS=$(find ts/ -name "*.d.ts" -o -name "*.json")
+
+NJS_TEST_TS_SRCS=$(find test/ts/ -name "*.ts" -o -name "*.json")

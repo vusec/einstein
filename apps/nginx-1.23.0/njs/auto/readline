@@ -1,0 +1,79 @@
+# Copyright (C) Dmitry Volyntsev
+# Copyright (C) NGINX, Inc.
+
+
+NJS_READLINE_LIB=
+
+njs_found=no
+
+njs_feature="GNU readline library"
+njs_feature_name=NJS_HAVE_GNU_READLINE
+njs_feature_run=no
+njs_feature_incs=
+njs_feature_libs="-lreadline"
+njs_feature_test="#include <stdio.h>
+                  #include <readline/readline.h>
+                  #include <readline/history.h>
+
+                  int main(void) {
+                      add_history(NULL);
+                      return 0;
+                  }"
+. auto/feature
+
+if [ $njs_found = no ]; then
+    njs_feature="editline library in editline/readline.h"
+    njs_feature_name=NJS_HAVE_EDITLINE
+    njs_feature_libs="-ledit"
+    njs_feature_test="#include <stdio.h>
+                      #include <editline/readline.h>
+
+                      int main(void) {
+                          add_history(NULL);
+                          return 0;
+                      }"
+    . auto/feature
+fi
+
+if [ $njs_found = no ]; then
+
+    # FreeBSD port
+
+    njs_feature_name=NJS_HAVE_EDIT_READLINE
+    njs_feature="editline in edit/readline/readline.h"
+    njs_feature_test="#include <stdio.h>
+                      #include <edit/readline/readline.h>
+
+                      int main(void) {
+                          add_history(NULL);
+                          return 0;
+                      }"
+
+    . auto/feature
+fi
+
+if [ $njs_found = no ]; then
+
+    # NetBSD
+
+    njs_feature_name=NJS_HAVE_NETBSD_READLINE
+    njs_feature="editline in readline/readline.h"
+    njs_feature_test="#include <stdio.h>
+                      #include <readline/readline.h>
+
+                      int main(void) {
+                          add_history(NULL);
+                          return 0;
+                      }"
+    . auto/feature
+fi
+
+if [ $njs_found = yes ]; then
+    NJS_HAVE_READLINE=YES
+    njs_define=NJS_HAVE_READLINE . auto/define
+    NJS_READLINE_LIB=$njs_feature_libs
+
+else
+    NJS_HAVE_READLINE=NO
+    echo " - njs CLI is built without interactive shell support"
+fi

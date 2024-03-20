@@ -1,0 +1,43 @@
+#!/bin/bash
+
+PROC_NAME="postgres"
+BIN_PATH=`pwd`/install/bin/postgres
+BC_PATH=`pwd`/install/bin/postgres
+
+ROOT=${ROOT-../..}
+
+. ${ROOT}/apps/scripts/include/cmdctl.inc
+
+DATADIR=`pwd`/data
+LISTEN_PORT=1080
+mode=$1
+shift || mode="no_action"
+
+function cmdctl_server_ps {
+    FIRST_PID=$(ps --sort=start_time -eo comm,pid,args | grep "$(whoami)" | grep -e "[0-9] $BIN_PATH" -e "postgres: " | head -1 | awk '{ print $2; }')
+    ps --sort=start_time ${2} -eo comm,${1},ppid,pid,args | grep "$(whoami)" | grep " $FIRST_PID " | grep -v grep
+}
+
+case "$mode" in
+  'start')
+    if [ ! -f postgresql.init.done ]; then
+    	echo "***** Initializing $PROC_NAME server..."
+        ./postgresql.init
+    fi
+    echo "***** Starting $PROC_NAME server..."
+    cmdctl_server_check_not_running
+    eval $CMD_PREFIX $BIN_PATH -p $LISTEN_PORT -D $DATADIR $* &> __serverctl.tmp &
+    cmdctl_server_wait_for_listen_port $LISTEN_PORT
+    cmdctl_server_wait_for_file /tmp/.s.PGSQL.$LISTEN_PORT
+    cat __serverctl.tmp 1>&2
+    rm -f __serverctl.tmp
+    ;;
+  'fix')
+    cmdctl_server_stop
+    ./postgresql.init
+    ;;
+  *)
+    cmdctl_server_action $mode $*
+    ;;
+esac
+

@@ -1,0 +1,57 @@
+The Apache-Test project is co-maintained by several developers, who
+take turns at making CPAN releases. Therefore you may find several
+CPAN directories containing Apache-Test releases. The best way to find
+the latest release is to use http://search.cpan.org/.
+
+If you have a question or you want to submit a bug report or make a
+contribution, please do not email individual authors, but send an
+email to the test-dev <at> httpd.apache.org mailing list. This list is
+moderated, so unless you are subscribed to it, your message will have
+to be approved first by a moderator. Therefore please allow some time
+(up to a few days) for your post to propagate to the list.
+
+If 'make test' fails to start, with an error message:
+
+  !!! no test server configured, please specify an httpd or apxs or put
+  either in your PATH. For example: t/TEST -httpd /path/to/bin/httpd
+
+or similar, please don't submit a bug report, since this is a user
+error, not a bug in Apache-Test. Instead, do what the error message
+suggests; Apache-Test needs to know where it can find Apache and other
+components. If you have apxs installed you can run the test suite via:
+
+  % t/TEST -apxs /path/to/bin/apxs
+
+or if you set the APXS environment variable, via make:
+
+  % APXS=/path/to/bin/apxs make test
+
+If you don't have 'apxs', tell Apache-Test where your httpd can be
+found:
+
+  % t/TEST -httpd /path/to/bin/httpd
+
+or via the APACHE environment variable:
+
+  % APACHE=/path/to/bin/httpd make test
+
+*** CPAN Testers ***
+
+CPAN Testers using CPANPLUS and running under 'root' are required to
+update their perl installation to have IPC::Run 0.78 or higher. Please
+do not post failure reports unless you have this prerequisite
+satisfied. It has nothing to do with Apache-Test itself, and needed
+for CPANPLUS to flush the STDERR and STDOUT streams at the right time,
+allowing you to skip the test suite if the conditions aren't suitable
+for its execution.
+
+*** Apache C modules bug reports ***
+
+It's now possible to easily create tarballs with self-contained bug
+reports for Apache modules in C. Geoff developed and maintains the 
+skeleton:
+
+   http://perl.apache.org/~geoff/bug-reporting-skeleton-apache.tar.gz
+
+So next time you want to send a reproducable bug report for some C module,
+grab that tarball, put your code in and submit it to the relevant list.

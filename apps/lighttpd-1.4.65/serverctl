@@ -1,0 +1,31 @@
+#!/bin/bash
+
+PROC_NAME="lighttpd"
+BIN_PATH=`pwd`/install/sbin/lighttpd
+
+ROOT=${ROOT-../..}
+
+. ${ROOT}/apps/scripts/include/cmdctl.inc
+
+mode=$1
+shift || mode="no_action"
+
+function cmdctl_server_ps {
+    FIRST_PID=`ps --sort=start_time -eo comm,pid,args | grep -e "^$PROC_NAME " | head -1 | awk '{ print $2; }'`
+    ps --sort=start_time ${2} -eo comm,${1},ppid,pid,args | grep " $FIRST_PID " | grep -v grep
+}
+
+case "$mode" in
+  'start')
+    echo "***** Starting $PROC_NAME server..."
+    eval $CMD_PREFIX $BIN_PATH $*
+    ;;
+  'cleanup')
+    cmdctl_server_cleanup
+    rm -f install/logs/*
+    ;;
+  *)
+    cmdctl_server_action $mode $*
+    ;;
+esac
+

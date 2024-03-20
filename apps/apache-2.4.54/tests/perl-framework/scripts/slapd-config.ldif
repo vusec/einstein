@@ -1,0 +1,10 @@
+dn: olcDatabase={2}hdb,cn=config
+changetype: modify
+replace: olcSuffix
+olcSuffix: dc=example,dc=com
+-
+replace: olcRootDN
+olcRootDN: cn=admin,dc=example,dc=com
+-
+add: olcRootPW
+olcRootPW: travis

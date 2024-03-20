@@ -1,0 +1,27 @@
+=head1 NAME
+
+Changes - Apache::TestItSelf changes logfile
+
+=head1 Changes
+
+=over 4
+
+=item 0.01
+
+Fix Makefile.PL to make sure that MakeMaker won't descend into
+Apache-TestMe. NORECURS doesn't work in older MM versions, so use the
+DIR attr as a workaround [Stas]
+
+new test: minmaxclients.t: testing a bug with vhosts reproducable by
+t/TEST -conf followed by t/TEST -maxclients 1 [Stas]
+
+new test: interactive.t: the interactive config  [Stas]
+
+new test: httpd_arg.t: passing -httpd argument to 'perl Makefile.PL'
+and to 't/TEST' [Stas]
+
+starting the config test suite [Stas]
+
+=back
+
+=cut

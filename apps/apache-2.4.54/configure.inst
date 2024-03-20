@@ -1,0 +1,33 @@
+#!/bin/bash
+
+MYPWD=`pwd`
+ROOT="`readlink -f .`/../.."
+
+. $MYPWD/../scripts/include/configure.inst.inc
+
+mkdir -p $MYPWD/install
+rm -rf $MYPWD/install/*
+cd tests/perl-framework ; ./t/TEST -clean || true ; cd ../..
+cd srclib ; make clean || true ; cd ..
+
+# Unfortunately, --enable-modules=reallyall or --enable-modules=all causes a seg fault with Einstein. So, we'll use --enable-modules=most even though it gives less coverage.
+APACHE_OPTS=" --enable-modules=most --enable-load-all-modules "
+APACHE_OPTS+=" --disable-auth-form --disable-brotli --disable-proxy-html --disable-xml2enc "
+
+# Use the same ports that serverctl/clientctl/etc. expect
+APACHE_OPTS+=" --with-port=1080 --with-sslport=10443"
+
+# Possible values: event, worker, prefork, winnt. worker seems good for a memory-constrained env.
+APACHE_OPTS+=" --with-mpm=worker"
+
+# Use the included apr so that it's easily reproducible (i.e., so we don't have to rely on system apr libs)
+APACHE_OPTS+=" --with-included-apr"
+
+./configure $APACHE_OPTS --prefix=$MYPWD/install \
+   CC="$CC" \
+   CXX="$CXX" \
+   CFLAGS="$CFLAGS -Og -g" \
+   LDFLAGS="$LLVM_LIBS $LDFLAGS" \
+   RANLIB="$RANLIB" \
+   AR_FLAGS="$AR_FLAGS"
+

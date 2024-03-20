@@ -1,0 +1,25 @@
+#!/bin/bash
+
+ROOT=`readlink -f ../..`
+
+BENCH_TYPE=${BENCH_TYPE:-1}
+
+. ../scripts/include/cmdctl.inc
+
+# Run all tests
+if [ $BENCH_TYPE -eq 2 ]; then
+    RUN_EINSTEIN=1 USE_LOG_DIR=1 V=1 LOG_SUB_DIR=bench ./serverctl restart
+    sleep 10
+    ./serverctl udscmd pids dbt taintall
+    sleep 2
+    echo "Running tests... (TODO: Run _all_ tests with 'make installcheck-world')"
+    PGPORT=1080 PATH=${MYPERL5}/bin:${PATH} PERL5LIB=${MYPERL5}/lib/perl5 PERL_LOCAL_LIB_ROOT=${MYPERL5} PERL_MB_OPT="--install_base ${MYPERL5}" PERL_MM_OPT="INSTALL_BASE=${MYPERL5}" make installcheck PROVE_FLAGS='--timer'
+    ./serverctl stop
+    exit 0
+
+# Run execve tests
+elif [ $BENCH_TYPE -eq 3 ]; then
+    echo "TODO"
+    exit 0
+fi
+

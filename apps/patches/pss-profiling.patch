@@ -1,0 +1,103 @@
+diff --git b/apps/apache-2.4.54/runbench a/apps/apache-2.4.54/runbench
+index 604cc593..33c8571a 100755
+--- b/apps/apache-2.4.54/runbench
++++ a/apps/apache-2.4.54/runbench
+@@ -27,7 +27,10 @@ if [ $BENCH_TYPE -eq 2 ] || [ $BENCH_TYPE -eq 3 ]; then
+     cd tests/perl-framework
+     mkdir -p t/logs
+     t/TEST -clean
++    ${ROOT}/scripts/watch-pss.sh httpd ${ROOT}/scripts/pss-out/apache.mem &
++    WATCH_PSS_PID=$!
+     RUNBENCH_CMD="t/TEST -one-process ${TESTS}" cmdctl_runbench
++    kill ${WATCH_PSS_PID}
+     exit 0
+ fi
+ 
+diff --git b/apps/lighttpd-1.4.65/runbench a/apps/lighttpd-1.4.65/runbench
+index 5aeb7288..a5a38a84 100755
+--- b/apps/lighttpd-1.4.65/runbench
++++ a/apps/lighttpd-1.4.65/runbench
+@@ -7,7 +7,10 @@ BENCH_TYPE=${BENCH_TYPE:-1}
+ # Run all tests
+ if [ $BENCH_TYPE -eq 2 ]; then
+     ./serverctl stop
++    ${ROOT}/scripts/watch-pss.sh lighttpd ${ROOT}/scripts/pss-out/lighttpd.mem &
++    WATCH_PSS_PID=$!
+     time env VERBOSE=1 make check
++    kill ${WATCH_PSS_PID}
+     #RUNBENCH_CMD='env VERBOSE=1 make check' cmdctl_runbench
+     exit 0
+ 
+diff --git b/apps/memcached-1.6.17/runbench a/apps/memcached-1.6.17/runbench
+index c9b10475..5c61ca83 100755
+--- b/apps/memcached-1.6.17/runbench
++++ a/apps/memcached-1.6.17/runbench
+@@ -10,8 +10,11 @@ BENCH_TYPE=${BENCH_TYPE:-1}
+ 
+ # Run all tests
+ if [ $BENCH_TYPE -eq 2 ]; then
++    ${ROOT}/scripts/watch-pss.sh memcached ${ROOT}/scripts/pss-out/memcached.mem &
++    WATCH_PSS_PID=$!
+     make test
+     ./serverctl stop
++    kill ${WATCH_PSS_PID}
+     exit 0
+ 
+ # Run execve tests
+diff --git b/apps/nginx-1.23.0/runbench a/apps/nginx-1.23.0/runbench
+index 41318601..32d85cf9 100755
+--- b/apps/nginx-1.23.0/runbench
++++ a/apps/nginx-1.23.0/runbench
+@@ -28,9 +28,12 @@ if [ $BENCH_TYPE -eq 2 ] || [ $BENCH_TYPE -eq 3 ]; then
+         while ! lsof -ti tcp:8080 &> /dev/null; do sleep 0.2; done
+     fi
+ 
++    ${ROOT}/scripts/watch-pss.sh nginx ${ROOT}/scripts/pss-out/nginx.mem &
++    WATCH_PSS_PID=$!
+     cd tests/nginx-tests
+     TEST_NGINX_PREFIXED=1 TEST_NGINX_TESTDIR=$TESTDIR TEST_NGINX_PERSISTENT=$BENCH_PERSISTENT TEST_NGINX_BINARY=$NGINX_BIN TEST_NGINX_UNSAFE=1 \
+         RUNBENCH_CMD="$RUNBENCH_CMD" cmdctl_runbench
++    kill ${WATCH_PSS_PID}
+     exit 0
+ fi
+ 
+diff --git b/apps/postgresql-15.1/runbench a/apps/postgresql-15.1/runbench
+index 10c7f299..31b42e5f 100755
+--- b/apps/postgresql-15.1/runbench
++++ a/apps/postgresql-15.1/runbench
+@@ -8,11 +8,14 @@ BENCH_TYPE=${BENCH_TYPE:-1}
+ 
+ # Run all tests
+ if [ $BENCH_TYPE -eq 2 ]; then
++    ${ROOT}/scripts/watch-pss.sh postgres ${ROOT}/scripts/pss-out/postgres.mem &
++    WATCH_PSS_PID=$!
+     RUN_EINSTEIN=1 USE_LOG_DIR=1 V=1 LOG_SUB_DIR=bench ./serverctl restart
+     sleep 10
+     echo "Running tests... (TODO: Run _all_ tests with 'make installcheck-world')"
+     PGPORT=1080 PATH=${MYPERL5}/bin:${PATH} PERL5LIB=${MYPERL5}/lib/perl5 PERL_LOCAL_LIB_ROOT=${MYPERL5} PERL_MB_OPT="--install_base ${MYPERL5}" PERL_MM_OPT="INSTALL_BASE=${MYPERL5}" make installcheck PROVE_FLAGS='--timer'
+     ./serverctl stop
++    kill ${WATCH_PSS_PID}
+     exit 0
+ 
+ # Run execve tests
+diff --git b/apps/redis-7.0.5/runbench a/apps/redis-7.0.5/runbench
+index a8349d59..f1adc317 100755
+--- b/apps/redis-7.0.5/runbench
++++ a/apps/redis-7.0.5/runbench
+@@ -8,6 +8,8 @@ BENCH_TYPE=${BENCH_TYPE:-1}
+ 
+ # Run all tests
+ if [ $BENCH_TYPE -eq 2 ]; then
++    ${ROOT}/scripts/watch-pss.sh redis ${ROOT}/scripts/pss-out/redis.mem &
++    WATCH_PSS_PID=$!
+     RUN_EINSTEIN=1 USE_LOG_DIR=1 V=1 LOG_SUB_DIR=bench ./serverctl restart
+     sleep 10
+     echo "Tainting all memory... (TODO: Do this from within the test suite)"
+@@ -16,6 +18,7 @@ if [ $BENCH_TYPE -eq 2 ]; then
+     echo "Running tests..."
+     ./runtest --port 1080 --host 127.0.0.1 --verbose
+     ./serverctl stop
++    kill ${WATCH_PSS_PID}
+     exit 0
+ 
+ # Run execve tests

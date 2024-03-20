@@ -1,0 +1,29 @@
+
+# Copyright (C) Igor Sysoev
+# Copyright (C) NGINX, Inc.
+
+
+echo
+echo "NJS configuration summary:"
+echo
+echo " + using CC: \"$CC\""
+echo " + using CFLAGS: \"$NJS_CFLAGS $NJS_CC_OPT $CFLAGS\""
+echo
+
+if [ $NJS_HAVE_PCRE = YES ]; then
+  echo " + using PCRE library: $NJS_PCRE_LIB"
+fi
+
+if [ $NJS_HAVE_READLINE = YES ]; then
+  echo " + using readline library: $NJS_READLINE_LIB"
+fi
+
+if [ $NJS_HAVE_OPENSSL = YES ]; then
+  echo " + using OpenSSL library: $NJS_OPENSSL_LIB"
+fi
+
+echo
+echo " njs build dir: $NJS_BUILD_DIR"
+echo " njs CLI: $NJS_BUILD_DIR/njs"
+
+echo

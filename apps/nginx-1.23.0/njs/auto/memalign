@@ -1,0 +1,50 @@
+
+# Copyright (C) Igor Sysoev
+# Copyright (C) NGINX, Inc.
+
+
+# Linux glibc 2.1.91, FreeBSD 7.0, Solaris 11,
+# MacOSX 10.6 (Snow Leopard), NetBSD 5.0.
+
+njs_feature="posix_memalign()"
+njs_feature_name=NJS_HAVE_POSIX_MEMALIGN
+njs_feature_run=yes
+njs_feature_incs=
+njs_feature_libs=
+njs_feature_test="#include <stdlib.h>
+
+                 int main(void) {
+                     void  *p;
+
+                     if (posix_memalign(&p, 4096, 4096) != 0)
+                         return 1;
+
+                     free(p);
+                     return 0;
+                 }"
+. auto/feature
+
+
+if [ $njs_found = no ]; then
+
+    # Solaris, HP-UX.
+
+    njs_feature="memalign()"
+    njs_feature_name=NJS_HAVE_MEMALIGN
+    njs_feature_run=yes
+    njs_feature_incs=
+    njs_feature_libs=
+    njs_feature_test="#include <stdlib.h>
+
+                     int main(void) {
+                         void  *p;
+
+                         p = memalign(4096, 4096);
+                         if (p == NULL)
+                             return 1;
+
+                         free(p);
+                         return 0;
+                     }"
+    . auto/feature
+fi

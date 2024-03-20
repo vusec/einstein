@@ -1,0 +1,12 @@
+
+# Copyright (C) Igor Sysoev
+# Copyright (C) NGINX, Inc.
+
+
+cat << END >> $NJS_AUTO_CONFIG_H
+
+#ifndef $njs_define
+#define $njs_define  1
+#endif
+
+END

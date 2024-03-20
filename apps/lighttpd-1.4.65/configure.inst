@@ -1,0 +1,25 @@
+#!/bin/bash
+
+MYPWD=`pwd`
+ROOT=../..
+
+. ${ROOT}/apps/scripts/include/configure.inst.inc
+
+CFLAGS+=" -g -Og "
+LDFLAGS+=" -g -Og "
+
+make clean || true
+
+EXTRA="--with-pic --enable-static --with-ldap --with-pam --with-attr --with-openssl --with-pcre --with-pcre2 --with-zlib --with-zstd --with-bzip2 --with-libdeflate --with-libxml --with-sqlite --with-xxhash --with-maxminddb --with-lua"
+
+./configure \
+        --prefix=$MYPWD/install \
+	$EXTRA \
+        CC="$CC" \
+        CFLAGS="$CFLAGS" \
+        LDFLAGS="$LDFLAGS"
+
+mkdir -p install/etc
+SEDPWD=`echo $MYPWD | sed "s/\//\\\\\\\\\//g"`
+cat lighttpd.conf | sed "s/DOCUMENT_ROOT/\"$SEDPWD\/htdocs\"/g" > install/etc/lighttpd.conf
+

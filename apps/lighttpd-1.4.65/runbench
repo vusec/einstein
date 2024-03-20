@@ -1,0 +1,28 @@
+#!/bin/bash
+
+BENCH_TYPE=${BENCH_TYPE:-1}
+
+. ../scripts/include/cmdctl.inc
+
+if [ $BENCH_TYPE -eq 2 ]; then
+    # Run all tests
+    TESTS_FILE=$(readlink -f runbench.tests.all)
+elif [ $BENCH_TYPE -eq 3 ]; then
+    # Run custom tests
+    TESTS_FILE=$(readlink -f runbench.tests.custom)
+fi
+
+if [ $BENCH_TYPE -eq 2 ] || [ $BENCH_TYPE -eq 3 ]; then
+    trap "echo Exited!; exit;" SIGINT SIGTERM
+    cat ${TESTS_FILE} | while read TEST
+    do
+        ./serverctl stop
+        set +e
+        time env VERBOSE=1 RUNTESTS="${TEST}" make check
+        set -e
+    done
+    exit 0
+fi
+
+../httpd*/runbench
+

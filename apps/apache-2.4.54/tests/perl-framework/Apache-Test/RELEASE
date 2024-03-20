@@ -1,0 +1,97 @@
+Instructions for Apache-Test Release Manager
+
+0. Ask the PMC to verify that you have the appropriate CPAN permissions
+   on test-dev@.
+
+1. 'make dist' - to make sure nothing is missing from the manifest,
+   etc. Now test this generated package (not svn) with as many
+   configurations as possible on as many platforms as possible.
+
+  a. edit ./Changes:
+     - change -dev to -rc\d+ starting with -rc1
+     - note that you *do not* want to change the version in Apache/Test.pm,
+       this is a significant difference than other Apache::* modules.
+       this means that development proceeds with non '-dev' or '-rc1' version
+       tags, so keep that in mind.
+
+  b. commit Changes
+     % svn ci -m "1.44 rc1" Changes
+
+  c. nuke any preinstalled Apache-Test libs and run 'make test'
+
+  d. test that you can 'make install' and then run 'make test' again
+
+  e. test whether we are still 100% OK on systems with no LWP:
+     % APACHE_TEST_PRETEND_NO_LWP=1 make test
+
+2. once confident that the package is good, commit the release candidate
+   to https://dist.apache.org/repos/dist/dev/perl and post 24 hour-ish
+   candidate alert to the various lists.  note that you will need to
+   be subscribed to all of the following lists.
+
+     o test-dev/perl.apache.org
+     o dev/perl.apache.org
+     o modperl/perl.apache.org
+     o dev/httpd.apache.org
+
+   (or maybe longer to give most people a chance to catch up). no need
+   to tag this package
+
+   Subject: [RELEASE CANDIDATE] Apache-Test-1.44 RC\d+
+
+  a. if problems are detected during stage 2, repeat stages 1 and 2.
+
+3. when the package has been reported to be good, prepare a new
+   package to be released
+
+  a. edit ./Changes:
+     - remove -rc\d+
+     - add release date
+
+  b. rerun:
+     % perl Makefile.PL
+     make sure tag looks right
+     % make -n tag
+
+  c. commit Changes
+     % svn ci -m "1.44 release" Changes
+
+  d. tag
+     % make tag
+
+  e. create the final package
+     % make dist
+
+  f. test the final package again at least once
+
+4. Upload the package to CPAN
+
+5. Announce the package
+
+  a. post to the following lists:
+
+     o test-dev/perl.apache.org
+     o dev/perl.apache.org
+     o modperl/perl.apache.org
+
+   Subject: [ANNOUNCE] Apache-Test-1.44
+
+     include:
+     - MD5 sig (as it comes from CPAN upload announce).
+     - the latest Changes
+
+6. Prepare for the next cycle
+
+  a. increment version in lib/Apache/Test.pm
+
+  b. edit ./Changes:
+     - start a new item with incremented version + '-dev'
+
+     =item 1.45-dev
+
+  c. bump up version numbers in this file to make it easier to do the
+     next release.
+     % perl -pi.bak -e 's/(\d+)\.(\d+)/join(".", $1, $2+1)/eg' RELEASE
+
+  d. commit Changes
+     % svn ci -m "start 1.44-dev cycle" Changes RELEASE lib/Apache/Test.pm

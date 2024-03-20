@@ -1,0 +1,35 @@
+#!/bin/bash
+
+PROC_NAME="nginx"
+BIN_PATH=`pwd`/install/sbin/nginx
+
+ROOT=${ROOT-../..}
+
+. ${ROOT}/apps/scripts/include/cmdctl.inc
+
+mode=$1
+shift || mode="no_action"
+
+function cmdctl_server_ps {
+    FIRST_PID=`ps --sort=start_time -eo comm,pid,args | grep -e "^$PROC_NAME " | head -1 | awk '{ print $2; }'`
+    ps --sort=start_time ${2} -eo comm,${1},ppid,pid,args | grep " $FIRST_PID " | grep -v grep
+}
+
+case "$mode" in
+  'start')
+    echo "***** Starting $PROC_NAME httpd server..."
+    #LOG_SUB_DIR=${LOG_SUB_DIR:-default}
+    #mkdir -p .tmp/pss
+    #daemonize ${ROOT}/scripts/watch-pss.sh nginx ${PWD}/.tmp/pss/${LOG_SUB_DIR}.pss &
+    eval $CMD_PREFIX $BIN_PATH $*
+    ;;
+  'cleanup')
+    #set +e ; pkill watch-pss ; set -e
+    cmdctl_server_cleanup
+    rm -f install/logs/*
+    ;;
+  *)
+    cmdctl_server_action $mode $*
+    ;;
+esac
+

@@ -1,0 +1,13 @@
+#!/bin/bash
+
+PATTERN=${PATTERN:-.\*}
+KEYS=${KEYS:-callers callees}
+
+INFO_ARGS=""
+for k in $KEYS
+do
+    INFO_ARGS+=" -info-$k=$PATTERN"
+done
+
+LLVM_PASS_ARGS="$LLVM_PASS_ARGS -wrap-dummy-wrapper-ext-prefix=__EXT_ -info-ext-prefix=__EXT_ $INFO_ARGS" EXIT_AFTER_OPT=1 ./build.llvm wrap adce globaldce internalize info
+

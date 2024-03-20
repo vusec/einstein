@@ -1,0 +1,79 @@
+
+# Copyright (C) Igor Sysoev
+# Copyright (C) NGINX, Inc.
+
+
+NJS_CC_OPT=${NJS_CC_OPT:--O}
+NJS_LD_OPT=${NJS_CC_OPT:--O}
+
+NJS_DEBUG=NO
+NJS_DEBUG_MEMORY=NO
+NJS_DEBUG_OPCODE=NO
+NJS_DEBUG_GENERATOR=NO
+
+NJS_ADDRESS_SANITIZER=NO
+NJS_ADDR2LINE=NO
+NJS_TEST262=YES
+
+NJS_OPENSSL=YES
+
+NJS_PCRE=YES
+NJS_TRY_PCRE2=YES
+
+NJS_CONFIGURE_OPTIONS=
+
+for njs_option
+do
+    case "$njs_option" in
+        -*=*) value=`echo "$njs_option" | sed -e 's/[-_a-zA-Z0-9]*=//'`      ;;
+           *) value="" ;;
+    esac
+
+    case "$njs_option" in
+        --cc=*)                          CC="$value"                         ;;
+        --cc-opt=*)                      NJS_CC_OPT="$value"                 ;;
+        --ld-opt=*)                      NJS_LD_OPT="$value"                 ;;
+        --ar=*)                          AR="$value"                         ;;
+
+        --build-dir=*)                   NJS_BUILD_DIR="$value"              ;;
+
+        --address-sanitizer=*)           NJS_ADDRESS_SANITIZER="$value"      ;;
+        --addr2line=*)                   NJS_ADDR2LINE="$value"              ;;
+        --debug=*)                       NJS_DEBUG="$value"                  ;;
+        --debug-memory=*)                NJS_DEBUG_MEMORY="$value"           ;;
+        --debug-opcode=*)                NJS_DEBUG_OPCODE="$value"           ;;
+        --debug-generator=*)             NJS_DEBUG_GENERATOR="$value"        ;;
+        --test262=*)                     NJS_TEST262="$value"                ;;
+
+        --no-openssl)                    NJS_OPENSSL=NO                      ;;
+
+        --no-pcre)                       NJS_PCRE=NO                         ;;
+        --no-pcre2)                      NJS_TRY_PCRE2=NO                    ;;
+
+        --help)
+            . auto/help
+            exit 0
+        ;;
+
+        *)
+            echo
+            echo $0: error: invalid option \"$njs_option\".
+            echo Run \"$0 --help\" to see available options.
+            echo
+            exit 1
+        ;;
+    esac
+
+    njs_opt=`echo $njs_option | sed -e "s/\(--[^=]*=\)\(.* .*\)/\1'\2'/"`
+
+    NJS_CONFIGURE_OPTIONS="$NJS_CONFIGURE_OPTIONS $njs_opt"
+
+done
+
+if [ "$NJS_DEBUG_MEMORY" = "YES" ]; then
+    NJS_DEBUG=YES
+fi
+
+if [ "$NJS_DEBUG_OPCODE" = "YES" ]; then
+    NJS_ADDR2LINE=YES
+fi

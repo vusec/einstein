@@ -1,0 +1,3 @@
+These tests were taken from the .phpt files in the 'tests' directory of the PHP source tarball.  Some have been changed a bit, but most have been taken straight from the php test files.  Credit is due to the author(s) of these tests.
+http://www.php.net/
+jsachs@covalent.net

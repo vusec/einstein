@@ -1,0 +1,16 @@
+#!/bin/bash
+
+PROC_NAME=redis-server
+BIN_PATH=`pwd`/install/bin/redis-server
+
+. ../scripts/include/cmdctl.inc
+
+mode=$1
+shift || mode="no_action"
+
+case "$mode" in
+  *)
+    cmdctl_client_action $mode $*
+    ;;
+esac
+

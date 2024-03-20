@@ -1,0 +1,33 @@
+httpd-test/perl-framework STATUS:				-*-text-*-
+Last modified at [$Date: 2018-10-10 16:23:46 +0200 (Wed, 10 Oct 2018) $]
+
+Stuff to do:
+    * finish the t/TEST exit code issue (ORed with 0x2C if
+      framework failed)
+
+    * change existing tests that frob the DocumentRoot (e.g.,
+      t/modules/access.t) to *not* do that; instead, have
+      Makefile.PL prepare appropriate subdirectory configs
+      for them.  Why?  So t/TEST can be used to test a
+      remote server.
+
+    * problems with -d perl mode, doesn't work as documented
+      Message-ID: <3BD10479.2020506@stason.org>
+      Date: Sat, 20 Oct 2001 12:58:33 +0800
+      Subject: Re: perldb
+
+Tests to be written:
+
+    * t/apache
+      - simulations of network failures (incomplete POST bodies,
+        chunked and unchunked; missing POST bodies; slooow
+        client connexions, such as taking 1 minute to send
+        1KiB; ...)
+
+    * t/modules/autoindex
+      - something seems possibly broken with inheritance on 2.0
+
+    * t/ssl
+      - SSLPassPhraseDialog exec:
+      - SSLRandomSeed exec:
+

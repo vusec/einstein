@@ -1,0 +1,26 @@
+#!/bin/bash
+
+set -e
+./configure.inst
+set +e
+
+ROOT=${ROOT-../..}
+. ${ROOT}/apps/scripts/include/build.inst.inc
+
+PROG=memcached
+INPUT=${PROG}
+OUTPUT=install/bin/${PROG}
+LIBS=${LIBS:--levent}
+LINKER="$CC"
+
+rm -f memcached memcached.bc
+make clean
+
+make -j `grep -c ^processor /proc/cpuinfo` install
+
+if [ $HAVE_LIBDFT -eq 1 ]; then
+    ${LIBDFT}/utils/relink.py install/bin/memcached
+    ${LIBDFT}/utils/relink.py memcached
+    ${LIBDFT}/utils/relink.py memcached-debug
+fi
+

@@ -1,0 +1,17 @@
+#!/bin/bash
+
+set -e
+./configure.inst
+set +e
+
+ROOT=${ROOT-../..}
+. ${ROOT}/apps/scripts/include/build.inst.inc
+
+make clean
+
+# There must be some kind of race condition with the makefiles, because building in parallel sometimes causes errors. Hence, we'll try running it in parallel first, then continue serially if it fails.
+make -j `grep -c ^processor /proc/cpuinfo` install || make install
+
+if [ $HAVE_LIBDFT -eq 1 ]; then
+    ${LIBDFT}/utils/relink.py install/bin/httpd
+fi

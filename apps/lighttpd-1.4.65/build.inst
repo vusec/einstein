@@ -1,0 +1,20 @@
+#!/bin/bash
+
+set -e
+./autogen.sh
+./configure.inst
+set +e
+
+ROOT=${ROOT-../..}
+. ${ROOT}/apps/scripts/include/build.inst.inc
+
+if [ "$#" -ne 0 ]; then
+    MAKEFILES="Makefile src/Makefile tests/Makefile"
+fi
+
+rm -f src/lighttpd
+make -j `grep -c ^processor /proc/cpuinfo` install
+
+if [ $HAVE_LIBDFT -eq 1 ]; then
+    ${LIBDFT}/utils/relink.py install/sbin/lighttpd
+fi

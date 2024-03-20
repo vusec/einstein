@@ -1,0 +1,4 @@
+man3
+!*.so
+*.pod
+*.packlist

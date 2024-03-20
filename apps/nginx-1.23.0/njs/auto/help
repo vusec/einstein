@@ -1,0 +1,48 @@
+
+# Copyright (C) Igor Sysoev
+# Copyright (C) NGINX, Inc.
+
+
+cat << END
+
+./configure options:
+
+  --cc=FILE                 set C compiler filename, default: "$CC"
+  --cc-opt=OPTIONS          set additional C compiler options, \
+default: "$NJS_CC_OPT"
+  --ld-opt=OPTIONS          set additional linker options, \
+default: "$NJS_LD_OPT"
+  --ar=FILE                 set static linking program, default: "$AR"
+
+  --build-dir=DIR           set build directory, default: "$NJS_BUILD_DIR"
+
+  --no-pcre                 disables PCRE/PCRE2 discovery for RegExp
+                            backend. This flag allows to build PCRE/PCRE2
+                            outside of libnjs.a.  When this option is enabled
+                            functions described in njs_regex.h are not built.
+                            Instead this functions are expected to be provided
+                            while linking.
+
+  --no-pcre2                disables PCRE2 discovery for RegExp backend.
+                            When this option is enabled only PCRE library
+                            is discovered.
+
+  --no-openssl              disables OpenSSL discovery. When this option is
+                            enabled OpenSSL dependant code is not built as a
+                            part of libnjs.a.
+
+  --address-sanitizer=YES   enables build with address sanitizer, \
+default: "$NJS_ADDRESS_SANITIZER"
+  --addr2line=YES           enables native function symbolization, \
+default: "$NJS_ADDR2LINE"
+  --debug=YES               enables additional runtime checks, \
+default: "$NJS_DEBUG"
+  --debug-memory=YES        enables memory alloc debug, \
+default: "$NJS_DEBUG_MEMORY"
+  --debug-opcode=YES        enables runtime function tracing, \
+default: "$NJS_DEBUG_OPCODE"
+  --debug-generator=YES     enables generator debug, \
+default: "$NJS_DEBUG_GENERATOR"
+  --test262=YES             enables test262 extentions, \
+default: "$NJS_TEST262"
+END

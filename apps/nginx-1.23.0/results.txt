@@ -1,0 +1,270 @@
+   6360 Tainted syscall: syscall = accept4, nr_taint = {}, args_taint = [1, 0, 0, 0], syscall_specifics = (skipped), caller = accept4
+    479 Tainted syscall: syscall = accept4, nr_taint = {}, args_taint = [1, 1, 1, 0], syscall_specifics = (skipped), caller = accept4
+    602 Tainted syscall: syscall = accept4, nr_taint = {}, args_taint = [1, 1, 1, 1], syscall_specifics = (skipped), caller = accept4
+      1 Tainted syscall: syscall = bind, nr_taint = {}, args_taint = [0, 1, 0], syscall_specifics = (skipped), caller = bind
+      4 Tainted syscall: syscall = bind, nr_taint = {}, args_taint = [0, 1, 1], syscall_specifics = (skipped), caller = bind
+      6 Tainted syscall: syscall = bind, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = (skipped), caller = bind
+    676 Tainted syscall: syscall = brk, nr_taint = {}, args_taint = [1], syscall_specifics = (skipped), caller = brk
+    270 Tainted syscall: syscall = chmod, nr_taint = {}, args_taint = [1, 0], syscall_specifics = (skipped), caller = chmod
+     33 Tainted syscall: syscall = chmod, nr_taint = {}, args_taint = [1, 1], syscall_specifics = (skipped), caller = chmod
+     12 Tainted syscall: syscall = clock_nanosleep, nr_taint = {}, args_taint = [1, 0, 1, 0], syscall_specifics = (skipped), caller = clock_nanosleep
+      7 Tainted syscall: syscall = clone, nr_taint = {}, args_taint = [0, 0, 0, 1], syscall_specifics = (skipped), caller = fork
+      6 Tainted syscall: syscall = clone, nr_taint = {}, args_taint = [0, 1, 1, 1], syscall_specifics = (skipped), caller = clone
+  15905 Tainted syscall: syscall = close, nr_taint = {}, args_taint = [1], syscall_specifics = (skipped), caller = close
+     70 Tainted syscall: syscall = close, nr_taint = {}, args_taint = [1], syscall_specifics = (skipped), caller = __close_nocancel
+   2776 Tainted syscall: syscall = connect, nr_taint = {}, args_taint = [0, 1, 1], syscall_specifics = (skipped), caller = __connect
+    358 Tainted syscall: syscall = connect, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = (skipped), caller = __connect
+      6 Tainted syscall: syscall = dup2, nr_taint = {}, args_taint = [1, 0], syscall_specifics = (skipped), caller = __dup2
+      6 Tainted syscall: syscall = epoll_create, nr_taint = {}, args_taint = [1], syscall_specifics = (skipped), caller = epoll_create
+      6 Tainted syscall: syscall = epoll_ctl, nr_taint = {}, args_taint = [0, 0, 0, 1], syscall_specifics = (skipped), caller = epoll_ctl
+      6 Tainted syscall: syscall = epoll_ctl, nr_taint = {}, args_taint = [0, 0, 1, 1], syscall_specifics = (skipped), caller = epoll_ctl
+     36 Tainted syscall: syscall = epoll_ctl, nr_taint = {}, args_taint = [0, 1, 1, 1], syscall_specifics = (skipped), caller = epoll_ctl
+  10772 Tainted syscall: syscall = epoll_ctl, nr_taint = {}, args_taint = [1, 0, 1, 0], syscall_specifics = (skipped), caller = epoll_ctl
+    351 Tainted syscall: syscall = epoll_ctl, nr_taint = {}, args_taint = [1, 0, 1, 1], syscall_specifics = (skipped), caller = epoll_ctl
+   1581 Tainted syscall: syscall = epoll_ctl, nr_taint = {}, args_taint = [1, 1, 1, 1], syscall_specifics = (skipped), caller = epoll_ctl
+      6 Tainted syscall: syscall = epoll_wait, nr_taint = {}, args_taint = [0, 1, 1, 0], syscall_specifics = (skipped), caller = epoll_wait
+     13 Tainted syscall: syscall = epoll_wait, nr_taint = {}, args_taint = [0, 1, 1, 1], syscall_specifics = (skipped), caller = epoll_wait
+   3076 Tainted syscall: syscall = epoll_wait, nr_taint = {}, args_taint = [1, 1, 1, 0], syscall_specifics = (skipped), caller = epoll_wait
+  16590 Tainted syscall: syscall = epoll_wait, nr_taint = {}, args_taint = [1, 1, 1, 1], syscall_specifics = (skipped), caller = epoll_wait
+      1 Tainted syscall: syscall = execve, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {filename = apps/nginx-1.23.0/install/sbin/nginx, argv = [apps/nginx-1.23.0/install/sbin/nginx, -p, /tmp/nginx-test-DIR/, -c, nginx.conf, -e, error.log], envp = [PERL5LIB=apps/nginx-1.23.0/install/sbin/src/http/modules/perl:apps/nginx-1.23.0/install/sbin/src/http/modules/perl/blib/arch, NGINX=8;, SPARE=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX]}, caller = execve
+    879 Tainted syscall: syscall = exit_group, nr_taint = {}, args_taint = [1], syscall_specifics = (skipped), caller = _exit
+     23 Tainted syscall: syscall = fcntl, nr_taint = {}, args_taint = [1, 0, 0], syscall_specifics = (skipped), caller = __close_nocancel
+      6 Tainted syscall: syscall = fcntl, nr_taint = {}, args_taint = [1, 0, 1], syscall_specifics = (skipped), caller = __close_nocancel
+    281 Tainted syscall: syscall = fstat, nr_taint = {}, args_taint = [0, 1], syscall_specifics = (skipped), caller = __fxstat
+    287 Tainted syscall: syscall = fstat, nr_taint = {}, args_taint = [1, 0], syscall_specifics = (skipped), caller = __fxstat
+    180 Tainted syscall: syscall = fstat, nr_taint = {}, args_taint = [1, 1], syscall_specifics = (skipped), caller = __fxstat
+    878 Tainted syscall: syscall = futex, nr_taint = {}, args_taint = [1, 0, 0, 0, 0, 0], syscall_specifics = (skipped), caller = __pthread_once_slow
+    879 Tainted syscall: syscall = futex, nr_taint = {}, args_taint = [1, 0, 1, 0, 1, 1], syscall_specifics = (skipped), caller = __pthread_clockjoin_ex
+     24 Tainted syscall: syscall = getdents64, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = (skipped), caller = getdents64
+    520 Tainted syscall: syscall = getsockname, nr_taint = {}, args_taint = [1, 0, 0], syscall_specifics = (skipped), caller = getsockname
+     66 Tainted syscall: syscall = getsockname, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = (skipped), caller = getsockname
+   2681 Tainted syscall: syscall = getsockopt, nr_taint = {}, args_taint = [1, 0, 0, 0, 0], syscall_specifics = (skipped), caller = getsockopt
+    311 Tainted syscall: syscall = getsockopt, nr_taint = {}, args_taint = [1, 0, 0, 1, 1], syscall_specifics = (skipped), caller = getsockopt
+     56 Tainted syscall: syscall = ioctl, nr_taint = {}, args_taint = [1, 0, 0], syscall_specifics = (skipped), caller = tcgetattr
+    947 Tainted syscall: syscall = ioctl, nr_taint = {}, args_taint = [1, 0, 1], syscall_specifics = (skipped), caller = ioctl
+      1 Tainted syscall: syscall = ioctl, nr_taint = {}, args_taint = [1, 0, 1], syscall_specifics = (skipped), caller = tcgetattr
+      6 Tainted syscall: syscall = listen, nr_taint = {}, args_taint = [1, 0], syscall_specifics = (skipped), caller = listen
+     92 Tainted syscall: syscall = lseek, nr_taint = {}, args_taint = [1, 0, 0], syscall_specifics = (skipped), caller = lseek
+     35 Tainted syscall: syscall = lseek, nr_taint = {}, args_taint = [1, 1, 0], syscall_specifics = (skipped), caller = lseek
+      9 Tainted syscall: syscall = lstat, nr_taint = {}, args_taint = [1, 0], syscall_specifics = (skipped), caller = __lxstat64
+    879 Tainted syscall: syscall = madvise, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = (skipped), caller = __madvise
+    238 Tainted syscall: syscall = mkdir, nr_taint = {}, args_taint = [1, 0], syscall_specifics = (skipped), caller = mkdir
+     76 Tainted syscall: syscall = mkdir, nr_taint = {}, args_taint = [1, 1], syscall_specifics = (skipped), caller = mkdir
+     42 Tainted syscall: syscall = mmap, nr_taint = {}, args_taint = [0, 1, 0, 0, 1, 0], syscall_specifics = {prot = {PROT_READ, PROT_WRITE}}, caller = __mmap
+     82 Tainted syscall: syscall = munmap, nr_taint = {}, args_taint = [1, 1], syscall_specifics = (skipped), caller = __munmap
+      6 Tainted syscall: syscall = newfstatat, nr_taint = {}, args_taint = [0, 1, 1, 0], syscall_specifics = (skipped), caller = __fxstatat
+     32 Tainted syscall: syscall = newfstatat, nr_taint = {}, args_taint = [1, 1, 1, 0], syscall_specifics = (skipped), caller = __fxstatat
+     11 Tainted syscall: syscall = openat, nr_taint = {}, args_taint = [0, 0, 0, 1], syscall_specifics = (skipped), caller = __open64
+     44 Tainted syscall: syscall = openat, nr_taint = {}, args_taint = [0, 1, 0, 0], syscall_specifics = (skipped), caller = __open
+   2312 Tainted syscall: syscall = openat, nr_taint = {}, args_taint = [0, 1, 0, 0], syscall_specifics = (skipped), caller = __open64
+     12 Tainted syscall: syscall = openat, nr_taint = {}, args_taint = [0, 1, 0, 0], syscall_specifics = (skipped), caller = __open64_nocancel
+      4 Tainted syscall: syscall = openat, nr_taint = {}, args_taint = [0, 1, 0, 1], syscall_specifics = (skipped), caller = __open
+    168 Tainted syscall: syscall = openat, nr_taint = {}, args_taint = [0, 1, 0, 1], syscall_specifics = (skipped), caller = __open64
+      1 Tainted syscall: syscall = openat, nr_taint = {}, args_taint = [0, 1, 1, 1], syscall_specifics = (skipped), caller = __open64
+     54 Tainted syscall: syscall = openat, nr_taint = {}, args_taint = [1, 1, 0, 0], syscall_specifics = (skipped), caller = openat64
+     54 Tainted syscall: syscall = openat, nr_taint = {}, args_taint = [1, 1, 1, 0], syscall_specifics = (skipped), caller = openat64
+      3 Tainted syscall: syscall = pread64, nr_taint = {}, args_taint = [0, 0, 0, 1], syscall_specifics = (skipped), caller = pread
+      6 Tainted syscall: syscall = pread64, nr_taint = {}, args_taint = [0, 1, 0, 0], syscall_specifics = (skipped), caller = pread
+    117 Tainted syscall: syscall = pread64, nr_taint = {}, args_taint = [1, 1, 1, 0], syscall_specifics = (skipped), caller = pread
+   2201 Tainted syscall: syscall = pread64, nr_taint = {}, args_taint = [1, 1, 1, 1], syscall_specifics = (skipped), caller = pread
+      6 Tainted syscall: syscall = prlimit64, nr_taint = {}, args_taint = [0, 0, 0, 1], syscall_specifics = (skipped), caller = getrlimit64
+    432 Tainted syscall: syscall = pwrite64, nr_taint = {}, args_taint = [1, 1, 1, 1], syscall_specifics = (skipped), caller = pwrite64
+     84 Tainted syscall: syscall = pwritev, nr_taint = {}, args_taint = [1, 0, 0, 1, 0], syscall_specifics = (skipped), caller = pwritev
+      2 Tainted syscall: syscall = pwritev, nr_taint = {}, args_taint = [1, 1, 1, 1, 0], syscall_specifics = (skipped), caller = pwritev
+      2 Tainted syscall: syscall = read, nr_taint = {}, args_taint = [0, 1, 0], syscall_specifics = {fd = /tmp/nginx-test-DIR/file}, caller = read
+      6 Tainted syscall: syscall = read, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/1.example.com.crt, all_open_fds = (skipped)}, caller = read
+      3 Tainted syscall: syscall = read, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/1.example.com.key, all_open_fds = (skipped)}, caller = read
+      6 Tainted syscall: syscall = read, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/2.example.com.crt, all_open_fds = (skipped)}, caller = read
+      3 Tainted syscall: syscall = read, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/2.example.com.key, all_open_fds = (skipped)}, caller = read
+      6 Tainted syscall: syscall = read, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/3.example.com.crt, all_open_fds = (skipped)}, caller = read
+      3 Tainted syscall: syscall = read, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/3.example.com.key, all_open_fds = (skipped)}, caller = read
+     18 Tainted syscall: syscall = read, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/one.crt, all_open_fds = (skipped)}, caller = read
+      8 Tainted syscall: syscall = read, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/one.key, all_open_fds = (skipped)}, caller = read
+      4 Tainted syscall: syscall = read, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/pass.crt, all_open_fds = (skipped)}, caller = read
+      2 Tainted syscall: syscall = read, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/pass.key, all_open_fds = (skipped)}, caller = read
+     10 Tainted syscall: syscall = read, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/two.crt, all_open_fds = (skipped)}, caller = read
+      4 Tainted syscall: syscall = read, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/two.key, all_open_fds = (skipped)}, caller = read
+    374 Tainted syscall: syscall = read, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = {type = IPv4, protocol = TCP, name = localhost:http-alt->localhost:X}, all_open_fds = (skipped)}, caller = read
+      6 Tainted syscall: syscall = read, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = {type = IPv4, protocol = TCP, name = localhost:omniorb->localhost:X}, all_open_fds = (skipped)}, caller = read
+    532 Tainted syscall: syscall = read, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = {type = IPv4, protocol = TCP, name = localhost:tproxy->localhost:X}, all_open_fds = (skipped)}, caller = read
+     42 Tainted syscall: syscall = read, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = {type = IPv4, protocol = TCP, name = localhost:X->localhost:http-alt}, all_open_fds = (skipped)}, caller = read
+    521 Tainted syscall: syscall = read, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = {type = IPv4, protocol = TCP, name = localhost:X->localhost:tproxy}, all_open_fds = (skipped)}, caller = read
+    908 Tainted syscall: syscall = read, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = {type = IPv4, protocol = TCP, name = localhost:X->localhost:X}, all_open_fds = (skipped)}, caller = read
+      5 Tainted syscall: syscall = read, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = {type = IPv6, protocol = TCP, name = ip6-localhost:omniorb->ip6-localhost:X}, all_open_fds = (skipped)}, caller = read
+      6 Tainted syscall: syscall = read, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = {type = IPv6, protocol = TCP, name = ip6-localhost:tproxy->ip6-localhost:X}, all_open_fds = (skipped)}, caller = read
+      7 Tainted syscall: syscall = read, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = {type = IPv6, protocol = TCP, name = ip6-localhost:X->ip6-localhost:tproxy}, all_open_fds = (skipped)}, caller = read
+      5 Tainted syscall: syscall = read, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = {type = IPv6, protocol = TCP, name = ip6-localhost:X->ip6-localhost:X}, all_open_fds = (skipped)}, caller = read
+     43 Tainted syscall: syscall = read, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = {type = sock, name = protocol: TCP}, all_open_fds = (skipped)}, caller = read
+      5 Tainted syscall: syscall = read, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /usr/lib/x86_64-linux-gnu/perl5/5.30/nginx.pm, all_open_fds = (skipped)}, caller = read
+      5 Tainted syscall: syscall = read, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /usr/share/perl/5.30.0/constant.pm, all_open_fds = (skipped)}, caller = read
+      5 Tainted syscall: syscall = read, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /usr/share/perl/5.30.0/Exporter.pm, all_open_fds = (skipped)}, caller = read
+      5 Tainted syscall: syscall = read, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /usr/share/perl/5.30.0/strict.pm, all_open_fds = (skipped)}, caller = read
+     20 Tainted syscall: syscall = read, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /usr/share/perl/5.30.0/warnings.pm, all_open_fds = (skipped)}, caller = read
+      5 Tainted syscall: syscall = read, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /usr/share/perl/5.30.0/warnings/register.pm, all_open_fds = (skipped)}, caller = read
+      5 Tainted syscall: syscall = read, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /usr/share/perl/5.30.0/XSLoader.pm, all_open_fds = (skipped)}, caller = read
+   2061 Tainted syscall: syscall = readv, nr_taint = {}, args_taint = [1, 0, 0], syscall_specifics = (skipped), caller = readv
+    100 Tainted syscall: syscall = readv, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = (skipped), caller = readv
+    958 Tainted syscall: syscall = recvfrom, nr_taint = {}, args_taint = [1, 0, 0, 0, 0, 0], syscall_specifics = (skipped), caller = recv
+     79 Tainted syscall: syscall = recvfrom, nr_taint = {}, args_taint = [1, 0, 1, 0, 0, 0], syscall_specifics = (skipped), caller = recv
+  14161 Tainted syscall: syscall = recvfrom, nr_taint = {}, args_taint = [1, 1, 1, 0, 0, 0], syscall_specifics = (skipped), caller = recv
+    889 Tainted syscall: syscall = recvmsg, nr_taint = {}, args_taint = [1, 0, 0], syscall_specifics = (skipped), caller = recvmsg
+    148 Tainted syscall: syscall = recvmsg, nr_taint = {}, args_taint = [1, 1, 0], syscall_specifics = (skipped), caller = recvmsg
+     80 Tainted syscall: syscall = recvmsg, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = (skipped), caller = recvmsg
+    361 Tainted syscall: syscall = rename, nr_taint = {}, args_taint = [1, 1], syscall_specifics = (skipped), caller = rename
+      1 Tainted syscall: syscall = rmdir, nr_taint = {}, args_taint = [1], syscall_specifics = (skipped), caller = rmdir
+      6 Tainted syscall: syscall = rt_sigprocmask, nr_taint = {}, args_taint = [0, 1, 0, 0], syscall_specifics = (skipped), caller = pthread_sigmask
+      6 Tainted syscall: syscall = rt_sigprocmask, nr_taint = {}, args_taint = [0, 1, 0, 0], syscall_specifics = (skipped), caller = sigprocmask
+   8375 Tainted syscall: syscall = rt_sigreturn, nr_taint = {}, args_taint = [1], syscall_specifics = (skipped), caller = __restore_rt
+     35 Tainted syscall: syscall = rt_sigsuspend, nr_taint = {}, args_taint = [1], syscall_specifics = (skipped), caller = sigsuspend
+      1 Tainted syscall: syscall = sendmsg, nr_taint = {}, args_taint = [1, 0, 0], syscall_specifics = {fd = {type = IPv4, protocol = UDP, name = *:8999}, all_open_fds = (skipped)}, caller = sendmsg
+    169 Tainted syscall: syscall = sendmsg, nr_taint = {}, args_taint = [1, 0, 0], syscall_specifics = {fd = {type = IPv4, protocol = UDP, name = localhost:X}, all_open_fds = (skipped)}, caller = sendmsg
+    130 Tainted syscall: syscall = sendmsg, nr_taint = {}, args_taint = [1, 0, 0], syscall_specifics = {fd = {type = IPv4, protocol = UDP, name = localhost:X->localhost:X}, all_open_fds = (skipped)}, caller = sendmsg
+    579 Tainted syscall: syscall = sendmsg, nr_taint = {}, args_taint = [1, 0, 0], syscall_specifics = {fd = {type = unix, name = type=STREAM}, all_open_fds = (skipped)}, caller = sendmsg
+     24 Tainted syscall: syscall = sendmsg, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = {type = unix, name = type=STREAM}, all_open_fds = (skipped)}, caller = sendmsg
+      2 Tainted syscall: syscall = sendto, nr_taint = {}, args_taint = [1, 0, 0, 0, 0, 0], syscall_specifics = {fd = {type = IPv4, protocol = TCP, name = localhost:http-alt->localhost:X}, all_open_fds = (skipped)}, caller = __send
+      1 Tainted syscall: syscall = sendto, nr_taint = {}, args_taint = [1, 0, 0, 0, 0, 0], syscall_specifics = {fd = {type = IPv4, protocol = TCP, name = localhost:X->localhost:tproxy}, all_open_fds = (skipped)}, caller = __send
+      2 Tainted syscall: syscall = sendto, nr_taint = {}, args_taint = [1, 0, 0, 0, 0, 0], syscall_specifics = {fd = {type = IPv4, protocol = TCP, name = localhost:X->localhost:X}, all_open_fds = (skipped)}, caller = __send
+    156 Tainted syscall: syscall = sendto, nr_taint = {}, args_taint = [1, 0, 1, 0, 0, 0], syscall_specifics = {fd = {type = IPv4, protocol = UDP, name = localhost:X->localhost:X}, all_open_fds = (skipped)}, caller = __send
+      7 Tainted syscall: syscall = sendto, nr_taint = {}, args_taint = [1, 1, 0, 0, 0, 0], syscall_specifics = {fd = {type = IPv4, protocol = TCP, name = localhost:X->localhost:X}, all_open_fds = (skipped)}, caller = __send
+    280 Tainted syscall: syscall = sendto, nr_taint = {}, args_taint = [1, 1, 1, 0, 0, 0], syscall_specifics = {fd = {type = IPv4, protocol = TCP, name = localhost:http-alt->localhost:X}, all_open_fds = (skipped)}, caller = __send
+     90 Tainted syscall: syscall = sendto, nr_taint = {}, args_taint = [1, 1, 1, 0, 0, 0], syscall_specifics = {fd = {type = IPv4, protocol = TCP, name = localhost:X->localhost:http-alt}, all_open_fds = (skipped)}, caller = __send
+    436 Tainted syscall: syscall = sendto, nr_taint = {}, args_taint = [1, 1, 1, 0, 0, 0], syscall_specifics = {fd = {type = IPv4, protocol = TCP, name = localhost:X->localhost:tproxy}, all_open_fds = (skipped)}, caller = __send
+    495 Tainted syscall: syscall = sendto, nr_taint = {}, args_taint = [1, 1, 1, 0, 0, 0], syscall_specifics = {fd = {type = IPv4, protocol = TCP, name = localhost:X->localhost:X}, all_open_fds = (skipped)}, caller = __send
+    317 Tainted syscall: syscall = sendto, nr_taint = {}, args_taint = [1, 1, 1, 0, 0, 0], syscall_specifics = {fd = {type = IPv4, protocol = UDP, name = localhost:X->localhost:X}, all_open_fds = (skipped)}, caller = __send
+      7 Tainted syscall: syscall = set_robust_list, nr_taint = {}, args_taint = [1, 0], syscall_specifics = (skipped), caller = __nptl_set_robust
+      6 Tainted syscall: syscall = set_robust_list, nr_taint = {}, args_taint = [1, 0], syscall_specifics = (skipped), caller = start_thread
+   1814 Tainted syscall: syscall = setsockopt, nr_taint = {}, args_taint = [1, 0, 0, 0, 0], syscall_specifics = (skipped), caller = setsockopt
+    497 Tainted syscall: syscall = setsockopt, nr_taint = {}, args_taint = [1, 0, 0, 1, 0], syscall_specifics = (skipped), caller = setsockopt
+    447 Tainted syscall: syscall = shutdown, nr_taint = {}, args_taint = [1, 0], syscall_specifics = (skipped), caller = shutdown
+     13 Tainted syscall: syscall = socket, nr_taint = {}, args_taint = [0, 1, 0], syscall_specifics = (skipped), caller = socket
+   2457 Tainted syscall: syscall = socket, nr_taint = {}, args_taint = [1, 0, 0], syscall_specifics = (skipped), caller = socket
+    594 Tainted syscall: syscall = socket, nr_taint = {}, args_taint = [1, 1, 0], syscall_specifics = (skipped), caller = socket
+     12 Tainted syscall: syscall = socketpair, nr_taint = {}, args_taint = [0, 0, 0, 1], syscall_specifics = (skipped), caller = socketpair
+    617 Tainted syscall: syscall = stat, nr_taint = {}, args_taint = [1, 0], syscall_specifics = (skipped), caller = __xstat
+    153 Tainted syscall: syscall = stat, nr_taint = {}, args_taint = [1, 1], syscall_specifics = (skipped), caller = __xstat
+    879 Tainted syscall: syscall = tgkill, nr_taint = {}, args_taint = [0, 1, 0], syscall_specifics = (skipped), caller = pthread_cancel
+   1387 Tainted syscall: syscall = unlink, nr_taint = {}, args_taint = [1], syscall_specifics = (skipped), caller = unlink
+      7 Tainted syscall: syscall = utimes, nr_taint = {}, args_taint = [1, 0], syscall_specifics = (skipped), caller = utimes
+   5347 Tainted syscall: syscall = wait4, nr_taint = {}, args_taint = [1, 1, 1, 1], syscall_specifics = (skipped), caller = wait4
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [0, 1, 0], syscall_specifics = {fd = /tmp/nginx-test-DIR/file.exist, buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [0, 1, 0], syscall_specifics = {fd = /tmp/nginx-test-DIR/file-moved escape, buf = (skipped)}, caller = __write
+      5 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [0, 1, 1], syscall_specifics = {fd = pipe:[X], buf = (skipped)}, caller = write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [0, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/test1.log, buf = (skipped)}, caller = __write
+      2 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [0, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/test2.log, buf = (skipped)}, caller = __write
+      2 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [0, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/test4.log, buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [0, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/varlog_0, buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [0, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/varlog_3.log, buf = (skipped)}, caller = __write
+      2 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [0, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/varlog_, buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [0, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/varlog_filename, buf = (skipped)}, caller = __write
+    121 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 0, 0], syscall_specifics = {fd = /tmp/nginx-test-DIR/error.log, all_open_fds = (skipped), buf = (too large)}, caller = __write
+    156 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 0, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/debug1.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+    156 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 0, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/debug2.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+     39 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 0, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/e_debug_debug.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 0, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/e_debug_info.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 0, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/e_error_error.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 0, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/e_error_warn.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+     39 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 0, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/e_info_debug.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 0, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/e_info_info.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 0, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/e_multi_high.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      2 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 0, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/e_multi.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      2 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 0, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/e_multi_low.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 0, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/e_notice_info.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 0, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/e_notice_notice.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+1141696 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 0, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/error.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+    100 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 0, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/error.log, all_open_fds = (skipped), buf = (too large)}, caller = __write
+  21187 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 0, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/error.log (deleted), all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 0, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/error_reset.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 0, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/e_warn_notice.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 0, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/e_warn_warn.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 0, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/log_not_found.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+     48 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 0, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/stderr, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      2 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /dev/null, all_open_fds = (skipped), buf = (skipped)}, caller = write
+    166 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = (ERR), all_open_fds = (skipped), buf = (skipped)}, caller = __write
+    872 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = pipe:[X], all_open_fds = (skipped), buf = (skipped)}, caller = write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/200.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/400.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/403.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/500.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/502.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      2 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/503.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/access1.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/access2.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+   5914 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/access.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      9 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/access.log, all_open_fds = (skipped), buf = (too large)}, caller = __write
+     44 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/access.log (deleted), all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      2 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/addr.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      5 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/auth2.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      2 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/auth.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      3 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/auth.log, all_open_fds = (skipped), buf = (too large)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/binary.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/byte.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/bytes.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+     14 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/cc.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/combined.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      7 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/complex.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      2 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/compressed.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/date.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      2 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/dir/cache_first, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      2 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/dir/cache_lru, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/dir/cache_once, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      2 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/dir/cache_second, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/dir_moved/cache_first, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/dir_moved/cache_second, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+ 170150 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/error.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      4 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/error.log, all_open_fds = (skipped), buf = (skipped)}, caller = write
+     56 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/error.log, all_open_fds = (skipped), buf = (too large)}, caller = __write
+  19175 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/error.log (deleted), all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      3 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/filtered.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/id.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/iso8601.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      2 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/json.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/local.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/long.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/msec.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/multi1.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/multi2.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      2 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/none.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/noreuse.log (deleted), all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      2 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/pipe.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      4 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/pp4.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      4 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/pp6.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      2 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/pp.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/request.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      2 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/s2.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/s2.log (deleted), all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      3 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/s.log (deleted), all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/ssl.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      6 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/status.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      2 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/test1.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      2 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/test2.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+     33 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/test.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      3 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/test.log (deleted), all_open_fds = (skipped), buf = (skipped)}, caller = __write
+     17 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/time.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+     60 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/u.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = /tmp/nginx-test-DIR/vars.log, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+    202 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = {type = IPv4, protocol = TCP, name = localhost:http-alt->localhost:X}, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+    206 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = {type = IPv4, protocol = TCP, name = localhost:http-alt->localhost:X}, all_open_fds = (skipped), buf = (too large)}, caller = __write
+      6 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = {type = IPv4, protocol = TCP, name = localhost:omniorb->localhost:X}, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      2 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = {type = IPv4, protocol = TCP, name = localhost:omniorb->localhost:X}, all_open_fds = (skipped), buf = (too large)}, caller = __write
+    300 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = {type = IPv4, protocol = TCP, name = localhost:tproxy->localhost:X}, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+    131 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = {type = IPv4, protocol = TCP, name = localhost:tproxy->localhost:X}, all_open_fds = (skipped), buf = (too large)}, caller = __write
+     12 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = {type = IPv4, protocol = TCP, name = localhost:X->localhost:http-alt}, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      6 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = {type = IPv4, protocol = TCP, name = localhost:X->localhost:http-alt}, all_open_fds = (skipped), buf = (too large)}, caller = __write
+    214 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = {type = IPv4, protocol = TCP, name = localhost:X->localhost:tproxy}, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+     26 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = {type = IPv4, protocol = TCP, name = localhost:X->localhost:tproxy}, all_open_fds = (skipped), buf = (too large)}, caller = __write
+   1144 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = {type = IPv4, protocol = TCP, name = localhost:X->localhost:X}, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+    154 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = {type = IPv4, protocol = TCP, name = localhost:X->localhost:X}, all_open_fds = (skipped), buf = (too large)}, caller = __write
+      3 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = {type = IPv6, protocol = TCP, name = ip6-localhost:omniorb->ip6-localhost:X}, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = {type = IPv6, protocol = TCP, name = ip6-localhost:omniorb->ip6-localhost:X}, all_open_fds = (skipped), buf = (too large)}, caller = __write
+      3 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = {type = IPv6, protocol = TCP, name = ip6-localhost:tproxy->ip6-localhost:X}, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = {type = IPv6, protocol = TCP, name = ip6-localhost:tproxy->ip6-localhost:X}, all_open_fds = (skipped), buf = (too large)}, caller = __write
+      3 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = {type = IPv6, protocol = TCP, name = ip6-localhost:X->ip6-localhost:tproxy}, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      3 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = {type = IPv6, protocol = TCP, name = ip6-localhost:X->ip6-localhost:X}, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = {type = IPv6, protocol = TCP, name = ip6-localhost:X->ip6-localhost:X}, all_open_fds = (skipped), buf = (too large)}, caller = __write
+      7 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = {type = sock, name = protocol: TCP}, all_open_fds = (skipped), buf = (skipped)}, caller = __write
+      1 Tainted syscall: syscall = write, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = {fd = {type = sock, name = protocol: TCP}, all_open_fds = (skipped), buf = (too large)}, caller = __write
+  14271 Tainted syscall: syscall = writev, nr_taint = {}, args_taint = [1, 0, 0], syscall_specifics = (skipped), caller = writev
+   1309 Tainted syscall: syscall = writev, nr_taint = {}, args_taint = [1, 1, 1], syscall_specifics = (skipped), caller = writev
+================
+Unknown syscalls:
+    464 num=318

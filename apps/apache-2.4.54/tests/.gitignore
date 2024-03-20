@@ -1,0 +1,13 @@
+perl-framework/runbench.ini
+perl-framework/t/logs/access_log
+perl-framework/t/logs/error_log
+perl-framework/t/logs/httpd.pid
+perl-framework/t/conf/
+perl-framework/t/htdocs/
+**/SMOKE
+**/TEST
+**/REPORT
+perl-framework/Apache-Test/t/cgi-bin/*.pl
+perl-framework/c-modules/apache_httpd_test.h
+**/Makefile.old
+perl-framework/t/logs/

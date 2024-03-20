@@ -1,0 +1,1262 @@
+=head1 NAME
+
+Changes - Apache::Test change logfile
+
+=head1 CHANGES
+
+=over 3
+
+=item 1.44-dev
+
+=item 1.43 Nov 7 2021
+
+Our implementation of "which" should not search
+for a program in the elements of PATH when program
+already contains a path. [rjung]
+
+Fix hash generation when the openssl command
+was overwritten with the environment variable
+"APACHE_TEST_OPENSSL_CMD". [rjung]
+
+Add new config option limitrequestline needed
+when the local directory paths are long. [rjung]
+
+=item 1.42 Aug 28 2019
+
+Fix loading apache_test_config.pm for recent perls in which '.' is
+no longer in @INC by default. [Steve Hay]
+
+=item 1.41 Jul 11 2019
+
+Set DefaultStateDir for > 2.5.1 and add -t_state to override. [jorton]
+
+Inherit config via IncludeOptional as well as Include. [jorton]
+
+Increase size of MinSpare, MaxSpare and MaxClients to improve httpd test
+framework runs with worker and preform MPMs. [rjung]
+
+Changed the openssl version detection to work with other *SSL libraries.
+[icing]
+
+Switch test framework from using Net::SSL for
+raw TLS sockets to IO::Socket::SSL. [rjung]
+
+Fix mod_ssl tests under OpenSSL 1.1.1 / TLSv1.3. [jorton]
+
+Add cwd to generated lib path in TEST script since Perl >=5.26 don't
+do that any more. [jorton]
+
+Override loglevel to trace8 if running in 2.4. [covener]
+
+Allow an empty PREFIX. [sf]
+
+Add need_min_apache_fix(). [covener]
+
+=item 1.40 Sep 6 2016
+
+Specify licence (Apache 2.0) in META.yml. [Steve Hay, CPAN RT#111359]
+
+Fix broken POD. [Steve Hay]
+
+Switch argument order in "openssl gendsa". [rjung]
+
+Add (limited) checks for *_SAN_*_n and *_DN_Email variables. [kbrand]
+
+Update key sizes and message digest to what is common in 2015. [kbrand]
+
+=item 1.39 Apr 21 2015
+
+Test scripts can now test if perl has a fork() implementation available by
+using the Apache::Test::need_fork() function. [Steve Hay]
+
+CPAN RT#87620: Add -D APACHE2_4 to identify httpd-2.4. [Michael Schout]
+
+=item 1.38 Aug 6 2012
+
+Fix log_watch.t on Windows, which can't (naturally) delete open files.
+[Steve Hay]
+
+Fix t_filepath_cmp, t_catfile and t_catfile_apache in Apache::TestUtil on
+Windows: their use of Win32::GetLongPathName() was broken for non-existent
+files. [Steve Hay]
+
+Remove use of Nullsv as per modperl commit 1362399. [Steve Hay]
+
+have Apache::TestConfigPerl::configure_inc set up @INC to include
+../blib/lib and ../blib/arch if they exist. The bundled Apache::Reload
+may fail to load Apache2::Const & co otherwise when testing.
+[Torsten Foertsch]
+
+=item 1.37 January 29, 2012
+
+Apache::TestRequest: improve compatibility for SSL requests with LWP 6 and
+IO::Socket::SSL, in particular [Kaspar Brand]
+
+As of httpd revision 1053230 (version 2.3.11) the NameVirtualHost directive
+became superfluous and a warning is issued when it is met. So, Apache::Test
+now wraps NameVirtualHost directives in <IfVersion> blocks.
+[Kaspar Brand]
+
+Add comments about the source files of auto configurated tests to
+the generated httpd.conf and improve indentation a bit. [Torsten Foertsch]
+
+Run t/TEST tests by default in alphabetical order and
+only t/SMOKE tests by default in random order. [Rainer Jung]
+
+Add t_file_watch_for to Apache::TestUtil [Torsten Foertsch]
+
+Add $boolean parameter to Apache::TestHandler::ok and Apache::TestHandler::ok1
+Add a few bits of documentation [Torsten Foertsch]
+
+Apache::TestHandler forgot to require Apache2::RequestRec [Torsten Foertsch]
+
+=item 1.36 February 2, 2011
+
+Skip sok.t unless perlio is enabled [Torsten Foertsch]
+
+Deprecate t/TEST -times=X in favor of t/SMOKE -times=X.  Changes to
+TAP::Harness have removed the ability to re-use test object attributes.
+Also generate t/SMOKE on build now, instead of requiring the user to build it.
+Thanks to Jim Jagielski for the spot on the -times=X issue on t/TEST.
+[Fred Moyer]
+
+More or less cosmetical, prevent repeating "adding source lib" info lines
+in the output when testing Apache::Test, SizeLimit and similar
+[Torsten Foertsch]
+
+=item 1.35 January 22, 2011
+
+Return value on running tests as root should be 0, not 1.  Thanks to Michael Schout for the spot.
+[Fred Moyer]
+
+Add support for RFC2253 DN string format to dn_oneline in Apache::TestSSLCA
+[Stefan Fritsch]
+
+Make Apache::Test::sok() compatible with the -withtestmore option
+[Torsten Foertsch]
+
+Make -withtestmore a per-package option (make it behave sane).
+[Torsten Foertsch]
+
+=item 1.34 December 18, 2010
+
+Fix build edge case where rpm based mp sources missing Apache2::Build cause
+require failure in Apache-TestConfig.  Reported by Ryan Gies.
+[Fred Moyer]
+
+When an explicit shared mod_perl lib is not defined, default to the first
+shared module found by find_apache_module().
+[Fred Moyer]
+
+Fix logic error in TOP_LEVEL constant calculation.  Remove Apache::test
+compatibility from mod_perl 1.27.
+[Fred Moyer]
+
+Remove the custom config feature, and instead use inline directives,
+ENV vars, and look for apxs et al in PATH.
+[Fred Moyer]
+
+Prevent reconfiguration when t/TEST is called with -run-tests only.
+(rev 1004278) [Torsten Foertsch]
+
+Make "t/TEST -ping=block" work when LWP is installed. (rev 1004275)
+[Torsten Foertsch]
+
+Don't attempt to run the test suite as root.  The workarounds needed
+to facilitate root testing cause large maintenance costs, and return
+no tangible benefits.
+[Fred Moyer]
+
+=item 1.33 September 14, 2010
+
+Propagate APACHE_TEST_NO_STICKY_PREFERENCES to the Apache environment
+for mod_perl configurations (Apache::TestConfigPerl),
+http://www.gossamer-threads.com/lists/modperl/dev/101929
+[Torsten Foertsch]
+
+Provide build/test environment for modules bundled with mod_perl like
+Apache::Reload and Apache::SizeLimit
+[Torsten Foertsch]
+
+The CN in server certificates generated by Apache::TestSSLCA will now
+match the servername passed to t/TEST.
+[Joe Orton]
+
+Add check for automated testing environment variable before prompting
+with EU::MM to quit the test suite.  Some automated smoke tests were
+failed because the EU::MM prompt was timing out.
+[Adam Prime, Fred Moyer]
+
+https://rt.cpan.org/Public/Bug/Display.html?id=32993
+use TAP::Harness for Apache::TestHarnessPHP
+[Mark A. Hershberger]
+
+https://rt.cpan.org/Public/Bug/Display.html?id=54476
+Fix error where non root user gets test failure with httpd suexec and mod_fcgid
+[Peter (Stig) Edwards]
+
+=item 1.32 April 15, 2010
+
+Fix issue with recent feature where lack of libapreq resulted in test failure.
+[Philippe M. Chiasson]
+
+Added t_{start,read,finish}_file_watch to Apache::TestUtil [Torsten Foertsch]
+
+=item 1.31 February 24, 2010
+
+Modify need_cgi so that it looks for cgi.c instead of cgi.  This is a fix
+for the case insensitive filesystem correction listed below.
+[Phillipe M. Chiasson]
+
+t/next_available_port.t doesn't need mod_cgid, use need_cgi instead
+of need_module('mod_cgi.c')
+[Philippe M. Chiasson]
+
+PR: 21554
+Load mod_apreq2.so if it is available
+[Derek Price, <derek@ximbiot.com>]
+
+Add conditional to ignore IfVersion directive if mod_version is not built.
+[Adam Prime <adam.prime@utoronto.ca>, Fred Moyer <phred@apache.org>]
+
+PR: 41239
+t/TEST -ping does not return a valid return code to the calling shell
+[ozw1z5rd <alessio.palma@staff.dada.net>]
+
+Prevent infinite loop when no default apxs or httpd is present and repeated
+attempts to run the test suite under an automated harness (such as a cpan 
+smoke test).  Issue reported by CORION and ANDK, PR: 12911
+[Fred Moyer <phred@apache.org>]
+
+Use need_module('mod_cgi.c') and need_module('mod_cgid.c') in 
+t/next_available_port.t instead of need_cgi.  On case insensitive file
+systems such as OS X, need_cgi will fulfill the requirement with cgi.pm,
+when mod_cgi.c is the desired requirement.
+[Fred Moyer <phred@apache.org>]
+
+Fix overridden get_basic_credentials test when using NTLM authentication
+[Rick Frankel <cpan@rickster.com>]
+
+Work around a bug introduced in libwww-perl in version
+5.820 for httpd's credentials
+[Gunnar Wolf <gwolf@gwolf.org>, Niko Tyni <ntyni@debian.org>]
+
+Make Apache::TestConfig::untaint_path tolerate undefined arguments
+[Torsten Foertsch <torsten.foertsch@gmx.net]
+
+Inherit LoadFile directives from the global httpd.conf
+[Torsten Foertsch <torsten.foertsch@gmx.net]
+
+Don't overwrite php.ini if it already exists
+PR: 32994
+[MAHEX <MAHEX@cpan.org>]
+
+=item 1.30 November 26, 2007
+
+Added t_write_test_lib for temporary testing packages
+[Fred Moyer <fred@redhotpenguin.com>]
+
+Fix syntax error in generated PHP files t/conf/*.php.in
+[Philippe M. Chiasson]
+
+Add bwshare.so to the list of modules to not inherit b/c
+it rate limits requests to less then that of a test suite.
+PR: 25548
+[imacat <imacat@mail.imacat.idv.tw>]
+
+Add EXTRA_CFLAGS to c-module building if defined in the environment
+[Geoffrey Young]
+
+=item 1.29 November 28, 2006
+
+Require a minium of Module::Build 0.18 when using Apache::TestMB.
+PR: 19513
+[Philip M. Gollucci]
+
+Teach Apache::TestClient to encode spaces(' ') in query string of URLs
+as %20.  This is not a full mapping of ASCII to URL encoding.
+If you need this, install LWP -- then Apache-Test will use
+LWP -- which does this for you.
+[Philip M. Gollucci]
+
+Allow Apache::TestClient which is used when LWP is not installed
+to accept mutiple headers of the same name.
+[Philip M. Gollucci]
+
+Add t_start_error_log_watch() and t_finish_error_log_watch()
+to the Apache::TestUtil API which are only exported unpon request.
+[Torsten Foertsch <torsten.foertsch@gmx.net>]
+
+Allow version variants of debuggers to be passed as arguments
+to -debug.  i.e. -debug=gdb65 for systems with multiple
+versions of the same debugger. [Philip M. Gollucci]
+
+On Win32, the Apache executable is called httpd.exe in Apache/2.2,
+so let Apache::TestConfig try to find that if Apache.exe isn't
+found [Randy Kobes]
+
+force reconfiguration if existing configuration was generated
+by an older version of Apache-Test [Geoffrey Young]
+
+the -t_pid_file code resulted in confusing and fatal error message
+for people using stale 1.27 configurations.  so take steps to make
+sure things continue to work.  [Geoffrey Young]
+
+
+=item 1.28 - February 22, 2006 
+
+add need_imagemap() and have_imagemap() to check for mod_imap
+or mod_imagemap [ Colm MacCárthaigh ]
+
+shortcuts like need_cgi() and need_php() no longer spit out
+bogus skip messages  [Geoffrey Young]
+
+Adjust Apache::TestConfig::untaint_path() to handle relative paths
+that don't start with /.  [Stas]
+
+If perlpath is longer than 62 chars, some shells on certain platforms
+won't be able to run the shebang line, so when seeing a long perlpath
+use the eval workaround [Mike Smith <mike@mailchannels.com>]
+
+Location of the pid file is now configurable via the command line
+-t_pid_file option [Joe Orton]
+
+remove the mod_perl.pm entry from %INC after Apache::Test finishes
+initializing itself.  because both mp1 and mp2 share the entry,
+leaving it around means that Apache::Test might prevent later modules
+from loading the real mod_perl module they're interested in, leading
+to bad things  [Geoffrey Young]
+
+use which("cover") to find the cover utility from Devel::Cover and run
+it only if found. [Stas]
+
+Devel::Cover magic is now fully integrated.  no more modperl_extra.pl
+or extra.conf.in fiddling - 'make testcover' should be all you need
+to do now [Geoffrey Young]
+
+Implemented a magic @NextAvailablePort@ to be used in config files to
+automatically allocate the next available port [Stas]
+
+Adjust Apache::TestConfig::add_inc to add lib/ in separate call to
+lib::->import at the very end of @INC manipulation to ensure it'll be
+on top of @INC. For some reason lib has changed to add directories in
+a different order than it did before. [Stas]
+
+
+
+=item 1.27 - October 20, 2005
+
+localize ScriptSock directive to always point to t/logs/cgisock
+regardless of inherited and custom mod_cgid settings
+[Geoffrey Young]
+
+Prevent the config file from being overwritten
+on platforms such as WIN32 under certain conditions.
+[Randy Kobes]
+
+make sure that the TESTS Makefile.PL parameter is properly
+recognized ["Christopher H. Laco" <apache-test chrislaco.com>]
+
+Add the output of ldd(unix/cygwin) and otool -L (darwin)
+for httpd to the mp2bug report script.
+[Philip M. Gollucci]
+
+fall back on using httpd-defined HTTPD_ROOT as the base for
+httpd.conf if all other options fail.  [Geoffrey Young]
+
+
+
+=item 1.26 - July 25, 2005
+
+some people have their Apache user/group names include spaces, so fix
+the autogenerated httpd.conf to quote the two. [Stas]
+
+make sure mp2 loading doesn't make it impossible to complete
+mp1 runs.  [Matt Sergeant, Geoffrey Young]
+
+add Apache::TestConfigParrot and Apache::TestRunParrot to
+support mod_parrot server-side testing [Geoffrey Young]
+
+update -withtestmore action to properly work with newer versions
+of Test::Builder [Geoffrey Young]
+
+
+
+=item 1.25 - June 17, 2005
+
+provide $Apache::TestUtil::DEBUG_OUTPUT as target for t_debug()
+statements, defaulting to STDOUT.  this allows for changing
+t_debug() to STDERR when using functions like t_write_file()
+from within handler() server-side tests.  [Geoffrey Young]
+
+adjust need_module()/have_module() to not try to require a module if
+it was explicitly passed with a .c extension. in certain cases this
+prevents a fatal error (e.g. trying to call
+Apache::Test::have_module('mod_alias.c') from the <Perl>
+sections. [Stas]
+
+
+
+=item 1.24 - May 20, 2005
+
+When adding TypesConfig directives (either inherited from the global
+httpd.conf or from the locally generated mime.types) make sure to
+enclose it in <IfModule mod_mime.c>..</IfModule>, since mod_mime might
+be unavailable. [Stas]
+
+
+
+=item 1.23 - May 3, 2005
+
+Fix Apache::TestRequest::hostport to return the default host:port
+string if $Apache::TestRequest::Module is 'default' or undef [Stas]
+
+Fix Apache::TestRequest::module2url to allow passing '' as a URI
+path. [Stas]
+
+tweaks to Apache::TestClient to better deal with corrupted responses
+when LWP is not available. [Stas]
+
+
+
+=item 1.22 - April 14, 2005
+
+    ******************** IMPORTANT ********************
+      this version of Apache-Test does not completely
+    configure mod_perl for mod_perl versions 1.99_21 or
+    earlier.  Please read the below changes carefully.
+    ***************************************************
+
+remove Apache::TestConfig::modperl_2_inc_fixup().  Apache-Test
+is no longer Apache2.pm aware - it will not configure mod_perl
+support to look in Apache2/ automatically.  [joes]
+
+Add support for mp2's Apache:: -> Apache2:: rename [joes]
+
+
+
+=item 1.21 - March 23, 2005
+
+fix Apache::TestConfig (was missing 'use lib' before using
+lib::import) [William McKee <william@knowmad.com>]
+
+TestConfigPerl will now configure mod_perl last, giving mod_perl
+highest priority throughout the httpd lifecycle.  [Geoffrey Young]
+
+Apache::TestConfig::untaint_path needs to remove empty entries in the
+PATH list, since -T considers those tainted too. [Stas]
+
+add Apache::TestHarnessPHP which allows for running client-side
+scripts via php instead of perl.  [Geoffrey Young]
+
+
+
+=item 1.20 - January 22, 2005
+
+instead of trying to match various custom server name variations (each
+vendor seems to replace "Apache" in 'httpd -v' with their own name),
+just try to match the "/x.y" in "Foo-Apache-Bar/x.y.z" to figure out
+the server generation (rev). [Stas]
+
+extend Apache::TestConfig::which() to search under perl's bin
+directory (in the case of local perl install many utils get installed
+there, but won't be in PATH). [Stas]
+
+Apache::TestConfig::inherit_load_module handles .dll modules
+(previously was only .so) [Stas]
+
+Apache::TestConfig::should_skip_module now works with regex
+patterns. [Stas]
+
+
+
+=item 1.19 - January 5, 2005
+
+Test for module.c instead of module.so for IfModule in
+find_and_load_module [Chia-Liang Kao <chialiang gmail.com>]
+
+Apache-Test/META.yml is excluded from mp2 distro to make PAUSE indexer
+happy, but then perl Makefile.PL complains about a missing META.yml,
+so autogenerate it if it wasn't in the distro [Stas]
+
+
+
+=item 1.18 - December 23, 2004
+
+fix a bug in A-T config generation, when a vhost entry was in
+autogenerated httpd.conf (e.g. coming from .pm file) and another from
+extra.conf.in. We used to have a ports collision, since extra.conf
+wasn't reparsed and the same port was getting assigned to more than
+one vhost entry, preventing server startup:
+  default_ VirtualHost overlap on port 8530, the first has precedence
+  (98)Address already in use: make_sock: could not bind to address
+  0.0.0.0:8530 no listening sockets available, shutting down
+could be reproduced with t/TEST -conf followed by t/TEST -maxclients 1
+in the mp2 test suite (or the new Apache-TestMe test suite, which now
+includes a special setup for this bug). [Stas]
+
+new TestConfig wrapper find_and_load_module [Chia-Liang Kao <chialiang
+gmail.com>]
+
+add Apache-TestItSelf and Apache-TestMe sub-projects. [Stas]
+
+add various straps to aid the new Apache-TestItSelf sub-project, which
+is used to test A-T config options [Stas]
+
+avoid entering endless loops when interactive config is used, by
+restarting the test suite with an explicit selected arguments for
+-httpd (and optionally -apxs) [Stas]
+
+META.yml is now locally maintained. we need to tell PAUSE indexer not
+to try to index HTTP::Request::Common and warnings packages, which
+happen to be used by A-T [Stas]
+
+
+
+=item 1.17 - December 11, 2004
+
+Apache::TestHandler: need to load Apache::RequestIO for mp2 for puts()
+to work [Stas]
+
+new Apache::TestConfig wrapper untaint_path() [Randy Kobes]
+
+fix the config thaw() functionality (when top_dir wasn't in @INC the
+saved config won't be loaded and tests will blow) [Stas]
+
+new wrapper Apache::TestRequest::module2url to simplify handling of
+vhosts in the client. ["Christopher H. Laco" <apache-test
+chrislaco.com>]
+
+resolve -T taint issues: [Stas]
+- untaint $cmd in Apache::TestConfig::open_cmd
+- fix the tainting of @INC (by untaintinig top_dir variable)
+
+require Cwd 2.06 or higher (to solve File::Spec::rel2abs problems
+under -T). Enforce the modules version requirements for those who
+aren't running under CPAN/CPANPLUS shell) [Stas]
+
+Apache::TestTrace: don't export by default the 'todo' utility's symbol
+since it collides with Test::More [Stas]
+
+Tweak the handling of mp2 source build case in
+Apache::TestConfig::httpd_config(), apparently mp2 source build
+doesn't always know where httpd/apxs are, so we need to give a better
+error message in this particular case. [Stas]
+
+Add cookie jar tests ["Christopher H. Laco" <apache-test
+chrislaco.com>]
+
+Don't run interactive prompts when STDIN is closed [Stas]
+
+Add LockFile directive in the autogenerated httpd.conf, which points
+to t/logs, to handle the case where LockFile is hardcoded at compile
+time to some other directory on the system. [Stas]
+
+
+
+=item 1.16 - November 9, 2004
+
+launder the require()d custom config filename to make -T happy
+[Torsten Förtsch <torsten.foertsch gmx.net>]
+
+added Apache::TestRunPHP and Apache::TestConfigPHP classes,
+which provide a framework for server-side testing via PHP scripts
+[Geoffrey Young]
+
+fix problem with multiple all.t files where only the final
+file was being run through the test harness.  [Geoffrey Young]
+
+Documented that redirection does not work with "POST" requests in
+Apache::TestRequest unless LWP is installed. [David Wheeler]
+
+Separated the setting of the undocumented $RedirectOK package
+variable by users of Apache::TestRequest from when it is set
+internally by passing the "requests_redirectable" parameter to
+the user_agent() method. This allows users to override the
+behavior set by the user_agent() method without replacing it.
+[David Wheeler]
+
+
+
+=item 1.15 - October 22, 2004
+
+add need_php4() and have_php4() which will return true when mod_php4
+is available.  also, tidy up need_php() and have_php() for PHP4 on
+Apache 2.0.  [Joe Orton]
+
+add new test_config make target, equivalent to t/TEST -conf,
+and make it a prerequisite for the cmodules make target.  now
+you can 'make cmodules' to build the things in c-modules/
+without running t/TEST -conf first.  [Geoffrey Young]
+
+add -withtestmore import action, which allows Test::More >= 0.49
+to replace Test.pm as the engine for server-side tests
+[Geoffrey Young]
+
+add automatic core dump backtrace generation in t/REPORT if
+Devel::GDB is installed [Gozer]
+
+add 'testcover' make target for running tests with Devel::Cover
+[Geoffrey Young]
+
+
+
+=item 1.14 - October 12, 2004
+
+improve the same_interpreter framework to handle response failures
+while trying to init and later find out the same interpreter. [Stas]
+
+make sure that 'make distclean' cleans all the autogenerated files
+[Stas]
+
+make sure that if -maxclients option is passed on the command line,
+minclients will never be bigger than that value [Stas]
+
+add -one-process runtime argument, which will start the server
+in single-server mode (httpd -X in Apache 1.X or 
+httpd -D ONE_PROCESS in 2.X) [Geoffrey Young]
+
+In open_cmd, sanitize PATH instead of clearing it [Gozer]
+
+Allow / \ and \\ path delimiters in SKIP file [Markus Wichitill
+<mawic@gmx.de>]
+
+Added an apxs query cache for improved test performance [Gozer]
+
+run_tests make target no longer invokes t/TEST -clean, making it
+possible to save a few development cycles when a full cleanup is
+not required between runs.  [Geoffrey Young] 
+
+Apache::TestSmoke imrovements: [Stas]
+ o the command line option -iterations=N should always be respected
+   (previously it was internally overriden for order!='random').
+ o since IPC::Run3 broke the Ctrl-C handler, we started to loose any
+   intermediate results, should the run be aborted. So for now, try to
+   always store those results in the temp file:
+   smoke-report...$iter.temp
+
+fix 'require blib' in scripts to also call 'blib->import', required to
+have an effect under perl 5.6.x. [Stas]
+
+don't allow running an explicit 'perl Makefile.PL', when Apache-Test
+is checked out into the modperl-2.0 tree, since it then decides that
+it's a part of the modperl-2.0 build and will try to use modperl
+httpd/apxs arguments which could be unset or wrong [Stas]
+
+Fix skip test suite functionality in the interactive configuration
+phase [Stas]
+
+s/die/CORE::die/ after exec() to avoid warnings (and therefore
+failures) when someone overrides CORE::die when using Apache-Test
+[William McKee, Stas]
+
+Overrode Module::Build's "testcover" action in Apache::TestMB to
+prevent the Apache::Test sticky preference files from being included
+in the coverage report. [David]
+
+
+
+
+=item 1.13 - Aug 20, 2004
+
+move the custom config code into Apache::TestConfig, split the config
+object creation in 2 parts - first not requiring the knowledge of
+httpd location, the second requiring one, refactor the custom config
+interactive prompting into the second phase, if failed to find
+httpd. Reshuffle the code to run first bits not requiring the
+knowledge of httpd location. [Stas]
+
+fix Apache::TestCommonPost::lwp_do to work with LWP 5.800
+($res->content() doesn't allow CODE refs anymore, instead used
+content_ref to avoid huge strings copy) [Stas]
+
+add @PHP_MODULE@ extra.conf.in substitution variable, which selects
+mod_php4 or mod_php5 as appropriate.  [Geoffrey Young]
+
+the have() function was removed entirely - use need() instead.
+[Geoffrey Young]
+
+add need() and need_* variant functions (need_module(), need_apache(),
+etc) for use specifically with plan() to decide whether or not a test
+should run.  have_* variants (have_module(), have_apache(), etc) are
+now specifically for use outside of plan(), although they can continue
+to be used within plan() without fear of current tests breaking.
+[Geoffrey Young]
+
+add need_php() and have_php() which will return true when either
+mod_php4 or mod_php5 are available, providing functionality similar to 
+need_cgi() and have_cgi().
+[Geoffrey Young]
+
+Add APACHE_TEST_EXTRA_ARGS make variable to all invocations to t/TEST
+to allow passing extra arguments from the command line. [Gozer]
+
+When APACHE_TEST_NO_STICKY_PREFERENCES=1 is used don't even try to
+interactively configure the server, as we don't save any config it was
+entering an infinite loop. [Stas]
+
+If a directory t/lib exists from where the tests are run, adjust
+@INC so that this directory is added when running the tests,
+both within t/TEST and within t/conf/modperl_inc.pl.
+This allows inclusion of modules specific to the tests that 
+aren't intended to be installed. [Stas, Randy]
+
+make a special case for threaded mpm configuration, to ensure that
+unless maxclients was specified, MaxClients will be exactly twice
+bigger than ThreadsPerChild (minclients), since if we don't do that,
+Apache will reduce MaxClients to the same value as
+ThreadsPerChild. [Stas]
+
+Renamed generate_test_script() to generate_script() in Apache::TestMB
+to match the naming convention used in Apache::TestMM and elsewhere.
+[David]
+
+Apache::TestMB now only prints the "Generating test running script"
+message if verbosity is enabled (e.g., by passing --verbose when
+executing Build.PL). [David]
+
+Fixed the "requests_redirectable" parameter to
+Apache::TestRequest::user_agent() so that it works as docmented when
+passed a negative value. [Boris Zentner]
+
+Documented support for passing an array reference to the
+"requests_redirectable" parameter to Apache::TestRequest::user_agent()
+to be passed to LWP::UserAgent if LWP ist installed. [David]
+
+
+=item 1.12 - June 28, 2004
+
+Force projects that use Apache::TestReportPerl to implement
+report_to() if they use t/REPORT in their projects. [Stas]
+
+Add redirect tests [David Wheeler <david@kineticode.com>]
+
+add -no-httpd runtime option to allow tests to run without configuring,
+starting, or stopping Apache.  this essentially provides a direct
+Test::Harness interface through t/TEST, useful for running single tests
+that do not depend on Apache.  [Geoffrey Young]
+
+Add support for Module::Build, with a new module: Apache::TestMB (a
+"clone" of Apache::TestMM for ExtUtils::MakeMaker). [David Wheeler
+<david@kineticode.com>]
+
+switch the order of arguments in t_cmp() and t_is_equal() so that
+the order matches Test::More::is() and other Test::More functions.
+the new call is: t_cmp($received, $expected, $comment);  support
+for $expected as the first argument marked as deprecated and will
+be removed in the course of the next few release cycles.
+[Geoffrey Young]
+
+add skip_reason() to Apache::Test, which provides a mechanism for
+user-specified skip messages [Geoffrey Young]
+
+Tweak Apache::TestRun to support test filenames starting with
+/(.\\)?t\\/ prefixes, windows style (needed for t/SMOKE) [Steve Hay]
+
+
+
+=item 1.11 - May 21, 2004
+
+if we fail to match the Apache revision (which is OK at the early
+stages, like 'perl Makefile.PL', default to a non-existing revision
+0. But provide no more misleading defaults (used to default to
+revision 2 and then looking for mod_perl2). [Stas]
+
+Improve the regex to match the Apache revision out of 'httpd -v'
+[Michael A Nachbaur <mike@nachbaur.com>]
+
+-minclients is now what -maxclients used to be, -maxclients is now
+really what it says it is [Stas]
+
+Fix Apache::TestRequest::lwp_as_string to work with LWP 5.79 [Stas]
+
+
+
+
+=item 1.10 - April 18, 2004
+
+Quote and escape the executables in the shell calls [Ken Coar, Stas]
+
+Quote and escape filtered args received during 'perl Makefile.PL'
+[Geoffrey Young, Ken Coar]
+
+add :withtestmore import tag to Apache::Test, which will export
+all standard Apache::Test symbols except those that collide with
+Test::More.  [Geoffrey Young]
+
+Use function prototypes in Apache::TestUtil functions t_cmp() and
+t_is_equal() to handle the case when an argument to the function, is a
+function call itself which may return undef (previously had to
+explicitly force a scalar context to get the undef value). The idea
+was borrowed from Test::More. [Stas]
+
+Fixed a Windows-only segment which would result in a
+'use of uninitialised value' error if a hash being traversed
+had an entry with a key but an undefined value.  [Ken]
+
+Support continuous configuration line when parsing the inherited
+configuration file [Stas]
+
+Since some of the inherited from the global httpd.conf modules require
+mod_perl to be loaded first, arrange for that to happen. [Stas]
+
+Don't try to set ulimit unlimited for coredumps on Solaris, unless run
+as root [Rob Kinyon <Rob.Kinyon@progressive-medical.com>]
+
+Added '-httpd_conf_extra <filename>' configuration option to
+allow a file of server config directives to be inherited
+in addition to the server's own httpd.conf file (or the one
+specified by -httpd_conf).  [Ken and Stas]
+
+Generated Listen directive now listen on 0.0.0.0 to force using
+IPv4 addresses on IPv6 systems until LWP supports IPv6. [Gozer]
+
+improved docs [David Wheeler <david@kineticode.com>]
+
+Add a virtual method Apache::TestRun::pre_configure, and fix the
+documentation to say that subclasses must not forget to run the
+superclass' method. [Stas]
+
+Apache::TestRunPerl now performs an early check whether it can load
+the right mod_perl environment. [William McKee <william@knowmad.com>,
+Stas]
+
+$ENV{APACHE_TEST_NO_STICKY_PREFERENCES}, if true, will both suppress
+generation of persistent preferences and ignore any that already exist.
+[Geoffrey Young]
+
+make the project's test suite relocatable, handling the case where
+after Apache-Test configuration was created and not cleaned up before
+the directory was moved. This is especially important for those cases
+where users try to run 'make test' as root from /root, A-T tells them
+that they can't do that (because of the perms) and suggests to try
+again, afer moving the whole project under /tmp or similar. [Stas]
+
+When running as 'root' make the client side drop the root permissions
+and run with the same permissions as the server side
+(e.g. nobody). This is needed in case the client side creates any
+files after the initial check (during server side startup and beyond),
+so that the server side could read/write them. [Stas]
+
+t_server_log_error_is_expected t_server_log_warn_is_expected
+t_client_log_error_is_expected t_client_log_warn_is_expected
+now support an optional argument, suggesting how many entries
+to expect [Stas]
+
+
+
+=item 1.09 - March 8, 2004
+
+remove the dependency on APR::UUID (i.e. mod_perl 2.0) in the
+same_interpreter framework (use plain time/rand/$$ concatenation)
+[Stas]
+
+Updated to the new Apache License Version 2.0 [Gozer]
+
+handle cases on Win32 when supplied paths have spaces in their
+names [Stas]
+
+c-modules build errors are no longer ignored [Stas]
+
+change -DAPACHE1 (and like defines) to -D APACHE1 to fix Win32
+compatibility issues [Steve Hay]
+
+fix the custom config use for Apache-Test's own upgrades [Stas]
+
+
+
+=item 1.08 - February 24, 2004
+
+Instead of hard-coding listen directive to 127.0.0.1, use the server
+name. [Gozer]
+
+added -defines configuration option, providing a way to pass additional
+-D names to the server for use in <IfDefine> blocks.  [Geoffrey Young]
+
+Make it possible to run TEST (or another driving script) from any path
+(e.g. t/TEST, ./TEST, /full/path/to/t/TEST) [Stas]
+
+If at least one *conf*.in files is modified since the last
+configuration, make sure to regenerate them all, so the right ports
+will be assigned. [Stas]
+
+Make sure that Apache-Test modules are installed into INSTALLSITEARCH
+during a standalone build. Because EU::MM does so when A-T is bundled
+with mp2, and we want to avoid having A-T installed in two different
+places under @INC. [Stas]
+
+HTTP/0.9 responses no longer croak, provided $ENV{APACHE_TEST_HTTP_09_OK} 
+is true.  [Geoffrey Young]
+
+Hard-code listen directive to 127.0.0.1, solving problems for people
+with IPv4 & IPv6 address until a better solution is found. [Gozer]
+
+prefix Apache::TestTrace (non-colour mode) messages with the loglevel,
+similar to what Apache does. [Stas]
+
+Instrument A-T with an optional successful (shell-wise) abort of the
+test suite, by asking the user whether they want to continue w/o
+completing the test suite. Use it in places where we know that the
+test suite will certaionly fail (e.g. running from /root as 'root', or
+not providing httpd/apxs locations). [Stas]
+
+In order to make Apache-Test compatible with the rest of Perl testing
+frameworks, we no longer chdir into t/, but run from the root of the
+project (where t/ resides). A test needing to know where it's running
+from (e.g. to read/write files/dirs on the filesystem), should do that
+relative to the serverroot, documentroot and other server
+configuration variables, available via
+Apache::Test::vars('serverroot'), Apache::Test::vars('documentroot'),
+etc. [Stas]
+
+Apache::Test::vars() can now query for config arguments [Stas]
+
+generate t/conf if it does not already exist, which
+it may not if the tests are entirely autoconfigured.
+[Geoffrey Young]
+
+Special to Apache-Test environment variables:
+APXS APACHE APACHE_GROUP APACHE_USER APACHE_PORT
+are now moved to:
+APACHE_TEST_APXS APACHE_TEST_HTTPD APACHE_TEST_GROUP 
+APACHE_TEST_USER APACHE_TEST_PORT
+respectively, for consistency with other APACHE_TEST_ env vars and in
+order not to interfere with other projects that may use the same env
+vars. [Stas]
+
+if $self->{reconfigure} is true, make sure to perform a complete
+reconfiguration, to solve the bug where conf.in files weren't reparsed
+and vhost hostport info was getting lost on subsequent runs when
+APACHE env var was set (one of the cases when $self->{reconfigure} is
+true). [Stas]
+
+handle "Include conf/*conf" cases when inheriting httpd.conf in a
+cleaner way, don't complain that "*conf" doesn't exist, since it's a
+glob pattern. Instead check try to resolve the base directory. [Stas]
+
+import the Apache::TestMM clean target in Makefile.PL so 'make clean'
+will call t/TEST -clean [Stas]
+
+fix have_apache_version(), have_min_apache_version(), and
+have_min_module_version() to use proper numeric version strings 
+in comparisons.  thanks to Rafael Garcia-Suarez for the spot.
+[Geoffrey Young]
+
+fix Apache::TestConfig::which to check that the found file is a plain
+file [Stas]
+
+implementing custom interactive and non-interactive (with the -save
+option) reusable configuration for -httpd, -apxs, -user, -group, and
+-port [Randy Kobes, Stas]
+
+
+
+=item 1.07 - Decemeber 22, 2003
+
+allow conditional C module compilation on a more granular level.
+#define HTTPD_TEST_REQUIRE_APACHE 2.0.49 is now recognized.
+[Geoffrey Young]
+
+Another attempt at providing a test function that verifies whether
+Apache when switching from 'root' to 'nobody' or another user will be
+able to access and create files under the t/ directory. This time
+using perl's vars $(, $< since POSIX equivalents seem to be broken on
+some systems. Also using a better test that actually tries to
+write/read/execute in the path under test. [Stas]
+
+Cleanly exit (and complain) if the default hostname resolution has
+failed (usually due to a missing localhost entry in /etc/hosts) [Stas]
+
+Fix Apache::TestConfigParse to handle quoted Include arguments [Stas]
+
+Fix Apache::TestServer::wait_till_is_up not to bail out if the server
+takes time to start and LWP is not available. [Stas]
+
+Fix Apache::TestConfigParse to handle glob includes, like Include
+conf/*.conf on RedHat [Philippe M. Chiasson]
+
+Fix Apache::TestConfig::add_config not to append " " at the end of the
+config lines. This was a problem with config sections imported from
+.pm files, the appended "" made it impossible to have multi-line
+directives using \ [Stas]
+
+Fix a bug in '-port select' which was incorrectly using the same port
+twice [Stas]
+
+added bugreport and file argument options to 
+Apache::TestRun::generate_script() [Geoffrey Young]
+
+
+
+=item 1.06 - November 10, 2003
+
+added -startup_timeout and $ENV{APACHE_TEST_STARTUP_TIMEOUT} as places
+to specify the maximum number of seconds to wait for the test
+server to start.  the default is still 60 seconds.  [Geoffrey Young]
+
+use apxs PREFIX to resolve relative httpd.conf directives
+ServerRoot is not present [Mike Cramer]
+
+add support for a new subclass method 'bug_report', which if provided
+will be called when 'make test' fails. we use it in mod_perl to print
+the pointers on how to proceed when the failure occurs. [Stas]
+
+sudo and su -u aren't portable, therefore use a simple setuid/setguid
+perl program instead, to check whether the root directory of the test
+suite is rwx by the user/group apache is going to run under (when
+running 'make test' as root). [Stas]
+
+
+
+=item 1.05 - October 23, 2003
+
+core scanning changes [Stas]
+- speedup by not chdir'ing into subdirs
+- an optional scanning of only t/ dir (used by TestSmoke)
+- don't scan on win32, since it has no core files
+
+in the autogenerated t/conf/modperl_inc.pl don't add the project/lib
+directory, unless a special env var APACHE_TEST_LIVE_DEV is true. This
+is because some projects change things in project/blib and pushing
+project/lib on top of @INC, breaks the test suite for them [Stas]
+
+TestRun was using httpd.pid file to ensure that the server is killed
+before starting it, if the file existed. This was a problem on win32
+platforms, where a process scheduler tries to re-use the pids that
+were just freed, which may have killed a valid process which is not
+even Apache.exe. So we try not to rely on that file, and if the server
+wasn't properly stopped and still running, users will learn about
+that, since the port will be busy, and Apache will fail to
+start. Users have to kill it manually. TestSmoke is no longer using an
+explicit kill `cat httpd.pid` to stop Apache, but delegates the
+stopping procedure to TestRun [Steve Hay, Randy Kobes]
+
+use IPC::Run3 in Apache::TestSmoke to run t/TEST commands,
+so as t/SMOKE can be used on Win32 [Stas, Steve Hay, Randy Kobes]
+
+place mod_perl-specific directives in <IfModule> containers
+within httpd.conf, allowing the default server to start if
+mod_perl isn't present.  [Geoffrey Young]
+
+fix t/request.t to get /index.html, instead of / since not everybody
+uses mod_dir [Steve Piner <stevep@marketview.co.nz>]
+
+when testing whether Apache started as root and running under 'nobody'
+or alike, will be able to -r/-w/-x in t/ use 'su' instead of 'sudo',
+the latter is not available on all unix platforms. [Vivek Khera
+<khera@kcilink.com>]
+
+in the Apache/test.pm nuke code s/PERLRUN/FULLPERL/ as older MakeMaker
+doesn't have the PERLRUN target [Stas]
+
+Apache 1.3 servers now run in standard prefork mode under
+normal operation.  single server mode (httpd -X) was replaced
+with MaxClients set to 1 by default.  [Geoffrey Young]
+
+
+
+=item 1.04 - September 29, 2003
+
+if the server stops reading from the client before it has sent all its
+data, Apache::TestClient (which is used when LWP is not available)
+would just die without any error message (5.8.1) because no SIGPIPE
+handler was setup and the Broken Pipe error was missed. Replacing
+'print $s' with $s->send() solves this problem: Apache::TestClient
+will just move on without bailing out. [Stas]
+
+if env var APACHE_TEST_PRETEND_NO_LWP is true, Apache::Test will
+pretend that LWP is not available. useful for testing whether the test
+suite will survive on a system which doesn't have libwww-perl
+installed. [Stas]
+
+Apache::TestSmoke provides a new mode: -bug_mode, which runs an
+equivalent of plain 't/TEST' but generates a lot of useful debug
+information, in addition to matching the core files to the tests that
+caused them. [Stas]
+
+Apache::TestSmoke now scans for core files, just like Apache::TestRun
+does [Stas]
+
+Allow the creation of name based virtual hosts by supplying
+<VirtualHost servername:module> containers in .conf.in$ files.
+[André Malo]
+
+fix Apache::TestSSLCA to generate a separate index.txt file for each
+module, as on certain platforms openssl fails to re-use the same
+file. [Stas]
+
+remove the unused example section from t/conf/extra.conf.in, it made
+an assumption that mod_auth is available [Stas]
+
+in the autogenerated t/conf/httpd.conf include mod_alias and mod_mime
+loading, in case they were built as a shared object and wasn't loaded
+from the system-wide httpd.conf from which Apache::Test inherits the
+config. [Stas]
+
+added have_apache_mpm() function [Geoffrey Young]
+
+when moving test-specific config directives from __DATA__ to
+httpd.conf don't use hash, or the order of arguments is not
+preserved. Thanks to perl-5.8.1 for randomizing the hash seed, which
+has exposed the bug by breaking the test suite. [Stas]
+
+when the tests are run in the 'root' mode, check whether the
+DocumentRoot and its parent dirs are rwx before the tests are run and
+suggest possible workarounds when the tests are doomed to fail,
+because of the permission issues. [Stas]
+
+UPLOAD is now auto-exported, like the rest [David Wheeler
+<david@kineticode.com>]
+
+Change the way the redirect_ok parameter works so that it affects only
+_that call_ to the function. Afterward it should revert to the old
+value of $RedirectOK. [David Wheeler <david@kineticode.com>]
+
+Change user_agent() so that the LWP::UserAgent "requests_redirectable"
+parameter actually does something useful vis-à-vis $RedirectOK. [David
+Wheeler <david@kineticode.com>]
+
+Apache::TestRequest API documenation [David Wheeler
+<david@kineticode.com>]
+
+Enable TransferLog in the autogenerated httpd.conf only if
+mod_log_config is available [Stas]
+
+
+
+=item 1.03 - June 19, 2003
+
+Instrumented Makefile.PL to unconditionally remove any old
+pre-installed occurrences of Apache/test.pm, which has been renamed to
+Apache/testold.pm in mod_perl 1.28 to avoid collisions with
+Apache/Test.pm on case-insensitive systems. [Stas]
+
+Apache::TestClient now handles correctly responses with no body and
+its response header() method is no longer case-sensitive [Stas]
+
+add skip helper shortcuts: have_min_perl_version,
+have_min_module_version [Stas]
+
+pass to 'use lib' only 'lib/' dirs that actually exist in
+autogenerated t/TEST t/SMOKE and others. [Stas]
+
+add the ASF LICENSE file to the distro [Stas]
+
+get rid of Apache::TestTrace's dependency on Apache::TestConfig as it
+creates too many circular use() problems. [Stas]
+
+wrap blib loading in eval block (added to autogenerated files), to
+prevent 'make clean' failures. [Stas]
+
+add two more variants of each of the tracing functions. If the '_mark'
+suffix is appended (e.g., 'error_mark') the trace will start with the
+filename and the line number the function was called from. If the
+'_sub' suffix is appended (e.g., 'error_info') the trace will start
+with the name of the subroutine the function was called from. [Stas]
+
+add support for a new env var APACHE_TEST_TRACE_LEVEL, used to
+override the tracing level. It propogates the overriden (either by env
+var APACHE_TEST_TRACE_LEVEL or -trace option) value to the
+server-side, so we can use Apache::TestTrace in mod_perl handlers, and
+be able enable/disable tracing from the commmand line. This way we
+don't have to comment out debug prints. [Stas]
+
+
+
+=item 1.02
+
+not released
+
+
+
+=item 1.01 - May  1, 2003
+
+improved support for 3rd party modules test configuration setup:
+automatically include 'use blib' in autogenerated t/TEST and add 'use
+Apache2' in the startup file for mod_perl 2.0. [Stas]
+
+new configuration option: -libmodperl [path/to/]mod_perl.so (so one
+can build several DSO objects, rename them, so several builds can
+co-exist under the same LIBEXECDIR and test them all. Mainly useful
+for testing 3rd party modules, with different mod_perl DSO builds. [Stas]
+
+set $Apache::Test5005compat::VERSION because of the bogus warnings
+generated by EU::MM::parse_version() when it sees
+$NOT_THIS_MODULE::VERSION [Randal L. Schwartz <merlyn@stonehenge.com>]
+
+a few fixes in Makefile.PL and t/TEST.PL to work with perl-5.005_03
+[Stas]
+
+perlpods are found either in the 'pods/' or 'pod/' subdirs [Randal
+L. Schwartz <merlyn@stonehenge.com>]
+
+Autoconfigure Alias /getfiles-* only if the corresponding targets
+exist [Stas]
+
+
+
+=item 1.00 - Apr 28, 2003 
+
+when inheriting httpd.conf on some platforms SERVER_CONFIG_FILE is an
+absolute path, so try to use that if found. [Haroon Rafique
+<haroon.rafique@utoronto.ca>]
+
+new Apache::Test functions: 
+have_min_apache_version - to require a minimal Apache version. 
+have_apache_version     - to require a specific Apache version. 
+[Stas]
+
+Apache::TestUtil API change:
+write_perl_script  => t_write_perl_script
+write_shell_script => t_write_shell_script 
+chown              => t_chown
+All 3 functions are now optionally exported [Geoffrey Young].
+
+Provide a new request macro _BODY_ASSERT to replace _BODY in cases
+where the client part of the test directly prints to the output, in
+order to avoid skipped tests instead of reporting the failure of the
+server side. Use it in automatically generated tests. [Stas]
+
+httpd (1.3 && 2) / winFU have problems when the first path's segment
+includes ':' (security precaution which breaks the rfc) so we can't
+use /TestFoo::bar as path_info in Apache::Tests. Adjusting all tests
+to use /TestFoo__bar. [Stas]
+
+change Apache::TestConfig::filter_args to accept arguments which
+aren't only key/value pairs, but also tokens like 'FOO=1' [Stas]
+
+In autogenerated t/TEST, make sure not to include 'use Apache2' for
+the mod_perl 2.0 build itself [Stas]
+
+avoid starting httpd with 'Group root' when running the test suite
+under root [Stas]
+
+add support for 'make test TEST_VERBOSE=1 "TEST_FILES=foo bar"' [Stas]
+
+Apache::Test now can run 'make test' under 'root', without permission
+problems (e.g. when files need to be written), it'll chown all the
+files under t/ to the user chosen to run the server with, before
+running the tests and will restore the permissions at the end. [Stas]
+
+don't inherit loading of the mod_perl object from the system-wide
+config, since Apache::TestRunPerl already configures it [Stas]
+
+Support two new shortcuts for skip functionality:
+ - have_threads: checks whether both Apache and Perl support threads
+ - under_construction: to print a consistent/clear skip reason
+[Stas]
+
+Support <NoAutoConfig> </NoAutoConfig> blocks in .pm files, so we can
+have a full manual control over generated config sections. These
+sections are fully parsed and variables are substituted, including
+vhosts. [Stas]
+
+Implement a more robust autogenerated client .t test in
+Apache::TestConfigPerl. Before this fix if the server side returned
+500, the test would get skipped, not good. Now it will die a horrible
+death. [Stas]
+
+Before v1.0 most changes were logged in modperl-2.0/Changes (see
+mod_perl <= v1.99_08).
+
+=back

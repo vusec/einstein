@@ -1,0 +1,15 @@
+dn: cn=httpd,dc=example,dc=com
+objectClass: applicationProcess
+objectClass: simpleSecurityObject
+cn: httpd
+description: Service Account for httpd
+userPassword: mod_authnz_ldap
+
+dn: ou=dept,dc=example,dc=com
+ou: dept
+objectClass: organizationalUnit
+
+# Group
+dn: cn=Subgroup,ou=dept,dc=example,dc=com
+objectClass: groupOfUniqueNames
+uniqueMember: uid=beta,dc=example,dc=com

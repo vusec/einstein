@@ -1,0 +1,17 @@
+#!/bin/bash
+
+PROC_NAME=lighttpd
+BIN_PATH=`pwd`/install/sbin/lighttpd
+RUN_DEPS="wget"
+
+. ../scripts/include/cmdctl.inc
+
+mode=$1
+shift || mode="no_action"
+
+case "$mode" in
+  *)
+    cmdctl_client_action $mode $*
+    ;;
+esac
+

@@ -1,0 +1,13 @@
+use strict;
+use warnings FATAL => qw(all);
+
+use File::Spec ();
+
+use lib ();  # empty so we can calculate the lib to use
+
+my @libs = (File::Spec->catfile('@ServerRoot@', 'response'),
+            File::Spec->catfile('@ServerRoot@', qw(.. lib)));
+
+lib->import(@libs);
+
+1;

@@ -1,0 +1,33 @@
+#!/bin/bash
+
+#!/bin/bash
+
+ROOT=`readlink -f ../..`
+
+BENCH_TYPE=${BENCH_TYPE:-1}
+
+. ../scripts/include/cmdctl.inc
+
+# Run all tests
+if [ $BENCH_TYPE -eq 2 ]; then
+    make test
+    ./serverctl stop
+    exit 0
+
+# Run execve tests
+elif [ $BENCH_TYPE -eq 3 ]; then
+    echo "TODO"
+    exit 0
+
+# Run benchmarking suite
+elif [ $BENCH_TYPE -eq 4 ]; then
+    echo "TODO: Test this since its migration from llvm-apps"
+    RUNBENCH_THREADS=${RUNBENCH_THREADS:-8}
+    RUNBENCH_REQUESTS=${RUNBENCH_REQUESTS:-1000000}
+    BENCH_OPTS=${BENCH_OPTS:-}
+    RUNBENCH_CMD="memcslap --servers 127.0.0.1:1080 --verbose --concurrency $RUNBENCH_THREADS --execute-number $RUNBENCH_REQUESTS $BENCH_OPTS" cmdctl_runbench \
+        "^concurrency:\s*\([0-9]*\).*$::::num_threads=\1" \
+        "^[^O]*Ops:\s*\([0-9]*\).*$::::num_requests=\1" \
+        "^[^T]*TPS:\s*\([0-9.]*\).*$::::requests_per_sec=\1" \
+        "^Run.time:\s*\([0-9.]*\).*$::::bench_secs=\1"
+fi
