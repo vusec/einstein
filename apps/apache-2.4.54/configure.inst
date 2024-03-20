@@ -20,9 +20,6 @@ APACHE_OPTS+=" --with-port=1080 --with-sslport=10443"
 # Possible values: event, worker, prefork, winnt. worker seems good for a memory-constrained env.
 APACHE_OPTS+=" --with-mpm=worker"
 
-# Use the included apr so that it's easily reproducible (i.e., so we don't have to rely on system apr libs)
-APACHE_OPTS+=" --with-included-apr"
-
 ./configure $APACHE_OPTS --prefix=$MYPWD/install \
    CC="$CC" \
    CXX="$CXX" \

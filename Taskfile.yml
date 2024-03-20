@@ -22,10 +22,7 @@ env:
   HAVE_LIBDFT: 1
   ##################################
   # Misc vars
-  ### We have to do this janky PREFIX thing before some commands because go-task cannot override env vars
   DEFAULT_CORES: '{{.ROOT}}/results/misc/default-cores/'
-  APACHE_APR_URL: "https://dlcdn.apache.org//apr/apr-1.7.4.tar.gz"
-  APACHE_UTIL_URL: "https://dlcdn.apache.org//apr/apr-util-1.6.3.tar.gz"
 
 vars:
   NPROC:
@@ -39,14 +36,14 @@ tasks:
   init:
     desc: Initializes repo
     cmds:
-      - task init-submodule init-pkgs init-env init-getpin init-misc einstein-default-config apache-setup db-init
+      - task init-submodule init-pkgs init-env init-getpin einstein-default-config db-init
 
   init-pkgs:
     cmds:
       - sudo apt-get update && sudo apt-get -y upgrade
-      - sudo apt-get install -y cpanminus libpq-dev miller libldap2-dev libpam0g-dev libzstd-dev libbz2-dev libxxhash-dev libmaxminddb-dev liblua5.4-dev lldb gcovr smem gcc-9 g++-9 python3-pip postgresql prelink libpcre3-dev libxslt-dev libgeoip-dev libgd-dev libperl-dev libipc-run-perl bison flex libmemcached-tools libevent-dev gdb net-tools
+      - sudo apt-get install -y cpanminus libpq-dev miller libldap2-dev libpam0g-dev libzstd-dev libbz2-dev libxxhash-dev libmaxminddb-dev liblua5.4-dev lldb gcovr smem gcc-9 g++-9 python3-pip postgresql prelink libpcre3-dev libxslt-dev libgeoip-dev libgd-dev libperl-dev libipc-run-perl bison flex libmemcached-tools libevent-dev gdb net-tools apache2-dev libcrypt-ssleay-perl
       - pip install django tqdm pygdbmi psycopg2
-      - cpanm -S IPC::Run Time::Stopwatch Bundle::ApacheTest HTTP::DAV DateTime Time::HiRes Test::Harness Crypt::SSLeay Net::SSLeay IO::Socket::SSL IO::Socket::IP IO::Select LWP::Protocol::https AnyEvent AnyEvent::WebSocket::Client LWP::Protocol::AnyEvent::http FCGI || true
+      - cpanm -S IPC::Run Time::Stopwatch Bundle::ApacheTest HTTP::DAV DateTime Time::HiRes Test::Harness Crypt::SSLeay Net::SSLeay IO::Socket::SSL IO::Socket::IP IO::Select LWP::Protocol::https AnyEvent AnyEvent::WebSocket::Client LWP::Protocol::AnyEvent::http FCGI
 
   init-submodule:
     cmds:
@@ -55,11 +52,6 @@ tasks:
   init-getpin:
     cmds:
       - cd src/misc && wget https://software.intel.com/sites/landingpage/pintool/downloads/${PIN_VERSION}.tar.gz && tar -xf ${PIN_VERSION}.tar.gz && rm ${PIN_VERSION}.tar.gz
-
-  init-misc:
-    cmds:
-      # Prepare default directory for core dumps
-      - mkdir -p ${DEFAULT_CORES}
 
   init-env:
     cmds:
@@ -359,10 +351,6 @@ tasks:
 
   ################################
   #### apache
-  apache-setup:
-    cmds:
-      - cd apps/apache-2.4.54/srclib && wget -qO- {{.APACHE_APR_URL}} | tar xvz && mv apr-*.*.* apr
-      - cd apps/apache-2.4.54/srclib && wget -qO- {{.APACHE_UTIL_URL}} | tar xvz && mv apr-util-*.*.* apr-util
   apache-build:         {cmds: [task app-build       -- apache-2.4.54]}
   apache-test:          {cmds: [task app-test        -- apache-2.4.54 -f $ROOT/apps/apache-2.4.54/myhttpd.conf -k start]}
   # If 'bench' or 'custom' doesn't work the first time, try running the commands under 'Configuring Apache test suite' in apps/apache-2.4.54/runbench

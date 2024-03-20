@@ -39,8 +39,7 @@ We use each target application's test suite to drive the analysis.
 
 ## Set-up ##
 
-First, to clone the repository, run: `git clone https://github.com/vusec/einstein.git`.
-Then, to download and install dependencies, including [go-task](https://taskfile.dev/#/installation) as a task-runner, run: `sudo snap install task --classic && cd einstein && task init`.
+To download and install dependencies, including [go-task](https://taskfile.dev/#/installation) as a task-runner, from this repository, run: `sudo snap install task --classic && task init`.
 
 ### Installation ###
 
