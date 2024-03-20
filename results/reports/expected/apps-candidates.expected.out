@@ -1,0 +1,29 @@
+=======================================================================
+Candidate exploit tables:
+
+Vulnerable gadgets found per syscall and argument type:
+Syscalls | Total covered |Total found where this arg has a dataflow from attacker data (% that are identity dataflows, if any)
+execve   |      11       |    7 (86%)    |    7 (86%)    |    7 (86%)    |               |               |              
+mmap     |     787       |    55 (5%)    |   441 (8%)    |      55       |   16 (100%)   |      17       |      73      
+mprotect |     144       |   97 (68%)    |   98 (27%)    |       1       |               |               |              
+mremap   |      11       |      11       |       7       |      11       |       -       |       -       |              
+pwrite64 |     1270      |   1217 (3%)   |   741 (47%)   |   399 (19%)   |   506 (36%)   |               |              
+pwritev  |      10       |   10 (100%)   |   10 (10%)    |       -       |   10 (20%)    |               |              
+sendfile |      1        |       -       |       -       |       1       |       1       |               |              
+sendmmsg |      2        |       2       |       2       |       -       |       -       |               |              
+sendmsg  |      12       |   5 (100%)    |   3 (100%)    |       -       |               |               |              
+sendto   |     431       |   389 (7%)    |   410 (38%)   |   408 (6%)    |       -       |       -       |       -      
+write    |     3083      |   768 (74%)   |  2877 (91%)   |  1265 (10%)   |               |               |              
+writev   |     754       |   244 (18%)   |   742 (76%)   |       -       |               |               |              
+* Syscalls not covered: execveat pwritev2 remap_file_pages 
+
+Vulnerable gadgets found per target application:
+- apache: 1834 gadgets (97% with an iflow)
+- lighttpd: 92 gadgets (98% with an iflow)
+- nginx: 1623 gadgets (82% with an iflow)
+- postgres: 2105 gadgets (27% with an iflow)
+- redis: 218 gadgets (84% with an iflow)
+* TOTAL: 5872 gadgets (67% with an iflow)
+
+=======================================================================
+

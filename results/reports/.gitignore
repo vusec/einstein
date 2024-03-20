@@ -1,0 +1,5 @@
+*.json
+*.sh
+_old
+dcurrent.json
+*.db
