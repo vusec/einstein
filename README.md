@@ -47,13 +47,20 @@ To build [libdft](https://github.com/vusec/libdft64-ng), the command server, the
 
 ### Basic Test ###
 
-Next, test that the different components work as follows. Note for any commands that run the `db-analyze-reports` task: If it fails, try running the `db-analyze-reports-singleproc` task instead. It will be slower, but will avoid any load-related crashes.
-
-- To test libdft's "taint all memory" functionality, run `task libdft-test -- memtaint` and compare its output to the [expected output](https://github.com/vusec/libdft64-ng/blob/master/tests/memtaint.expected.out). Note that the addresses in the actual output may differ from the addresses in the expected output.
-- To test libdft's per-instruction taint policies, run `task libdft-test -- ins` and compare its output to the [expected output](https://github.com/vusec/libdft64-ng/blob/master/tests/ins.expected.out). Note that the addresses in the actual output may differ from the addresses in the expected output.
-- To test Einstein on a simple program, run `task einstein-test`. Then, compare the output of `task db-print-candidates` with the [expected output](apps/tests/src/tainted-syscall.expected.out).
-- To test Einstein on each target application running a simple workload (e.g., sending a simple GET request to a web server), run `task reports-clean apps-test db-add-reports db-analyze-reports`. Then, compare the output of `task db-print-candidates` with the [expected output](results/reports/expected/apps-test-candidates.expected.out).
-- To test Einstein's exploit confirmation for `nginx`, run `task reports-clean einstein-nowrite-config nginx-eval-custom db-add-reports db-analyze-reports db-analyze-candidates`. Then, compare the output of `task db-print-exploits` with the [expected output](results/reports/expected/nginx-custom-exploits.expected.out).
+Next, test that the different components work as follows[^1]:
+[^1]: For any commands that run the `db-analyze-reports` task: If it fails, try running the `db-analyze-reports-singleproc` task instead. It will be slower, but will avoid any load-related crashes.
+- **(T1)**: *libdft memory tainting [1 compute-second].*\
+*To test libdft's "taint all memory" functionality, run `task libdft-test -- memtaint` and compare its output to the [expected output](https://github.com/vusec/libdft64-ng/blob/master/tests/memtaint.expected.out). Note that the addresses in the actual output may differ from the addresses in the expected output.*
+- **(T2)**: *libdft instruction tainting** [1 compute-second].*\
+*To test libdft's per-instruction taint policies, run `task libdft-test -- ins` and compare its output to the [expected output](https://github.com/vusec/libdft64-ng/blob/master/tests/ins.expected.out). Note that the addresses in the actual output may differ from the addresses in the expected output.*
+- **(T3)**: *Einstein tool* [1 compute-minute].*\
+*To test Einstein on a simple program, run `task einstein-test`. Then, compare the output of `task db-print-candidates` with the [expected output](apps/tests/src/tainted-syscall.expected.out).*
+- **(T4)**: *Target applications** [4 compute-minutes].*\
+*To test Einstein running each target application with a simple workload (e.g., sending a simple GET request to a web server), run `task reports-clean apps-test db-add-reports db-analyze-reports`. Then, compare the output of `task db-print-candidates` with the [expected output](results/reports/expected/apps-test-candidates.expected.out).*
+- **(T5)**: *Target application test suites [20 compute-minutes].*\
+*To test Einstein running each target applications' test suites for 2 minutes each (rather than the entire test suites), run `task reports-clean apps-eval-brief db-add-reports db-analyze-reports`. Then, compare the output of `task db-print-exploits` with the [expected output](results/reports/expected/apps-brief-candidates.expected.out).*
+- **(T6)**: *Exploit confirmation* [2 compute-minutes].*\
+*To test Einstein's exploit confirmation for `nginx`, run `task reports-clean einstein-nowrite-config nginx-eval-custom db-add-reports db-analyze-reports db-analyze-candidates`. Then, compare the output of `task db-print-exploits` with the [expected output](results/reports/expected/nginx-custom-exploits.expected.out).*
 
 ## Evaluation Workflow ##
 
@@ -67,19 +74,17 @@ We make the following claims:
 
 We prove the above claims using the following experiments:
 
-#### (E1): Confirming vulnerable syscall identification for all target applications. [30 human-minutes + 24 compute-hours] ####
+- **(E1)**: *Vulnerable syscall identification [24 compute-hours].*
+  - **How to:** *We will run each application with Einstein, then analyze the reports to identify vulnerable syscalls.*
+  - **Preparation:** *Run `task reports-clean` to remove past reports.*
+  - **Execution:** *Run `task apps-eval db-add-reports db-analyze-reports`.*
+  - **Results:** *Compare the output of `task db-print-candidates` to the [expected output](results/reports/expected/apps-candidates.expected.out). The output contains thousands of vulnerable gadgets, broken down by: (i) syscall and argument type (i.e., Table 3), and (ii) target application (i.e., Table 4)—thereby proving Claim (C1).*
 
-- How to: We will run each application with Einstein, then analyze the reports to identify vulnerable syscalls.
-- Preparation: Run `task reports-clean` to remove past reports.
-- Execution: Run `task apps-eval db-add-reports db-analyze-reports`.
-- Results: Compare the output of `task db-print-candidates` to the [expected output](results/reports/expected/apps-candidates.expected.out). The output contains thousands of vulnerable gadgets, broken down by: (i) syscall and argument type (i.e., Table 3), and (ii) target application (i.e., Table 4)—thereby proving Claim (C1).
-
-#### (E2): Confirming exploit generation for `nginx`. [30 human-minutes + 12 compute-hours] ####
-
-- How to: We will run `nginx` with Einstein, then analyze the reports to identify vulnerable syscalls, then confirm candidate exploits as working exploits.
-- Preparation: Run `task reports-clean` to remove past reports.
-- Execution: Run `task nginx-eval db-add-reports db-analyze-reports db-analyze-candidates`.
-- Results: Compare the output of `task db-print-exploits` to the [expected output](results/reports/expected/nginx-exploits.expected.out). The output contains hundreds of confirmed exploits for `nginx` (i.e., Table 5)—thereby proving Claim (C2).
+- **(E2)**: *Exploit generation [12 compute-hours].*
+  - **How to:** *We will run `nginx` with Einstein, then analyze the reports to identify vulnerable syscalls, then confirm candidate exploits as working exploits.*
+  - **Preparation:** *Run `task reports-clean` to remove past reports.*
+  - **Execution:** *Run `task nginx-eval db-add-reports db-analyze-reports db-analyze-candidates`.*
+  - **Results:** *Compare the output of `task db-print-exploits` to the [expected output](results/reports/expected/nginx-exploits.expected.out). The output contains hundreds of confirmed exploits for `nginx` (i.e., Table 5)—thereby proving Claim (C2).*
 
 ## Notes on Reusability ##
 
