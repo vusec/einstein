@@ -1,0 +1,20 @@
+name:         Apache-Test
+version_from: lib/Apache/Test.pm
+installdirs:  site
+
+requires:
+    Cwd:                           2.06
+    File::Spec:                    0.8
+
+distribution_type: module
+
+license: apache_2_0
+
+no_index:
+    package:
+        - HTTP::Request::Common
+        - warnings
+        - TestMore::testmorepm
+        - TestMore::testpm
+    directory:
+        - Apache-TestItSelf

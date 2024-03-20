@@ -22,7 +22,7 @@ my @test_cases = (
   [ "GET / HTTP/1.1\r\nHost: nvh-strict\r\n\r\n"     => 200, 200, "NVH matches"],
   [ "GET / HTTP/1.1\r\nHost: nvh-strict:1\r\n\r\n"   => 200, 200, "NVH matches port ignored"],
 );
-plan tests => scalar(@test_cases) * 2, need_min_apache_version('2.5.1');
+plan tests => scalar(@test_cases) * 2, need_min_apache_version('2.4.49');
 
 
 foreach my $vhosts ((["default" => 1], ["core" => 2])) {

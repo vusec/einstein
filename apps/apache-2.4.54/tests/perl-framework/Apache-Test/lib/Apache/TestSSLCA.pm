@@ -294,8 +294,20 @@ nsComment = This Is A Comment
 1.3.6.1.4.1.18060.12.0 = DER:0c064c656d6f6e73
 subjectAltName = email:\$mail$san_msupn
 
+[ client_ext ]
+extendedKeyUsage = clientAuth
+
 [ server_ext ]
 subjectAltName = DNS:\$CN$san_dnssrv
+extendedKeyUsage = serverAuth
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid,issuer
+
+[ ca_ext ]
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid:always,issuer
+basicConstraints = critical,CA:true
+
 EOF
 
     return $file;
@@ -326,7 +338,7 @@ sub new_ca {
               join ':', dn_oneline('client_snakeoil'),
               $basic_auth_password);
 
-    openssl req => "-new -x509 -keyout $cakey -out $cacert $days",
+    openssl req => "-new -x509 -extensions ca_ext -keyout $cakey -out $cacert $days",
                    config('ca');
 
     export_cert('ca'); #useful for importing into IE
@@ -367,7 +379,8 @@ sub sign_cert {
     my $name = shift;
     my $exts = '';
 
-    $exts = ' -extensions client_ok_ext' if $name =~ /client_ok/;
+    $exts = ' -extensions client_ext' if $name =~ /client/;
+    $exts .= ' -extensions client_ok_ext' if $name =~ /client_ok/;
 
     $exts = ' -extensions server_ext' if $name =~ /server/;
 

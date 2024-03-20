@@ -117,7 +117,29 @@ my @testcases = (
        [ 'Test-Header' => 'foo' ],
     ],
 );
-   
+if (have_min_apache_version('2.5.1')) {
+    push(@testcases,
+        (
+            # edit*
+            [
+                "Header echo Test-Header\nHeader edit* Test-Header (?<=a)(ba) cd", # lookbehind
+                [ 'Test-Header' => 'ababa' ],
+                [ 'Test-Header' => 'acdcd' ],
+            ],
+            [
+                "Header echo Test-Header\nHeader edit* Test-Header ^ foo",         # empty match (no infinite loop!)
+                [ 'Test-Header' => 'bar' ],
+                [ 'Test-Header' => 'foobar' ],
+            ],
+            [
+                "Header echo Test-Header\nHeader edit* Test-Header ^(.*)\$ \$1;httpOnly;secure", # empty header/match (no infinite loop!)
+                [ 'Test-Header' => '' ],
+                [ 'Test-Header' => ';httpOnly;secure' ],
+            ],
+        )
+    );
+}
+
 plan tests => 
     @header_types**4 + @header_types**3 + @header_types**2 + @header_types**1 + scalar @testcases * 2,
     have_module 'headers';

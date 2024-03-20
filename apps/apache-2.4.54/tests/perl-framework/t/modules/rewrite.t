@@ -16,6 +16,49 @@ my @url = qw(forbidden gone perm temp);
 my @todo;
 my $r;
 
+my @redirects_all = (
+        ["/modules/rewrite/escaping/qsd-like/foo", "/foo\$", have_min_apache_version('2.4.57')], # PR66547
+        ["/modules/rewrite/escaping/qsd-like-plus-qsa/foo?preserve-me", "/foo\\?preserve-me\$", have_min_apache_version('2.5.1')], # PR66672
+        ["/modules/rewrite/escaping/qsd-like-plus-qsa-qsl/foo/%3fbar/?preserve-me", "/foo/%3fbar/\\?preserve-me\$", have_min_apache_version('2.5.1')], # PR66672
+    );
+
+my @escapes = (
+    # rewrite to local/PT is not escaped
+    [ "/modules/rewrite/escaping/local/foo%20bar"            =>  403],
+    # rewrite to redir escape opted out
+    [ "/modules/rewrite/escaping/redir_ne/foo%20bar"         =>  403],
+    # rewrite never escapes proxy targets, even though [NE] is kind or repurposed.
+    [ "/modules/rewrite/escaping/proxy/foo%20bar"            =>  403],
+    [ "/modules/rewrite/escaping/proxy_ne/foo%20bar"         =>  403],
+
+    [ "/modules/rewrite/escaping/fixups/local/foo%20bar"     =>  403],
+    [ "/modules/rewrite/escaping/fixups/redir_ne/foo%20bar"  =>  403],
+    [ "/modules/rewrite/escaping/fixups/proxy/foo%20bar"     =>  403],
+    [ "/modules/rewrite/escaping/fixups/proxy_ne/foo%20bar"  =>  403],
+);
+if (have_min_apache_version('2.4.57')) {
+    push(@escapes, (
+        # rewrite to redir escaped by default
+        [ "/modules/rewrite/escaping/redir/foo%20bar"            =>  302],
+        [ "/modules/rewrite/escaping/fixups/redir/foo%20bar"     =>  302],
+    ));
+}
+
+my @bflags = (
+    # t/conf/extra.conf.in
+    [ "/modules/rewrite/escaping/local_b/foo/bar/%20baz%0d"               =>  "foo%2fbar%2f+baz%0d"],    # this is why [B] sucks
+    [ "/modules/rewrite/escaping/local_b_justslash/foo/bar/%20baz/"       =>  "foo%2fbar%2f baz%2f"],    # test basic B=/
+);
+if (have_min_apache_version('2.4.57')) {
+    # [BCTLS] / [BNE]
+    push(@bflags, (
+        [ "/modules/rewrite/escaping/local_bctls/foo/bar/%20baz/%0d"          =>  "foo/bar/+baz/%0d"],       # spaces and ctls only
+        [ "/modules/rewrite/escaping/local_bctls_nospace/foo/bar/%20baz/%0d"  =>  "foo/bar/ baz/%0d"],       # ctls but keep space
+        [ "/modules/rewrite/escaping/local_bctls_andslash/foo/bar/%20baz/%0d" =>  "foo%2fbar%2f+baz%2f%0d"], # not realistic, but opt in to slashes
+        [ "/modules/rewrite/escaping/local_b_noslash/foo/bar/%20baz/%0d"      =>  "foo/bar/+baz/%0d"],       # negate something from [B]
+    ));
+}
+
 if (!have_min_apache_version('2.4.19')) {
     # PR 50447, server context
     push @todo, 26
@@ -28,8 +71,10 @@ if (!have_min_apache_version('2.4')) {
 # Specific tests for PR 58231
 my $vary_header_tests = (have_min_apache_version("2.4.30") ? 9 : 0) + (have_min_apache_version("2.4.29") ? 4 : 0);
 my $cookie_tests = have_min_apache_version("2.4.47") ? 6 : 0;
+my @redirects = map {$_->[2] ? $_ : ()} @redirects_all;
 
-plan tests => @map * @num + 16 + $vary_header_tests + $cookie_tests, todo => \@todo, need_module 'rewrite';
+plan tests => @map * @num + 16 + $vary_header_tests + $cookie_tests + scalar(@escapes) + scalar(@redirects) + scalar(@bflags),
+              todo => \@todo, need_module 'rewrite';
 
 foreach (@map) {
     foreach my $n (@num) {
@@ -130,6 +175,7 @@ if (have_min_apache_version('2.4')) {
 
 if (have_min_apache_version("2.4.29")) {
     # PR 58231: Vary:Host header (was) mistakenly added to the response
+    # XXX: If LWP uses http2, this can result in "Host: localhost, test1"
     $r = GET("/modules/rewrite/vary1.html", "Host" => "test1");
     ok t_cmp($r->content, qr/VARY2/, "Correct internal redirect happened, OK");
     ok t_cmp($r->header("Vary"), qr/(?!.*Host.*)/, "Vary:Host header not added, OK");
@@ -185,3 +231,31 @@ if (have_min_apache_version("2.4.47")) {
     $r = GET("/modules/rewrite/cookie/foo");
     ok t_cmp($r->header("Set-Cookie"), qr/SameSite=foo/, "samesite=foo");
 }
+
+
+foreach my $t (@escapes) {
+    my $url= $t->[0];
+    my $expect = $t->[1];
+    t_debug "Check $url for $expect\n";
+    $r = GET($url, redirect_ok => 0);
+    ok t_cmp $r->code, $expect;
+}
+foreach my $t (@bflags) {
+    my $url= $t->[0];
+    my $expect= $t->[1];
+    t_debug "Check $url for $expect\n";
+    $r = GET($url, redirect_ok => 0);
+    t_debug("rewritten query '" . $r->header("rewritten-query") . "'");
+    ok t_cmp $r->header("rewritten-query"), $expect;
+}
+
+foreach my $t (@redirects) {
+    my $url= $t->[0];
+    my $expect= $t->[1];
+    t_debug "Check $url for redir $expect\n";
+    $r = GET($url, redirect_ok => 0);
+    my $loc = $r->header("location");
+    t_debug " redirect is $loc";
+    ok $loc =~ /$expect/;
+}
+

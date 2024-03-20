@@ -1,0 +1,194 @@
+#t/TEST -proxy
+
+<IfModule mod_proxy.c>
+
+    <VirtualHost _default_:mod_proxy>
+        ProxyRequests On
+    </VirtualHost>
+
+    <IfVersion >= 2.4.49>
+        # Test the mapping.
+        ProxyPass /mapping http://@SERVERNAME@:@PORT@/servlet mapping=servlet
+    </IfVersion>
+
+</IfModule>
+
+<IfModule mod_proxy_hcheck.c>
+  # Suppress the error_log spam every 100ms watchdog cycle at trace5
+  LogLevel proxy_hcheck:trace4
+</IfModule>
+
+<IfModule mod_proxy_balancer.c>
+
+   <VirtualHost proxy_http_bal1>
+      DocumentRoot @SERVERROOT@/htdocs
+   </VirtualHost>
+
+   <VirtualHost proxy_http_bal2>
+      DocumentRoot @SERVERROOT@/htdocs
+   </VirtualHost>
+
+   <VirtualHost proxy_http_balancer>
+
+   <IfModule mod_lbmethod_byrequests.c>
+     <Proxy balancer://foo1>
+       BalancerMember http://@SERVERNAME@:@PROXY_HTTP_BAL1_PORT@  loadfactor=1
+       BalancerMember http://@SERVERNAME@:@PROXY_HTTP_BAL2_PORT@  loadfactor=1
+     </Proxy>
+     ProxySet balancer://foo1 lbmethod=byrequests
+     <Location /baltest1>
+       ProxyPass balancer://foo1/
+     </Location>
+   </IfModule>
+
+   <IfModule mod_lbmethod_bytraffic.c>
+     <Proxy balancer://foo2>
+       BalancerMember http://@SERVERNAME@:@PROXY_HTTP_BAL1_PORT@  loadfactor=1
+       BalancerMember http://@SERVERNAME@:@PROXY_HTTP_BAL2_PORT@  loadfactor=1
+     </Proxy>
+     ProxySet balancer://foo2 lbmethod=bytraffic
+     <Location /baltest2>
+       ProxyPass balancer://foo2/
+     </Location>
+   </IfModule>
+
+   <IfModule mod_lbmethod_bybusyness.c>
+     <Proxy balancer://foo3>
+       BalancerMember http://@SERVERNAME@:@PROXY_HTTP_BAL1_PORT@  loadfactor=1
+       BalancerMember http://@SERVERNAME@:@PROXY_HTTP_BAL2_PORT@  loadfactor=1
+     </Proxy>
+     ProxySet balancer://foo3 lbmethod=bybusyness
+     <Location /baltest3>
+       ProxyPass balancer://foo3/
+     </Location>
+   </IfModule>
+
+   <IfModule mod_lbmethod_heartbeat.c>
+     <Proxy balancer://foo4>
+       BalancerMember http://@SERVERNAME@:@PROXY_HTTP_BAL1_PORT@  loadfactor=1
+       BalancerMember http://@SERVERNAME@:@PROXY_HTTP_BAL2_PORT@  loadfactor=1
+     </Proxy>
+     ProxySet balancer://foo4 lbmethod=heartbeat
+     <Location /baltest4>
+       # TODO heartbeat needs additional configuration to have it work
+       ProxyPass balancer://foo4/
+     </Location>
+   </IfModule>
+
+     ## PR 45434 tests
+     <Proxy balancer://pr45434>
+       BalancerMember http://@SERVERNAME@:@PORT@/modules
+     </Proxy> 
+     
+     ProxyPass /pr45434 balancer://pr45434/alias
+     ProxyPassReverse /pr45434 balancer://pr45434/alias
+
+     <Proxy balancer://failover>
+       BalancerMember http://@SERVERNAME@:@NextAvailablePort@  loadfactor=1 retry=1ms
+       BalancerMember http://@SERVERNAME@:@PROXY_HTTP_BAL1_PORT@  loadfactor=1 status=H
+     </Proxy>
+     ProxyPassMatch ^/baltest_echo_post balancer://failover/echo_post
+
+     ## Test "dynamic balancer
+     <Proxy balancer://dynproxy>
+       ProxySet growth=10
+     </Proxy>
+     <Location /balancer-manager>
+       SetHandler balancer-manager
+       Allow from all
+     </Location>
+     ProxyPass /dynproxy balancer://dynproxy/
+    
+   </VirtualHost>
+
+</IfModule>
+
+#
+# Test config for FCGI (see t/modules/proxy_fcgi.t)
+#
+<IfModule mod_proxy_fcgi.c>
+  # XXX we have no way to retrieve the NextAvailablePort from Apache::Test...
+  Define FCGI_PORT @NextAvailablePort@
+
+  <VirtualHost proxy_fcgi>
+    <IfVersion >= 2.4.26>
+      # ProxyFCGISetEnvIf tests
+      <Location /fcgisetenv>
+        SetHandler proxy:fcgi://127.0.0.1:${FCGI_PORT}
+
+        ProxyFCGISetEnvIf true  QUERY_STRING test_value
+        ProxyFCGISetEnvIf true  TEST_EMPTY
+        ProxyFCGISetEnvIf false TEST_NOT_SET
+        ProxyFCGISetEnvIf true  TEST_DOCROOT "%{DOCUMENT_ROOT}"
+        ProxyFCGISetEnvIf "reqenv('GATEWAY_INTERFACE') =~ m#CGI/(.\..)#" TEST_CGI_VERSION "v$1"
+        ProxyFCGISetEnvIf true !REMOTE_ADDR
+      </Location>
+    </IfVersion>
+
+    <Directory @SERVERROOT@/htdocs/modules/proxy/fcgi>
+      <FilesMatch \.php$>
+        SetHandler proxy:fcgi://127.0.0.1:${FCGI_PORT}
+      </FilesMatch>
+    </Directory>
+
+    <IfVersion >= 2.4.26>
+      <Directory @SERVERROOT@/htdocs/modules/proxy/fcgi-generic>
+        ProxyFCGIBackendType GENERIC
+        <FilesMatch \.php$>
+          SetHandler proxy:fcgi://127.0.0.1:${FCGI_PORT}
+        </FilesMatch>
+      </Directory>
+      <Directory @SERVERROOT@/htdocs/php/fpm>
+        ProxyFCGIBackendType FPM
+      </Directory>
+    </IfVersion>
+
+    <IfModule mod_rewrite.c>
+      <IfVersion >= 2.4.26>
+        <Directory @SERVERROOT@/htdocs/modules/proxy/fcgi-generic-rewrite>
+          ProxyFCGIBackendType GENERIC
+          RewriteEngine On
+          RewriteRule ^.*\.php(/.*)?$ fcgi://127.0.0.1:${FCGI_PORT}@SERVERROOT@/htdocs/modules/proxy/fcgi-generic-rewrite/$0 [L,P]
+        </Directory>
+      </IfVersion>
+
+      <Directory @SERVERROOT@/htdocs/modules/proxy/fcgi-rewrite-path-info>
+        RewriteEngine On
+        RewriteCond %{REQUEST_FILENAME} !-f
+        RewriteRule ^.*$ index.php/$0 [L]
+        <Files index.php>
+          SetHandler proxy:fcgi://127.0.0.1:${FCGI_PORT}
+        </Files>
+      </Directory>
+    </IfModule>
+
+    <IfModule mod_actions.c>
+      #AddType application/x-php-fpm .php
+      Action application/x-php-fpm /php/fpm/action virtual
+      <Location /php/fpm/action>
+           SetHandler proxy:fcgi://localhost:9001
+      </Location>
+      <Directory @SERVERROOT@/htdocs/modules/proxy/fcgi-action>
+        AddType application/x-fcgi-action .php
+        Action application/x-fcgi-action /fcgi-action-virtual virtual
+      </Directory>
+      <Location /fcgi-action-virtual>
+        SetHandler proxy:fcgi://127.0.0.1:${FCGI_PORT}
+      </Location>
+      Action application/x-php-fpm /php-fpm-pp/
+      ProxyPass /php-fpm-pp/ fcgi://localhost:9001/@SERVERROOT@/htdocs/
+      ProxyPassReverse /php-fpm-pp/ fcgi://localhost:9001/@SERVERROOT@/htdocs/
+    </IfModule>
+
+
+  </VirtualHost>
+
+   ProxyPass /proxy/wsoc ws://@SERVERNAME@:@PORT@/modules/lua/websockets.lua
+ 
+</IfModule>
+
+<IfModule mod_rewrite.c>
+  <Directory @SERVERROOT@/htdocs/modules/proxy/rewrite>
+     AllowOverride All
+  </Directory>
+</IfModule>
