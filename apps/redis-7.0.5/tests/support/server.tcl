@@ -458,11 +458,6 @@ proc start_server {options {code undefined}} {
         run_external_server_test $code $overrides
 
         set ::tags [lrange $::tags 0 end-[llength $tags]]
-
-        puts "Tainting all memory. (pwd: [pwd])..."
-        catch {exec ./serverctl udscmd pids dbt taintall}
-        puts "Done tainting all memory!"
-
         return
     }
 
