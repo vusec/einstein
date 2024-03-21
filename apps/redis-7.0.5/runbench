@@ -17,14 +17,15 @@ else
 fi
 
 trap "echo Exited!; exit;" SIGINT SIGTERM
-RUN_EINSTEIN=1 USE_LOG_DIR=1 V=1 LOG_SUB_DIR=bench ./serverctl restart
-sleep 10
 cat ${TESTS_FILE} | while read TEST
 do
-    echo "Running test ${TEST}..."
+    TEST_NO_SLASHES=$(echo ${TEST} | sed 's/\//_/g')
+    echo "Running test ${TEST} (${TEST_NO_SLASHES})..."
+    RUN_EINSTEIN=1 USE_LOG_DIR=1 V=1 LOG_SUB_DIR="${TEST_NO_SLASHES}" ./serverctl restart
+    sleep 8
     ./serverctl udscmd pids dbt setdebugstr "${TEST}"
     ./serverctl udscmd pids dbt taintall
-    sleep 3
-    ./runtest --port 1080 --host 127.0.0.1 --single ${TEST}
+    sleep 2
+    ./runtest --port 1080 --host 127.0.0.1 --single ${TEST} || true
 done
 exit 0
