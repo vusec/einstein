@@ -11,8 +11,8 @@ mode=$1
 shift || mode="no_action"
 
 function cmdctl_server_ps {
-    FIRST_PID=`ps --sort=start_time -eo comm,pid,args | grep -e "^$PROC_NAME " | head -1 | awk '{ print $2; }'`
-    ps --sort=start_time ${2} -eo comm,${1},ppid,pid,args | grep " $FIRST_PID " | grep -v grep
+    FIRST_PID=`ps --sort=start_time -eo comm,pid,user,args | grep -e "^$PROC_NAME " | head -1 | awk '{ print $2; }'`
+    ps --sort=start_time ${2} -eo comm,${1},ppid,pid,user,args | grep " $FIRST_PID " | grep -v grep
 }
 
 case "$mode" in

@@ -53,7 +53,7 @@ function cmdctl_runbench {
         $(which time) -f "\nrunbench_secs = %e" $RUNBENCH_CMD 2>&1 | tee runbench.log || RET=1
         if [ "$BENCH_MEM" == "1" ]; then
             local kill_pid=$( ./clientctl pid )
-            [ "$kill_pid" == "" ] || kill -SIGUSR1 $( ps -eo pid,comm,args | grep "$(whoami)" | grep $kill_pid | awk '$2 ~ /repeat.sh/ { print $1 }' )
+            [ "$kill_pid" == "" ] || kill -SIGUSR1 $( ps -eo pid,comm,user,args | grep "$(whoami)" | grep $kill_pid | awk '$2 ~ /repeat.sh/ { print $1 }' )
             wait $BENCH_MEM_PID
             cmdctl_runbench_add_mem_args MAX: runbench_max
             cmdctl_runbench_add_mem_args MEAN: runbench_mean
@@ -361,7 +361,7 @@ function cmdctl_server_frestart {
 function cmdctl_server_ps_wrapped {
     local wrapper=$1
     shift
-    PS_OUT=$( ps --sort=start_time ${2} -eo ${1},args | grep "$(whoami)" | grep -e $BIN_PATH -e $wrapper | grep -v grep )
+    PS_OUT=$( ps --sort=start_time ${2} -eo ${1},user,args | grep "$(whoami)" | grep -e $BIN_PATH -e $wrapper | grep -v grep )
     if [ "$PS_OUT" != "" ]; then
         echo "$PS_OUT" | awk "{ printf(\"$PROC_NAME %s %s $PROC_NAME\n\", \$1, \$2) }"
         return 1
@@ -381,7 +381,7 @@ function __cmdctl_server_ps {
 }
 
 function cmdctl_server_ps {
-    ps --sort=start_time ${2} -eo comm,${1},args | grep "$(whoami)" | grep $BIN_PATH | grep -v grep
+    ps --sort=start_time ${2} -eo comm,${1},user,args | grep "$(whoami)" | grep $BIN_PATH | grep -v grep
 }
 
 function cmdctl_server_ps_pids {
