@@ -318,6 +318,7 @@ tasks:
   app-eval-brief:
     cmds:
       - timeout --preserve-status 2m task app-eval -- {{.CLI_ARGS}}
+      - task apps-stop
 
   app-eval-custom:
     cmds:
