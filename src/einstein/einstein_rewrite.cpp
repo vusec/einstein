@@ -240,7 +240,7 @@ void einstein_config_parse(string path) {
   if (!config.is<picojson::object>()) EINSTEIN_EXIT("%s:%d: Config is not a JSON object\n", __FILE__, __LINE__);
 
   // Process config
-  EINSTEIN_LOG("%s:%d: Processing config: '%s'...\n", __FILE__, __LINE__, config.serialize().c_str());
+  //EINSTEIN_LOG("%s:%d: Processing config: '%s'...\n", __FILE__, __LINE__, config.serialize().c_str());
   hook_writes = config.get("options").get("hook_writes").get<bool>();
   do_rewrites = config.get("options").get("do_rewrites").get<bool>();
   memtaint_set_only_do_callback(do_rewrites);
@@ -254,6 +254,6 @@ void einstein_config_parse(string path) {
   //for (size_t i = 0; i < rewrites_list.size(); i++) EINSTEIN_LOG("%s:%d: rewrites_list[%lu]: '%s'\n", __FILE__, __LINE__, i, rewrites_list[i].to_str().c_str());
   //EINSTEIN_EXIT("%s:%d: Done! Exiting...\n", __FILE__, __LINE__);
 
-  EINSTEIN_LOG("%s:%d: Done processing config.\n", __FILE__, __LINE__);
+  //EINSTEIN_LOG("%s:%d: Done processing config.\n", __FILE__, __LINE__);
   return;
 }
