@@ -1,6 +1,8 @@
 #!/bin/bash
 
 ROOT=${ROOT:-../..}
+INSTALL_DIR="${INSTALL_DIR:-${ROOT}/build}"
+PIN_ROOT="${PIN_ROOT:-${ROOT}/src/misc/pin-3.28-98749-g6643ecee5-gcc-linux}"
 
 . $ROOT/apps/scripts/include/configure.inst.inc
 
