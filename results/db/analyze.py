@@ -37,15 +37,14 @@ def terminate_all_processes():
 
 ERR_VAL = float('inf')
 WAIT_VAL = float('-inf')
-LEN_CORE_READ = 32
-assert LEN_CORE_READ > Limits.MATCH_LEN_MAX
+CORE_READ_LEN_MAX = 256
+assert CORE_READ_LEN_MAX > Limits.MATCH_LEN_MAX
 
 corevals = {}
 def is_in_corevals(addr, core): return addr in corevals[core]
-def get_coreval(addr, core):
-    while corevals[core][addr] == WAIT_VAL: sleep(0.2) # TODO: A better way of checking this
-    return corevals[core][addr]
+def get_coreval(addr, core): return corevals[core][addr]
 def add_to_corevals(addr, val, core): corevals[core][addr] = val
+def del_from_corevals(addr, core): del corevals[core][addr]
 
 corestrs = {}
 def is_in_corestrs(addr, core): return addr in corestrs[core]
@@ -103,26 +102,42 @@ def make_gdb_query(core, query):
 ############################
 #### Core lookup
 
-def core_addr_lookup(addr, core):
-    if core == "": return ERR_VAL
-    if is_in_corevals(addr, core): return get_coreval(addr, core)
-    for i in range(0,LEN_CORE_READ-Limits.MATCH_LEN_MAX): add_to_corevals(addr + i, WAIT_VAL, core)
-    tmpress = make_gdb_query(core, "-data-read-memory-bytes " + hex(addr) + " " + str(LEN_CORE_READ))
-
+def core_addr_lookup_query(addr, core, size):
+    tmpress = make_gdb_query(core, "-data-read-memory-bytes " + hex(addr) + " " + str(size))
     bighex = None
     for tmpres in tmpress:
-        try:
-            bighex = tmpres['payload']['memory'][0]['contents']
-        except:
-            continue
+        try: bighex = tmpres['payload']['memory'][0]['contents']
+        except: continue
         if bighex != None: break
+    if bighex == None: print("Error looking up value in core: core_addr_lookup_query(addr=" + hex(addr) + ", core='" + core + "', size=" + str(size) + ") yields " + str(tmpress))
+    return bighex
+
+def core_addr_lookup(addr, core):
+    core_read_len = CORE_READ_LEN_MAX
+
+    if core == "": return ERR_VAL
+    while is_in_corevals(addr, core):
+        val = get_coreval(addr, core)
+        if val == WAIT_VAL: sleep(0.1) # TODO: A better way of checking this
+        else: return val
+    add_to_corevals(addr, WAIT_VAL, core)
+    for i in range(1,core_read_len-Limits.MATCH_LEN_MAX+1):
+        if not is_in_corevals(addr + i, core): add_to_corevals(addr + i, WAIT_VAL, core)
+
+    bighex = core_addr_lookup_query(addr, core, core_read_len)
+
     if bighex == None:
-        print("Error looking up value in core: core_addr_lookup(" + hex(addr) + ", '" + core + "') yields " + str(tmpress))
-        add_to_corevals(addr, ERR_VAL, core)
-        return ERR_VAL
+        for i in range(1,core_read_len-Limits.MATCH_LEN_MAX+1):
+            if is_in_corevals(addr + i, core) and get_coreval(addr + i, core) == WAIT_VAL: del_from_corevals(addr + i, core)
+
+        core_read_len = Limits.MATCH_LEN_MAX
+        bighex = core_addr_lookup_query(addr, core, core_read_len)
+        if bighex == None:
+            add_to_corevals(addr, ERR_VAL, core)
+            return ERR_VAL
 
     vals_list = bytes.fromhex(bighex)
-    for i in range(0,LEN_CORE_READ-Limits.MATCH_LEN_MAX): add_to_corevals(addr + i, vals_list[i:i+Limits.MATCH_LEN_MAX], core)
+    for i in range(0,core_read_len-Limits.MATCH_LEN_MAX+1): add_to_corevals(addr + i, vals_list[i:i+Limits.MATCH_LEN_MAX], core)
     vals_list += b'0' * (Limits.MATCH_LEN_MAX - len(vals_list)) # Pad with zeros up to length Limits.MATCH_LEN_MAX
     return vals_list
 
