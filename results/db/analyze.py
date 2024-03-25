@@ -14,9 +14,10 @@ from time import sleep
 DISABLE_PROGRESS_BAR_FOR_ANALYSIS = False
 DISABLE_PROGRESS_BAR_PER_CORE = True
 
-NUM_THREADS_PER_PROC = 8
-GDB_MAX_TIMEOUTS = 10
-GDB_TIMEOUT_SECS = 10
+NUM_THREADS_PER_PROC = 32
+GDB_MAX_QUERY_FAILURES = 10
+GDB_MAX_TIMEOUTS = 50
+GDB_TIMEOUT_SECS = 2
 
 def EXIT_ERR(msg=""):
     if msg: print(msg)
@@ -37,7 +38,7 @@ def terminate_all_processes():
 
 ERR_VAL = float('inf')
 WAIT_VAL = float('-inf')
-CORE_READ_LEN_MAX = 256
+CORE_READ_LEN_MAX = 64
 assert CORE_READ_LEN_MAX > Limits.MATCH_LEN_MAX
 
 corevals = {}
@@ -65,7 +66,6 @@ def core_analysis_init(core):
         # Create NUM_THREADS_PER_PROC gdb instances
         gdbinsts[core].append(GdbController())
         gdbinsts[core][i].write("core-file " + core, timeout_sec=5)
-    sleep(6) # Lets these gdbinsts finish starting up. Otherwise, our first queries to the gdbinsts will receive startup messages rather than the query's result messages.
 
 def core_analysis_done(core):
     if core == "": return
@@ -91,26 +91,29 @@ def make_gdb_query(core, query):
     my_gdb_inst = curr_gdb_inst
     curr_gdb_inst = (curr_gdb_inst + 1) % NUM_THREADS_PER_PROC
     timeout_count = 0
-    while timeout_count < GDB_MAX_TIMEOUTS:
+    failed_queries = 0
+    while timeout_count < GDB_MAX_TIMEOUTS and failed_queries < GDB_MAX_QUERY_FAILURES:
         try:
-            return gdbinsts[core][my_gdb_inst].write(query, timeout_sec=GDB_TIMEOUT_SECS)
+            tmp_responses = gdbinsts[core][my_gdb_inst].write(query, timeout_sec=GDB_TIMEOUT_SECS)
         except GdbTimeoutError:
             timeout_count = timeout_count + 1
-            print("GDB query timed out (timeout #" + str(timeout_count) + "). Trying again. (core: '" + core + "', query: '" + query + "')")
-    EXIT_ERR("Error: GDB query timed out " + str(timeout_count) + " times. (core: " + core + ")")
+            #print("GDB query timed out (timeout #" + str(timeout_count) + "). Trying again. (core: '" + core + "', query: '" + query + "')")
+            continue
+        for tmp_response in tmp_responses:
+            try:
+                if tmp_response['payload']['msg'] == 'Unable to read memory.': return None
+            except: pass
+            try: return tmp_response['payload']['memory'][0]['contents']
+            except: pass
+        failed_queries = failed_queries + 1
+        #print("Failed query " + str(failed_queries) + ": query: '" + query + "', core: '" + core + "', returned: '" + str(tmp_responses) + "'")
+    EXIT_ERR("Error: GDB query timed out " + str(timeout_count) + " times and failed " + str(failed_queries) + " times. (core: " + core + ")")
 
 ############################
 #### Core lookup
 
 def core_addr_lookup_query(addr, core, size):
-    tmpress = make_gdb_query(core, "-data-read-memory-bytes " + hex(addr) + " " + str(size))
-    bighex = None
-    for tmpres in tmpress:
-        try: bighex = tmpres['payload']['memory'][0]['contents']
-        except: continue
-        if bighex != None: break
-    if bighex == None: print("Error looking up value in core: core_addr_lookup_query(addr=" + hex(addr) + ", core='" + core + "', size=" + str(size) + ") yields " + str(tmpress))
-    return bighex
+    return make_gdb_query(core, "-data-read-memory-bytes " + hex(addr) + " " + str(size))
 
 def core_addr_lookup(addr, core):
     core_read_len = CORE_READ_LEN_MAX
