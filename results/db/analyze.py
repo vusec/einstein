@@ -507,6 +507,14 @@ def analyze_sec_reports_from_core(core):
     core_analysis_done(core)
     db.connections.close_all() # Not sure if this is necessary. Just trying to avoid hitting max_connections...
 
+def analyze_reports_from_core(core):
+    db.connections.close_all() # Not sure if this is necessary. Just trying to avoid hitting max_connections...
+    analyze_fd_reports_from_core(core)
+    analyze_sec_reports_from_core(core)
+    db.connections.close_all() # Not sure if this is necessary. Just trying to avoid hitting max_connections...
+
+################################################################
+
 def analyze_untainted_reports():
     rs = Report.objects.filter(tainted=False,done_analyzing=False)
     print("Updating " + str(rs.count()) + " untainted reports...")
@@ -521,8 +529,6 @@ def analyze_untainted_reports():
               has_arg4_taint=False, has_arg4_iflow=limits_tbl,
               has_arg5_taint=False, has_arg5_iflow=limits_tbl,
               done_analyzing=True)
-
-################################################################
 
 def print_cores_counts_exit(cores_counts):
     for cc in cores_counts: print(str(cc))
@@ -552,10 +558,8 @@ def analyze_reports(nproc):
     global ppool
     ppool = mpool.Pool(nproc)
 
-    NUM_FD_REPORTS = Report.objects.filter(tainted=True,syscall__in=SYSCALLS_FDCONF).count()
-    for _ in tqdm(ppool.imap_unordered(analyze_fd_reports_from_core, cores), total=NUM_CORES, desc="Analyzing " + str(NUM_FD_REPORTS) + " FD-configuring reports from " + str(NUM_CORES) +" snapshots", disable=DISABLE_PROGRESS_BAR_FOR_ANALYSIS): pass
-    NUM_SEC_REPORTS = Report.objects.filter(tainted=True,syscall__in=SYSCALLS_SECSENS).count()
-    for _ in tqdm(ppool.imap_unordered(analyze_sec_reports_from_core, cores), total=NUM_CORES, desc="Analyzing " + str(NUM_SEC_REPORTS) + " sec-sensitive reports from " + str(NUM_CORES) +" snapshots", disable=DISABLE_PROGRESS_BAR_FOR_ANALYSIS): pass
+    NUM_REPORTS =  Report.objects.filter(tainted=True).count()
+    for _ in tqdm(ppool.imap_unordered(analyze_reports_from_core, cores), total=NUM_CORES, desc="Analyzing " + str(NUM_REPORTS) + " reports from " + str(NUM_CORES) +" snapshots", disable=DISABLE_PROGRESS_BAR_FOR_ANALYSIS): pass
 
     atexit.unregister(terminate_all_processes)
     atexit.unregister(close_all_gdbinsts)
