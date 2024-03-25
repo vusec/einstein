@@ -13,7 +13,7 @@ import atexit
 DISABLE_PROGRESS_BAR_FOR_ANALYSIS = False
 DISABLE_PROGRESS_BAR_PER_CORE = True
 
-NUM_THREADS_PER_PROC = 32
+NUM_THREADS_PER_PROC = 16
 GDB_MAX_QUERY_FAILURES = 10
 GDB_MAX_TIMEOUTS = 50
 GDB_TIMEOUT_SECS = 2
@@ -83,7 +83,7 @@ def close_all_gdbinsts():
 
 curr_gdb_inst = 0
 
-def make_gdb_query(core, query):
+def make_gdb_query(core, query, size):
     global curr_gdb_inst
     my_gdb_inst = curr_gdb_inst
     curr_gdb_inst = (curr_gdb_inst + 1) % NUM_THREADS_PER_PROC
@@ -102,7 +102,10 @@ def make_gdb_query(core, query):
             except: pass
             try:
                 if isinstance(tmp_response['payload']['memory'][0]['contents'], list): continue # To work around some weird error that occurs (due to a bug in pygdbmi?)...
-                return tmp_response['payload']['memory'][0]['contents']
+                bighex = tmp_response['payload']['memory'][0]['contents']
+                vals_list = bytes.fromhex(bighex)
+                if len(vals_list) != size: continue # To work around some weird error that occurs (due to multi-threading?)
+                return
             except: pass
         failed_queries = failed_queries + 1
         #print("Failed query " + str(failed_queries) + ": query: '" + query + "', core: '" + core + "', returned: '" + str(tmp_responses) + "'")
@@ -115,9 +118,8 @@ def core_addr_prep(reg_tup):
     addr = reg_tup['start']
     size = reg_tup['size']
     core = reg_tup['core']
-    bighex = make_gdb_query(core, "-data-read-memory-bytes " + hex(addr) + " " + str(size))
-    if bighex == None: return
-    vals_list = bytes.fromhex(bighex)
+    vals_list = make_gdb_query(core, "-data-read-memory-bytes " + hex(addr) + " " + str(size), size)
+    if vals_list == None: return
     for i in range(0, size): add_to_corevals(addr + i, vals_list[i], core)
 
 def core_addr_lookup(addr, core, size):
