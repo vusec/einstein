@@ -239,15 +239,25 @@ def get_report(report_num, core, ids):
     except Report.MultipleObjectsReturned: EXIT_ERR("Error: Multiple reports with report_num:" + str(report_num) + ", core:\"" + core + "\", pid:" + str(pid) + ", ppid:" + str(ppid) + ", tid:" + str(tid) + ", ptid:" + str(ptid))
     except Report.DoesNotExist: pass
 
-    # The previous 'chained' report came from another thread
+    # The previous 'chained' report came from this process
     try: return Report.objects.get(report_num=report_num,application_corepath=core,pid=pid,ppid=ppid)
     except Report.MultipleObjectsReturned: EXIT_ERR("Error: Multiple reports with report_num:" + str(report_num) + ", core:\"" + core + "\", pid:" + str(pid) + ", ppid:" + str(ppid))
     except Report.DoesNotExist: pass
 
-    # The previous 'chained' report came from the parent process
+    # The previous 'chained' report came from this snapshot
     try: return Report.objects.get(report_num=report_num,application_corepath=core)
     except Report.DoesNotExist: pass
     # EXIT_ERR("Error: Cannot find report with report_num:" + str(report_num) + ", core:\"" + core + "\"")
+
+    # The previous 'chained' report came from a different snapshot in this process
+    try: return Report.objects.get(report_num=report_num,pid=pid)
+    except Report.DoesNotExist: pass
+
+    # The previous 'chained' report came from a different snapshot in the parent process
+    try: return Report.objects.get(report_num=report_num,pid=ppid)
+    except Report.DoesNotExist: pass
+
+    # TODO: Look sequentially (backwards) through this process's snapshots, then the parent process's snapshots, then the (grand?)parent proces's snapshots, etc...
 
     try: return Report.objects.get(report_num=report_num)
     except Report.MultipleObjectsReturned: EXIT_ERR("Error: Multiple reports with report_num:" + str(report_num))
