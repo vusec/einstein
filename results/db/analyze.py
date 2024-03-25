@@ -611,3 +611,13 @@ def analyze_rop_reports(nproc):
     for _ in tqdm(ppool.imap_unordered(analyze_rop_reports_from_core, cores), total=NUM_CORES, desc="Analyzing " + str(NUM_REPORTS) + " total ROP reports from " + str(NUM_CORES) +" snapshots", disable=DISABLE_PROGRESS_BAR_FOR_ANALYSIS): pass
     atexit.unregister(terminate_all_processes)
     atexit.unregister(close_all_gdbinsts)
+
+################################################################################################################################
+################################################################################################################################
+
+def analysis_reset():
+    db.connections.close_all() # Not sure if this is necessary. Just trying to avoid hitting max_connections...
+    print("Resetting reports analysis...")
+    Report.objects.filter(done_analyzing=True).update(done_analyzing=False)
+    print("Resetting ROP reports analysis...")
+    RopReport.objects.filter(done_analyzing=True).update(done_analyzing=False)
