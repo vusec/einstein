@@ -9,7 +9,6 @@ from pygdbmi.gdbcontroller import GdbController
 from pygdbmi.constants import GdbTimeoutError
 import multiprocessing.pool as mpool
 import atexit
-from time import sleep
 
 DISABLE_PROGRESS_BAR_FOR_ANALYSIS = False
 DISABLE_PROGRESS_BAR_PER_CORE = True
@@ -37,15 +36,13 @@ def terminate_all_processes():
 #### Core management
 
 ERR_VAL = float('inf')
-WAIT_VAL = float('-inf')
-CORE_READ_LEN_MAX = 64
-assert CORE_READ_LEN_MAX > Limits.MATCH_LEN_MAX
+PAGE_SIZE = 4096
+assert PAGE_SIZE > Limits.MATCH_LEN_MAX
 
 corevals = {}
-def is_in_corevals(addr, core): return addr in corevals[core]
-def get_coreval(addr, core): return corevals[core][addr]
+def is_in_corevals(addr, core, size): return addr in corevals[core] and addr+size in corevals[core] # TODO: Check every single addr in range, rather than just the beginning/ending?
+def get_corevals(addr, core, size): return [corevals[core][this_addr] for this_addr in range(addr,addr+size)]
 def add_to_corevals(addr, val, core): corevals[core][addr] = val
-def del_from_corevals(addr, core): del corevals[core][addr]
 
 corestrs = {}
 def is_in_corestrs(addr, core): return addr in corestrs[core]
@@ -103,7 +100,9 @@ def make_gdb_query(core, query):
             try:
                 if tmp_response['payload']['msg'] == 'Unable to read memory.': return None
             except: pass
-            try: return tmp_response['payload']['memory'][0]['contents']
+            try:
+                if isinstance(tmp_response['payload']['memory'][0]['contents'], list): continue # To work around some weird error that occurs (due to a bug in pygdbmi?)...
+                return tmp_response['payload']['memory'][0]['contents']
             except: pass
         failed_queries = failed_queries + 1
         #print("Failed query " + str(failed_queries) + ": query: '" + query + "', core: '" + core + "', returned: '" + str(tmp_responses) + "'")
@@ -112,48 +111,23 @@ def make_gdb_query(core, query):
 ############################
 #### Core lookup
 
-def core_addr_lookup_query(addr, core, size):
-    return make_gdb_query(core, "-data-read-memory-bytes " + hex(addr) + " " + str(size))
-
-def core_addr_lookup(addr, core):
-    core_read_len = CORE_READ_LEN_MAX
-
-    if core == "": return ERR_VAL
-    while is_in_corevals(addr, core):
-        val = get_coreval(addr, core)
-        if val == WAIT_VAL: sleep(0.1) # TODO: A better way of checking this
-        else: return val
-    add_to_corevals(addr, WAIT_VAL, core)
-    for i in range(1,core_read_len-Limits.MATCH_LEN_MAX+1):
-        if not is_in_corevals(addr + i, core): add_to_corevals(addr + i, WAIT_VAL, core)
-
-    bighex = core_addr_lookup_query(addr, core, core_read_len)
-
-    if bighex == None:
-        for i in range(1,core_read_len-Limits.MATCH_LEN_MAX+1):
-            if is_in_corevals(addr + i, core) and get_coreval(addr + i, core) == WAIT_VAL: del_from_corevals(addr + i, core)
-
-        core_read_len = Limits.MATCH_LEN_MAX
-        bighex = core_addr_lookup_query(addr, core, core_read_len)
-        if bighex == None:
-            add_to_corevals(addr, ERR_VAL, core)
-            return ERR_VAL
-
+def core_addr_prep(reg_tup):
+    addr = reg_tup['start']
+    size = reg_tup['size']
+    core = reg_tup['core']
+    bighex = make_gdb_query(core, "-data-read-memory-bytes " + hex(addr) + " " + str(size))
+    if bighex == None: return
     vals_list = bytes.fromhex(bighex)
-    for i in range(0,core_read_len-Limits.MATCH_LEN_MAX+1): add_to_corevals(addr + i, vals_list[i:i+Limits.MATCH_LEN_MAX], core)
-    vals_list += b'0' * (Limits.MATCH_LEN_MAX - len(vals_list)) # Pad with zeros up to length Limits.MATCH_LEN_MAX
-    return vals_list
+    for i in range(0, size): add_to_corevals(addr + i, vals_list[i], core)
 
-def core_addr_lookup_qword(addr, core):
-    vals_list = core_addr_lookup(addr, core)
-    if vals_list == ERR_VAL: return ERR_VAL
-    vals_sublist = vals_list[0:8]
-    return struct.unpack('<Q', vals_sublist)[0]
-def core_addr_lookup_byte(addr, core):
-    vals_list = core_addr_lookup(addr, core)
-    if vals_list == ERR_VAL: return ERR_VAL
-    vals_sublist = vals_list[0:1]
-    return struct.unpack('<B', vals_sublist)[0]
+def core_addr_lookup(addr, core, size):
+    if core == "" or not is_in_corevals(addr, core, size): return ERR_VAL
+    vals_list = get_corevals(addr, core, size)
+    #vals_list += [0] * (size - len(vals_list)) # Pad with zeros up to size
+    return bytearray(vals_list)
+
+def core_addr_lookup_qword(addr, core): return struct.unpack('<Q', core_addr_lookup(addr, core, 8))[0]
+def core_addr_lookup_byte(addr, core): return struct.unpack('<B', core_addr_lookup(addr, core, 1))[0]
 
 def core_addr_has_byte(addr, exp_val, core):
     found_val = core_addr_lookup_byte(addr, core)
@@ -162,7 +136,7 @@ def core_addr_has_byte(addr, exp_val, core):
 
 def core_addr_has_bytes(addr, exp_vals, core, ptr_depth_limit):
     if len(exp_vals) > Limits.MATCH_LEN_MAX: EXIT_ERR("Error: len(exp_vals) (" + str(len(exp_vals)) + ") should be less than or equal to Limits.MATCH_LEN_MAX (" + str(Limits.MATCH_LEN_MAX) + ")")
-    found_vals_all = core_addr_lookup(addr, core)
+    found_vals_all = core_addr_lookup(addr, core, Limits.MATCH_LEN_MAX)
     if found_vals_all == ERR_VAL: return False
 
     #print("Checking whether *" + hex(addr) + " == " + hex(int.from_bytes(found_vals_all[0:len(exp_vals)], 'little')) + " is equal to " + hex(int.from_bytes(exp_vals, 'little')))
@@ -469,28 +443,19 @@ def analyze_syscall(r):
 ################################################################
 
 def analyze_fd_reports_from_core(core):
-    db.connections.close_all() # Not sure if this is necessary. Just trying to avoid hitting max_connections...
-
     # Analyze "fd creating" syscalls sequentially
     rs = Report.objects.filter(done_analyzing=False,tainted=True,application_corepath=core,syscall__in=SYSCALLS_FDCONF).order_by('application_corepath', 'ppid', 'pid', 'report_num')
     COUNT = rs.count()
     if COUNT == 0: return
-    core_analysis_init(core)
 
     for r in tqdm(rs, desc="fd-creating:"+core, total=COUNT, disable=DISABLE_PROGRESS_BAR_PER_CORE):
         analyze_syscall(r)
         r.save()
 
-    core_analysis_done(core)
-    db.connections.close_all() # Not sure if this is necessary. Just trying to avoid hitting max_connections...
-
 def analyze_sec_reports_from_core(core):
-    db.connections.close_all() # Not sure if this is necessary. Just trying to avoid hitting max_connections...
-
     rs = Report.objects.filter(done_analyzing=False,tainted=True,application_corepath=core,syscall__in=SYSCALLS_SECSENS).order_by('application_corepath', 'ppid', 'pid', 'report_num')
     COUNT = rs.count()
     if COUNT == 0: return
-    core_analysis_init(core)
 
     # Analyze "sec sensitive" syscalls in parallel
     systpool = mpool.ThreadPool(NUM_THREADS_PER_PROC)
@@ -504,13 +469,62 @@ def analyze_sec_reports_from_core(core):
         'has_arg4_taint', 'has_arg4_iflow', 'arg4_iflows_list',
         'has_arg5_taint', 'has_arg5_iflow', 'arg5_iflows_list',
         'done_analyzing'], batch_size=1000)
-    core_analysis_done(core)
-    db.connections.close_all() # Not sure if this is necessary. Just trying to avoid hitting max_connections...
+
+################################################################
+
+def get_core_addrs_arg(sa):
+    if sa['type'] == 'none': return set()
+    s = set()
+
+    found_taint_field = False # Just to make sure we don't miss any taint fields
+    try:
+        s.update({e for l in sa['dword_taint'] for e in l if l != "FULL"})
+        found_taint_field = True
+    except KeyError: pass
+
+    try:
+        s.update({e for l in sa['qword_taint'] for e in l if l != "FULL"})
+        found_taint_field = True
+    except KeyError: pass
+
+    try:
+        s.update({e for l in sa['buf_taint'] for e in l if l != "FULL"})
+        found_taint_field = True
+    except KeyError: pass
+
+    if not found_taint_field: EXIT_ERR("Error finding taint for syscall argument: " + str(sa))
+    return s
+
+def get_core_addrs(rs):
+    core_addrs = set()
+    for r in rs:
+        for sa in r.syscall_args:
+            core_addrs.update(get_core_addrs_arg(sa))
+    return core_addrs
+
+def get_core_pages(core_addrs):
+    core_pages = set()
+    for addr in core_addrs: core_pages.add(addr - addr%PAGE_SIZE)
+    return core_pages
+
+def prep_corevals(core):
+    rs = Report.objects.filter(done_analyzing=False,tainted=True,application_corepath=core)
+    core_addrs = get_core_addrs(rs)
+    core_pages = get_core_pages(core_addrs)
+    core_pages_tups = [{'start': core_page, 'size': PAGE_SIZE, 'core': core} for core_page in core_pages]
+    systpool = mpool.ThreadPool(NUM_THREADS_PER_PROC)
+    for _ in tqdm(systpool.imap_unordered(core_addr_prep, core_pages_tups), disable=True): pass
+    systpool.terminate()
+
+################################################################
 
 def analyze_reports_from_core(core):
     db.connections.close_all() # Not sure if this is necessary. Just trying to avoid hitting max_connections...
+    core_analysis_init(core)
+    prep_corevals(core)
     analyze_fd_reports_from_core(core)
     analyze_sec_reports_from_core(core)
+    core_analysis_done(core)
     db.connections.close_all() # Not sure if this is necessary. Just trying to avoid hitting max_connections...
 
 ################################################################
@@ -558,7 +572,7 @@ def analyze_reports(nproc):
     global ppool
     ppool = mpool.Pool(nproc)
 
-    NUM_REPORTS =  Report.objects.filter(tainted=True).count()
+    NUM_REPORTS = Report.objects.filter(tainted=True).count()
     for _ in tqdm(ppool.imap_unordered(analyze_reports_from_core, cores), total=NUM_CORES, desc="Analyzing " + str(NUM_REPORTS) + " reports from " + str(NUM_CORES) +" snapshots", disable=DISABLE_PROGRESS_BAR_FOR_ANALYSIS): pass
 
     atexit.unregister(terminate_all_processes)
@@ -628,3 +642,4 @@ def analysis_reset():
     Report.objects.filter(done_analyzing=True).update(done_analyzing=False)
     print("Resetting ROP reports analysis...")
     RopReport.objects.filter(done_analyzing=True).update(done_analyzing=False)
+    db.connections.close_all() # Not sure if this is necessary. Just trying to avoid hitting max_connections...
