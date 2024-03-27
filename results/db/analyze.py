@@ -105,7 +105,7 @@ def make_gdb_query(core, query, size):
                 bighex = tmp_response['payload']['memory'][0]['contents']
                 vals_list = bytes.fromhex(bighex)
                 if len(vals_list) != size: continue # To work around some weird error that occurs (due to multi-threading?)
-                return
+                return vals_list
             except: pass
         failed_queries = failed_queries + 1
         #print("Failed query " + str(failed_queries) + ": query: '" + query + "', core: '" + core + "', returned: '" + str(tmp_responses) + "'")
