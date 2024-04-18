@@ -308,7 +308,7 @@ static bool sendto_arg_is_tainted(syscall_ctx_t *ctx) {
       is_tainted_vptr((void*)ctx->arg[1], ctx->arg_taint[1], (size_t)ctx->arg[2]) ||
       is_tainted_qword(ctx->arg_taint[2]) ||
       is_tainted_dword(ctx->arg_taint[3]) ||
-      is_tainted_sockaddr((const struct sockaddr *)ctx->arg[4], ctx->arg_taint[4], (socklen_t)ctx->arg[5]) ||
+      /*is_tainted_sockaddr((const struct sockaddr *)ctx->arg[4], ctx->arg_taint[4], (socklen_t)ctx->arg[5])) ||*/
       is_tainted_qword(ctx->arg_taint[5]);
 }
 static string sendto_get_details(syscall_ctx_t *ctx) {
