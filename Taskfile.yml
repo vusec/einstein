@@ -182,17 +182,17 @@ tasks:
   db-init:
     cmds:
       # Create DB user with roles, etc.
-      - sudo -u postgres psql -c "CREATE USER einstein_user WITH PASSWORD 'einstein_password'"
-      - sudo -u postgres psql -c "ALTER ROLE einstein_user SET client_encoding TO 'utf8'"
-      - sudo -u postgres psql -c "ALTER ROLE einstein_user SET default_transaction_isolation TO 'read committed'"
-      - sudo -u postgres psql -c "ALTER ROLE einstein_user SET timezone TO 'UTC'"
+      - sudo -i -u postgres psql -c "CREATE USER einstein_user WITH PASSWORD 'einstein_password'"
+      - sudo -i -u postgres psql -c "ALTER ROLE einstein_user SET client_encoding TO 'utf8'"
+      - sudo -i -u postgres psql -c "ALTER ROLE einstein_user SET default_transaction_isolation TO 'read committed'"
+      - sudo -i -u postgres psql -c "ALTER ROLE einstein_user SET timezone TO 'UTC'"
       - task db-create
 
   db-uninit:
     cmds:
       # Undo db-init
       - task db-clean
-      - sudo -u postgres psql -c "DROP USER einstein_user"
+      - sudo -i -u postgres psql -c "DROP USER einstein_user"
 
   ################################
   #### DB: Create/clean
@@ -200,8 +200,8 @@ tasks:
   db-create:
     cmds:
       # Create DB
-      - sudo -u postgres psql -c "CREATE DATABASE einstein_db"
-      - sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE einstein_db TO einstein_user"
+      - sudo -i -u postgres psql -c "CREATE DATABASE einstein_db"
+      - sudo -i -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE einstein_db TO einstein_user"
       - cd {{.RESULTS}} && ./db_manage.py makemigrations db && ./db_manage.py migrate
 
   db-clean:
@@ -209,7 +209,7 @@ tasks:
       # Remove DB
       - cd {{.RESULTS}} && rm -rf db/migrations __pycache__ db/__pycache__ reports/reports.db
       - task db-revoke-connections
-      - sudo -u postgres psql -c "DROP DATABASE einstein_db"
+      - sudo -i -u postgres psql -c "DROP DATABASE einstein_db"
 
   ################################
   #### DB: Save/revert
@@ -218,13 +218,13 @@ tasks:
     desc: Renames DB from einstein_db to saved_einstein_db
     cmds:
       - task db-revoke-connections
-      - sudo -u postgres psql -c "ALTER DATABASE einstein_db RENAME TO saved_einstein_db;"
+      - sudo -i -u postgres psql -c "ALTER DATABASE einstein_db RENAME TO saved_einstein_db;"
 
   db-revert:
     desc: Renames DB from saved_einstein_db to einstein_db
     cmds:
       - task db-revoke-connections db-backup-revoke-connections
-      - sudo -u postgres psql -c "ALTER DATABASE saved_einstein_db RENAME TO einstein_db;"
+      - sudo -i -u postgres psql -c "ALTER DATABASE saved_einstein_db RENAME TO einstein_db;"
 
   ################################
   #### DB: Add reports
@@ -290,18 +290,18 @@ tasks:
   db-revoke-connections:
     cmds:
       # Revoke any connections to einstein_db
-      - sudo -u postgres psql -c "REVOKE CONNECT ON DATABASE einstein_db FROM public"
-      - sudo -u postgres psql -c "SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = 'einstein_db';"
+      - sudo -i -u postgres psql -c "REVOKE CONNECT ON DATABASE einstein_db FROM public"
+      - sudo -i -u postgres psql -c "SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = 'einstein_db';"
 
   db-backup-revoke-connections:
     cmds:
       # Revoke any connections to backup_einstein_db
-      - sudo -u postgres psql -c "REVOKE CONNECT ON DATABASE saved_einstein_db FROM public"
-      - sudo -u postgres psql -c "SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = 'saved_einstein_db';"
+      - sudo -i -u postgres psql -c "REVOKE CONNECT ON DATABASE saved_einstein_db FROM public"
+      - sudo -i -u postgres psql -c "SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = 'saved_einstein_db';"
 
   db-list:
     cmds:
-      - sudo -u postgres psql -c "\l"
+      - sudo -i -u postgres psql -c "\l"
 
   ##############################################################################
   ## App tasks #################################################################
