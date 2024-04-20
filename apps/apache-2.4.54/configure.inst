@@ -23,7 +23,7 @@ APACHE_OPTS+=" --with-mpm=worker"
 ./configure $APACHE_OPTS --prefix=$MYPWD/install \
    CC="$CC" \
    CXX="$CXX" \
-   CFLAGS="$CFLAGS -Og -g" \
+   CFLAGS="$CFLAGS -Og -g -mno-default" \
    LDFLAGS="$LLVM_LIBS $LDFLAGS" \
    RANLIB="$RANLIB" \
    AR_FLAGS="$AR_FLAGS"
