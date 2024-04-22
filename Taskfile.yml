@@ -23,10 +23,7 @@ env:
   ##################################
   # Misc vars
   DEFAULT_CORES: '{{.ROOT}}/results/misc/default-cores/'
-
-vars:
-  NPROC:
-    sh: nproc
+  NPROC: { sh: nproc }
 
 tasks:
 
@@ -42,7 +39,7 @@ tasks:
     cmds:
       - sudo apt-get update && sudo apt-get -y upgrade
       - sudo apt-get install -y cpanminus libpq-dev miller libldap2-dev libpam0g-dev libzstd-dev libbz2-dev libxxhash-dev libmaxminddb-dev liblua5.4-dev lldb gcovr smem gcc-9 g++-9 python3-pip postgresql prelink libpcre3-dev libxslt-dev libgeoip-dev libgd-dev libperl-dev libipc-run-perl bison flex libmemcached-tools libevent-dev gdb net-tools apache2-dev libcrypt-ssleay-perl
-      - pip install django tqdm pygdbmi psycopg2
+      - pip install django tqdm pygdbmi psycopg2 django-db-connection-pool[postgresql]
       - cpanm -S IPC::Run Time::Stopwatch Bundle::ApacheTest HTTP::DAV DateTime Time::HiRes Test::Harness Crypt::SSLeay Net::SSLeay IO::Socket::SSL IO::Socket::IP IO::Select LWP::Protocol::https AnyEvent AnyEvent::WebSocket::Client LWP::Protocol::AnyEvent::http FCGI
 
   init-submodule:
@@ -194,15 +191,26 @@ tasks:
       - task db-clean
       - sudo -i -u postgres psql -c "DROP USER einstein_user"
 
+  _db-change-defaults:
+    cmds:
+      # Change default DB variables to support more connections
+      - sudo -i -u postgres psql -c "ALTER SYSTEM SET max_connections TO 2000;"
+      - sudo -i -u postgres psql -c "ALTER SYSTEM SET shared_buffers TO '2800MB';"
+      - sudo service postgresql restart
+
   ################################
   #### DB: Create/clean
+
+  _db-migrate:
+    cmds:
+      - cd {{.RESULTS}} && ./db_manage.py makemigrations db && ./db_manage.py migrate
 
   db-create:
     cmds:
       # Create DB
       - sudo -i -u postgres psql -c "CREATE DATABASE einstein_db"
       - sudo -i -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE einstein_db TO einstein_user"
-      - cd {{.RESULTS}} && ./db_manage.py makemigrations db && ./db_manage.py migrate
+      - task _db-migrate
 
   db-clean:
     cmds:
@@ -252,7 +260,7 @@ tasks:
       - cd apps && ./parse-rop-reports.sh ALL > {{.RESULTS}}/reports/{{.TIME}}_ROP_all.json
       - cd {{.RESULTS}}/reports/ && rm -f dcurrent_ROP.json && ln -s {{.TIME}}_ROP_all.json dcurrent_ROP.json
       - task db-clean db-create
-      - cd {{.RESULTS}} && ./db_main.py add_rop_reports --json_path=reports/dcurrent_ROP.json && ./db_main.py analyze_rop_reports --nproc {{.NPROC}} && ./db_main.py print_rop_candidates
+      - cd {{.RESULTS}} && ./db_main.py add_rop_reports --json_path=reports/dcurrent_ROP.json && ./db_main.py analyze_rop_reports && ./db_main.py print_rop_candidates
 
   ################################
   #### DB: Analysis, printing
@@ -260,11 +268,11 @@ tasks:
   db-analyze-reports:
     desc: Analyze reports find candidate exploits
     cmds:
-      - cd {{.RESULTS}} && ./db_main.py analyze_reports --nproc {{.NPROC}}
+      - cd {{.RESULTS}} && ./db_main.py analyze_reports
 
   db-analyze-reports-singleproc:
     cmds:
-      - cd {{.RESULTS}} && ./db_main.py analyze_reports --nproc 1
+      - cd {{.RESULTS}} && NPROC=1 ./db_main.py analyze_reports
 
   db-analyze-candidates:
     desc: Analyze candidate exploits to determine which are confirmed exploits

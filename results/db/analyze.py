@@ -1,3 +1,4 @@
+from db_manage import NPROC, NUM_THREADS_PER_PROC
 from db.models import Report, RopReport, Limits
 from db.output import SYSCALLS_SECSENS, SYSCALLS_FDCONF
 from django.db.models import Count
@@ -13,7 +14,6 @@ import atexit
 DISABLE_PROGRESS_BAR_FOR_ANALYSIS = False
 DISABLE_PROGRESS_BAR_PER_CORE = True
 
-NUM_THREADS_PER_PROC = 16
 GDB_MAX_QUERY_FAILURES = 10
 GDB_MAX_TIMEOUTS = 50
 GDB_TIMEOUT_SECS = 2
@@ -560,7 +560,7 @@ def print_cores_counts_exit(cores_counts):
     for cc in cores_counts: print(str(cc))
     EXIT_ERR("Done")
 
-def analyze_reports(nproc):
+def analyze_reports():
     atexit.register(close_all_gdbinsts)
     atexit.register(terminate_all_processes)
 
@@ -582,7 +582,7 @@ def analyze_reports(nproc):
 
     db.connections.close_all() # Not sure if this is necessary. Just trying to avoid hitting max_connections...
     global ppool
-    ppool = mpool.Pool(nproc)
+    ppool = mpool.Pool(NPROC)
 
     NUM_REPORTS = Report.objects.filter(tainted=True).count()
     for _ in tqdm(ppool.imap_unordered(analyze_reports_from_core, cores), total=NUM_CORES, desc="Analyzing " + str(NUM_REPORTS) + " reports from " + str(NUM_CORES) +" snapshots", disable=DISABLE_PROGRESS_BAR_FOR_ANALYSIS): pass
@@ -623,7 +623,7 @@ def analyze_rop_reports_from_core(core):
     RopReport.objects.bulk_update(rs, ['has_taint', 'has_iflow', 'done_analyzing'], batch_size=10000) # We can use bulk_update for ROP reports because they do not use chaining, and hence we do not need to lookup previous reports
     db.connections.close_all() # Not sure if this is necessary. Just trying to avoid hitting max_connections...
 
-def analyze_rop_reports(nproc):
+def analyze_rop_reports():
     atexit.register(close_all_gdbinsts)
     atexit.register(terminate_all_processes)
 
@@ -640,7 +640,7 @@ def analyze_rop_reports(nproc):
 
     db.connections.close_all() # Not sure if this is necessary. Just trying to avoid hitting max_connections...
     global ppool
-    ppool = mpool.Pool(nproc)
+    ppool = mpool.Pool(NPROC)
     for _ in tqdm(ppool.imap_unordered(analyze_rop_reports_from_core, cores), total=NUM_CORES, desc="Analyzing " + str(NUM_REPORTS) + " total ROP reports from " + str(NUM_CORES) +" snapshots", disable=DISABLE_PROGRESS_BAR_FOR_ANALYSIS): pass
     atexit.unregister(terminate_all_processes)
     atexit.unregister(close_all_gdbinsts)

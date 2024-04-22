@@ -17,21 +17,18 @@ if __name__ == "__main__":
                         help='action to perform')
     parser.add_argument('--json_path', metavar='jpath', help="the path to the JSON file")
     parser.add_argument('--root_path', metavar='rpath', help="the path to repository's root directory")
-    parser.add_argument('--nproc', metavar='nproc', type=int, help="the number of processes to spawn")
     args = parser.parse_args()
     if (args.action == 'add_reports' or args.action == 'add_rop_reports') and args.json_path is None:
         parser.error("Argument --json_path is required.")
     if args.action == 'analyze_candidates' and args.root_path is None:
         parser.error("Argument --root_path is required.")
-    if args.action == 'analyze_reports' and args.nproc is None or args.action == 'analyze_rop_reports' and args.nproc is None:
-        parser.error("Argument --nproc is required.")
 
     match args.action:
         case 'add_reports': add_reports(args.json_path)
         case 'add_rop_reports': add_rop_reports(args.json_path)
         case 'analysis_reset': analysis_reset()
-        case 'analyze_reports': analyze_reports(args.nproc)
-        case 'analyze_rop_reports': analyze_rop_reports(args.nproc)
+        case 'analyze_reports': analyze_reports()
+        case 'analyze_rop_reports': analyze_rop_reports()
         case 'analyze_candidates': rewrite_eval(args.root_path)
         case 'print_candidates': print_candidates()
         case 'print_rop_candidates': print_rop_candidates()
