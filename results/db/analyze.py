@@ -16,7 +16,7 @@ DISABLE_PROGRESS_BAR_PER_CORE = True
 
 GDB_MAX_QUERY_FAILURES = 10
 GDB_MAX_TIMEOUTS = 50
-GDB_TIMEOUT_SECS = 2
+GDB_TIMEOUT_SECS = 5
 
 def EXIT_ERR(msg=""):
     if msg: print(msg)
@@ -62,7 +62,13 @@ def core_analysis_init(core):
     for i in range(NUM_THREADS_PER_PROC):
         # Create NUM_THREADS_PER_PROC gdb instances
         gdbinsts[core].append(GdbController())
-        gdbinsts[core][i].write("core-file " + core, timeout_sec=5)
+        for _ in range(GDB_MAX_TIMEOUTS):
+            try:
+                gdbinsts[core][i].write("core-file " + core, timeout_sec=60)
+                success = True
+                break
+            except GdbTimeoutError: pass
+        if not success: EXIT_ERR("Could not load core file into gdb: " + core)
 
 def core_analysis_done(core):
     if core == "": return

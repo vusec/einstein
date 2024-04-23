@@ -17,9 +17,13 @@ def get_postgresql_max_connections():
         print("Error:", e)
         return 1
 
+# Adjust these if everything is stable and you want better performance
+MAX_NPROC = 8
+MAX_NTHREAD = 8
+
 PG_MAX_CONNECTIONS = get_postgresql_max_connections()
-NPROC = min(int(os.environ['NPROC']),PG_MAX_CONNECTIONS) if 'NPROC' in os.environ else 1
-NUM_THREADS_PER_PROC = min(int(PG_MAX_CONNECTIONS/NPROC),16)
+NPROC = min(int(os.environ['NPROC']),PG_MAX_CONNECTIONS,MAX_NPROC) if 'NPROC' in os.environ else 1
+NUM_THREADS_PER_PROC = min(int(PG_MAX_CONNECTIONS/NPROC),MAX_NTHREAD)
 
 def init_django():
     if settings.configured:
@@ -39,6 +43,8 @@ def init_django():
                 'PORT': '5432',
                 'POOL_OPTIONS': {
                     'POOL_SIZE': NUM_THREADS_PER_PROC,
+                    'MAX_OVERFLOW': -1,
+                    'RECYCLE': -1
                 }
             }
         },
