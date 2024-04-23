@@ -56,7 +56,8 @@ tasks:
       - sudo update-alternatives --remove-all gcc || true
       - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 110 --slave /usr/bin/g++ g++ /usr/bin/g++-9 --slave /usr/bin/gcov gcov /usr/bin/gcov-9
       # Enable userfaultfd (for libdft) and disable ptrace_scope (as advised by Pin's documentation)
-      - sudo sysctl -w vm.unprivileged_userfaultfd=1 kernel.yama.ptrace_scope=0
+      - printf "vm.unprivileged_userfaultfd=1\nkernel.yama.ptrace_scope=0\n" | sudo tee /etc/sysctl.d/99-einstein.conf
+      - sudo sysctl -p /etc/sysctl.d/99-einstein.conf
 
   ##############################################################################
   ## cmdsvr tasks ##############################################################
