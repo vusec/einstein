@@ -567,7 +567,6 @@ def appname_to_dbname(app):
     return app
 
 def rs_in_app(rs, app):
-    print("rs_in_app...")
     if app is None: return rs
     return rs.filter(application=app)
 
