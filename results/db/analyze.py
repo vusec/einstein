@@ -560,22 +560,34 @@ def print_cores_counts_exit(cores_counts):
     for cc in cores_counts: print(str(cc))
     EXIT_ERR("Done")
 
-def analyze_reports():
+def appname_to_dbname(app):
+    if (app == "memcached"): return "memcached-debug"
+    if (app == "redis"): return "redis-server"
+    if (app == "apache"): return "httpd"
+    return app
+
+def rs_in_app(rs, app):
+    print("rs_in_app...")
+    if app is None: return rs
+    return rs.filter(application=app)
+
+def analyze_reports(app):
     atexit.register(close_all_gdbinsts)
     atexit.register(terminate_all_processes)
+    app = appname_to_dbname(app)
 
     # Print status
-    NUM_REPORTS = Report.objects.count()
-    num_analyzed = Report.objects.filter(done_analyzing=True).count()
+    NUM_REPORTS = rs_in_app(Report.objects,app).count()
+    num_analyzed = rs_in_app(Report.objects.filter(done_analyzing=True),app).count()
     print("Already analyzed " + str(num_analyzed) + " / " + str(NUM_REPORTS) + " reports")
 
     # First, update the untainted reports (requires no actual analysis)
     analyze_untainted_reports()
-    num_analyzed = Report.objects.filter(done_analyzing=True).count()
+    num_analyzed = rs_in_app(Report.objects.filter(done_analyzing=True),app).count()
     print("Now already analyzed " + str(num_analyzed) + " / " + str(NUM_REPORTS) + " reports")
 
     # Start with the cores that have the most reports first
-    cores_counts = list(Report.objects.values('application_corepath').annotate(core_count=Count('application_corepath')).order_by('-core_count'))
+    cores_counts = list(rs_in_app(Report.objects,app).values('application_corepath').annotate(core_count=Count('application_corepath')).order_by('-core_count'))
     #print_cores_counts_exit(cores_counts)
     cores = [core_count['application_corepath'] for core_count in cores_counts]
     NUM_CORES = len(cores)
@@ -584,7 +596,7 @@ def analyze_reports():
     global ppool
     ppool = mpool.Pool(NPROC)
 
-    NUM_REPORTS = Report.objects.filter(tainted=True).count()
+    NUM_REPORTS = rs_in_app(Report.objects.filter(tainted=True),app).count()
     for _ in tqdm(ppool.imap_unordered(analyze_reports_from_core, cores), total=NUM_CORES, desc="Analyzing " + str(NUM_REPORTS) + " reports from " + str(NUM_CORES) +" snapshots", disable=DISABLE_PROGRESS_BAR_FOR_ANALYSIS): pass
 
     atexit.unregister(terminate_all_processes)

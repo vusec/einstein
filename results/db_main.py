@@ -17,6 +17,7 @@ if __name__ == "__main__":
                         help='action to perform')
     parser.add_argument('--json_path', metavar='jpath', help="the path to the JSON file")
     parser.add_argument('--root_path', metavar='rpath', help="the path to repository's root directory")
+    parser.add_argument('--app', metavar='app', help="the application name to target (e.g., nginx)")
     args = parser.parse_args()
     if (args.action == 'add_reports' or args.action == 'add_rop_reports') and args.json_path is None:
         parser.error("Argument --json_path is required.")
@@ -27,7 +28,7 @@ if __name__ == "__main__":
         case 'add_reports': add_reports(args.json_path)
         case 'add_rop_reports': add_rop_reports(args.json_path)
         case 'analysis_reset': analysis_reset()
-        case 'analyze_reports': analyze_reports()
+        case 'analyze_reports': analyze_reports(args.app)
         case 'analyze_rop_reports': analyze_rop_reports()
         case 'analyze_candidates': rewrite_eval(args.root_path)
         case 'print_candidates': print_candidates()

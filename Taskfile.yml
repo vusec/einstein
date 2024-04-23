@@ -271,9 +271,17 @@ tasks:
     cmds:
       - cd {{.RESULTS}} && ./db_main.py analyze_reports
 
+  db-analyze-reports-app:
+    cmds:
+      - cd {{.RESULTS}} && ./db_main.py analyze_reports --app={{.CLI_ARGS}}
+
   db-analyze-reports-singleproc:
     cmds:
       - cd {{.RESULTS}} && NPROC=1 ./db_main.py analyze_reports
+
+  db-analyze-reports-app-singleproc:
+    cmds:
+      - cd {{.RESULTS}} && NPROC=1 ./db_main.py analyze_reports --app={{.CLI_ARGS}}
 
   db-analyze-candidates:
     desc: Analyze candidate exploits to determine which are confirmed exploits
