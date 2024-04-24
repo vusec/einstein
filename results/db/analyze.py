@@ -576,20 +576,24 @@ def rs_in_app(rs, app):
     if app is None: return rs
     return rs.filter(application=app)
 
+def print_update(app, NUM_REPORTS):
+    num_analyzed = rs_in_app(Report.objects.filter(done_analyzing=True),app).count()
+    print("Analyzed " + str(num_analyzed) + " / " + str(NUM_REPORTS) + " reports", flush=True)
+
 def analyze_reports(app):
     atexit.register(close_all_gdbinsts)
     atexit.register(terminate_all_processes)
+
+    print("Beginning reports analysis...", flush=True)
     app = appname_to_dbname(app)
-
-    # Print status
     NUM_REPORTS = rs_in_app(Report.objects,app).count()
-    num_analyzed = rs_in_app(Report.objects.filter(done_analyzing=True),app).count()
-    print("Already analyzed " + str(num_analyzed) + " / " + str(NUM_REPORTS) + " reports")
 
-    # First, update the untainted reports (requires no actual analysis)
+    # 0. Check how many reports have already been analyzed
+    print_update(app, NUM_REPORTS)
+
+    # 1: Update the untainted reports (requires no actual analysis)
     analyze_untainted_reports()
-    num_analyzed = rs_in_app(Report.objects.filter(done_analyzing=True),app).count()
-    print("Now already analyzed " + str(num_analyzed) + " / " + str(NUM_REPORTS) + " reports")
+    print_update(app, NUM_REPORTS)
 
     # Start with the cores that have the most reports first
     cores_counts = list(rs_in_app(Report.objects,app).values('application_corepath').annotate(core_count=Count('application_corepath')).order_by('-core_count'))
@@ -603,6 +607,7 @@ def analyze_reports(app):
 
     NUM_REPORTS = rs_in_app(Report.objects.filter(tainted=True),app).count()
     for _ in tqdm(ppool.imap_unordered(analyze_reports_from_core, cores), total=NUM_CORES, desc="Analyzing " + str(NUM_REPORTS) + " reports from " + str(NUM_CORES) +" snapshots", disable=DISABLE_PROGRESS_BAR_FOR_ANALYSIS): pass
+    print_update(app, NUM_REPORTS)
 
     atexit.unregister(terminate_all_processes)
     atexit.unregister(close_all_gdbinsts)
