@@ -545,8 +545,8 @@ def analyze_sec_reports_from_core(core): analyze_reports_from_core(core, False)
 
 ################################################################
 
-def analyze_untainted_reports():
-    rs = Report.objects.filter(tainted=False,done_analyzing=False)
+def analyze_untainted_reports(rs):
+    rs = rs.filter(tainted=False,done_analyzing=False)
     print("Updating " + str(rs.count()) + " untainted reports...")
     limits_tbl = {'match_len': [False for i in range(Limits.MATCH_LEN_MAX+1)],
                   'ptr_depth_limit': [False for i in range(Limits.PTR_DEPTH_LIMIT_MAX+1)],
@@ -590,7 +590,7 @@ def analyze_reports(app):
     print_update(app, NUM_REPORTS)
 
     # 1: Update the untainted reports (requires no actual analysis)
-    analyze_untainted_reports()
+    analyze_untainted_reports(rs_in_app(Report.objects,app))
     print_update(app, NUM_REPORTS)
 
     # Uncomment to see the report count for each core
