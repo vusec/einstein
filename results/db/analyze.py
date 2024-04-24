@@ -460,21 +460,13 @@ def analyze_syscall(r):
 
 ################################################################
 
-def analyze_fd_reports_from_core(core):
+def analyze_fd_reports_from_core_internal(core, rs, COUNT):
     # Analyze "fd creating" syscalls sequentially
-    rs = Report.objects.filter(done_analyzing=False,tainted=True,application_corepath=core,syscall__in=SYSCALLS_FDCONF).order_by('application_corepath', 'ppid', 'pid', 'report_num')
-    COUNT = rs.count()
-    if COUNT == 0: return
-
     for r in tqdm(rs, desc="fd-creating:"+core, total=COUNT, disable=DISABLE_PROGRESS_BAR_PER_CORE):
         analyze_syscall(r)
         r.save()
 
-def analyze_sec_reports_from_core(core):
-    rs = Report.objects.filter(done_analyzing=False,tainted=True,application_corepath=core,syscall__in=SYSCALLS_SECSENS).order_by('application_corepath', 'ppid', 'pid', 'report_num')
-    COUNT = rs.count()
-    if COUNT == 0: return
-
+def analyze_sec_reports_from_core_internal(core, rs, COUNT):
     # Analyze "sec sensitive" syscalls in parallel
     systpool = mpool.ThreadPool(NUM_THREADS_PER_PROC)
     for _ in tqdm(systpool.imap_unordered(analyze_syscall, rs), desc="sec-sensitive:"+core, total=COUNT, disable=DISABLE_PROGRESS_BAR_PER_CORE): pass
@@ -525,8 +517,7 @@ def get_core_pages(core_addrs):
     for addr in core_addrs: core_pages.add(addr - addr%PAGE_SIZE)
     return core_pages
 
-def prep_corevals(core):
-    rs = Report.objects.filter(done_analyzing=False,tainted=True,application_corepath=core)
+def prep_corevals(core, rs):
     core_addrs = get_core_addrs(rs)
     core_pages = get_core_pages(core_addrs)
     core_pages_tups = [{'start': core_page, 'size': PAGE_SIZE, 'core': core} for core_page in core_pages]
@@ -536,14 +527,21 @@ def prep_corevals(core):
 
 ################################################################
 
-def analyze_reports_from_core(core):
-    db.connections.close_all() # Not sure if this is necessary. Just trying to avoid hitting max_connections...
+def analyze_reports_from_core(core, is_fd_conf):
+    if is_fd_conf: rs = Report.objects.filter(done_analyzing=False,tainted=True,application_corepath=core,syscall__in=SYSCALLS_FDCONF).order_by('ppid', 'pid', 'report_num')
+    else:          rs = Report.objects.filter(done_analyzing=False,tainted=True,application_corepath=core,syscall__in=SYSCALLS_SECSENS).order_by('ppid', 'pid', 'report_num')
+
+    COUNT = rs.count()
+    if COUNT == 0: return
+
     core_analysis_init(core)
-    prep_corevals(core)
-    analyze_fd_reports_from_core(core)
-    analyze_sec_reports_from_core(core)
+    prep_corevals(core, rs)
+    if is_fd_conf: analyze_fd_reports_from_core_internal(core, rs, COUNT)
+    else:          analyze_sec_reports_from_core_internal(core, rs, COUNT)
     core_analysis_done(core)
-    db.connections.close_all() # Not sure if this is necessary. Just trying to avoid hitting max_connections...
+
+def analyze_fd_reports_from_core(core):  analyze_reports_from_core(core, True)
+def analyze_sec_reports_from_core(core): analyze_reports_from_core(core, False)
 
 ################################################################
 
@@ -595,18 +593,24 @@ def analyze_reports(app):
     analyze_untainted_reports()
     print_update(app, NUM_REPORTS)
 
-    # Start with the cores that have the most reports first
-    cores_counts = list(rs_in_app(Report.objects,app).values('application_corepath').annotate(core_count=Count('application_corepath')).order_by('-core_count'))
-    #print_cores_counts_exit(cores_counts)
-    cores = [core_count['application_corepath'] for core_count in cores_counts]
-    NUM_CORES = len(cores)
+    # Uncomment to see the report count for each core
+    #print_cores_counts_exit(rs_in_app(Report.objects,app).values('application_corepath').annotate(core_count=Count('application_corepath')).order_by('-core_count')))
 
-    db.connections.close_all() # Not sure if this is necessary. Just trying to avoid hitting max_connections...
+    # Prep: Order cores by their PIDs, so we can be sure to finish evaluating any FD-configuring syscalls in a parent process before evaluating the child process (because parent_pid < child_pid)
+    cores = list(dict.fromkeys(rs_in_app(Report.objects,app).values('application_corepath', 'pid').distinct().order_by('pid').values_list('application_corepath', flat=True)))
+    NUM_CORES = len(cores)
+    NUM_FD_REPORTS = rs_in_app(Report.objects.filter(done_analyzing=False,tainted=True,syscall__in=SYSCALLS_FDCONF),app).count()
+    NUM_SEC_REPORTS = rs_in_app(Report.objects.filter(done_analyzing=False,tainted=True,syscall__in=SYSCALLS_SECSENS),app).count()
+
+    # 2: Analyze FD-configuring syscalls sequentially
+    for core in tqdm(cores, desc="Analyzing (sequentially) " + str(NUM_FD_REPORTS) + " FD-configuring syscalls from " + str(NUM_CORES) + " snapshot", total=NUM_CORES, disable=DISABLE_PROGRESS_BAR_FOR_ANALYSIS): analyze_fd_reports_from_core(core)
+    print_update(app, NUM_REPORTS)
+
+    # 3: Analyze sec-sensitive syscalls in parallel
+    db.connections.close_all()
     global ppool
     ppool = mpool.Pool(NPROC)
-
-    NUM_REPORTS = rs_in_app(Report.objects.filter(tainted=True),app).count()
-    for _ in tqdm(ppool.imap_unordered(analyze_reports_from_core, cores), total=NUM_CORES, desc="Analyzing " + str(NUM_REPORTS) + " reports from " + str(NUM_CORES) +" snapshots", disable=DISABLE_PROGRESS_BAR_FOR_ANALYSIS): pass
+    for _ in tqdm(ppool.imap_unordered(analyze_sec_reports_from_core, cores), desc="Analyzing (in parallel) " + str(NUM_SEC_REPORTS) + " sec-sensitive syscalls from " + str(NUM_CORES) +" snapshots", total=NUM_CORES, disable=DISABLE_PROGRESS_BAR_FOR_ANALYSIS): pass
     print_update(app, NUM_REPORTS)
 
     atexit.unregister(terminate_all_processes)
