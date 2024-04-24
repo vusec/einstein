@@ -10,6 +10,7 @@ from pygdbmi.gdbcontroller import GdbController
 from pygdbmi.constants import GdbTimeoutError
 import multiprocessing.pool as mpool
 import atexit
+from functools import cache
 
 DISABLE_PROGRESS_BAR_FOR_ANALYSIS = False
 DISABLE_PROGRESS_BAR_PER_CORE = True
@@ -237,6 +238,8 @@ def get_iflows(arg, core, limits):
 ############################
 #### Report chaining lookup
 
+# NOTE: Cache should be invalidated when DB connection is closed (e.g., when forking)
+@cache
 def get_report(report_num, core, ids):
     pid, ppid, tid, ptid = ids
 
@@ -607,7 +610,8 @@ def analyze_reports(app):
     print_update(app, NUM_REPORTS)
 
     # 3: Analyze sec-sensitive syscalls in parallel
-    db.connections.close_all()
+    db.connections.close_all() # setup: close DB connection
+    get_report.cache_clear()   # setup: clear cache, which has QuerySets that are now invalid
     global ppool
     ppool = mpool.Pool(NPROC)
     for _ in tqdm(ppool.imap_unordered(analyze_sec_reports_from_core, cores), desc="Analyzing (in parallel) " + str(NUM_SEC_REPORTS) + " sec-sensitive syscalls from " + str(NUM_CORES) +" snapshots", total=NUM_CORES, disable=DISABLE_PROGRESS_BAR_FOR_ANALYSIS): pass
