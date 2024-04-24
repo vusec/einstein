@@ -224,7 +224,7 @@ def get_iflows_handler(arg, core, limits):
         case "VPTR": return get_iflows_vptr(arg, core, limits, '')
         case "QWORD": return get_iflows_qword(arg, core, limits, '')
         case "DWORD": return get_iflows_dword(arg, core, limits) # NOTE: We get chained iflows in rewrite eval
-    print("Error: Unhandled type " + t)
+    print("Error: Unhandled type " + t, flush=True)
     return set()
 
 def get_iflows(arg, core, limits):
@@ -358,7 +358,7 @@ def has_iflow(arg, core, limits, ids):
         case "VPTR": return has_iflow_vptr(arg, core, limits)
         case "QWORD": return has_iflow_qword(arg, core, limits)
         case "DWORD": return has_iflow_dword(arg, core, limits, ids)
-    print("Error: Unhandled type " + t)
+    print("Error: Unhandled type " + t, flush=True)
     return False
 
 ################################################################
@@ -412,7 +412,7 @@ def has_taint(arg):
         case "QWORD": return has_taint_qword(arg)
         case "DWORD": return has_taint_dword(arg)
         case "none": return False
-    print("Error: Unhandled type " + t)
+    print("Error: Unhandled type " + t, flush=True)
     return False
 
 ################################################################
@@ -433,7 +433,7 @@ def analyze_syscall_arg(r, argnum):
         return
 
     if not os.path.isfile(r.application_corepath):
-        print("Error: Cannot analyze iflow for report because because its core dump does not exist at: " + r.application_corepath)
+        print("Error: Cannot analyze iflow for report because because its core dump does not exist at: " + r.application_corepath, flush=True)
         return
 
     # First, let's simply check whether there is an iflow for different limits
