@@ -2,28 +2,29 @@
 Candidate exploit tables:
 
 Vulnerable gadgets found per syscall and argument type:
-Syscalls | Total covered |Total found where this arg has a dataflow from attacker data (% that are identity dataflows, if any)
-execve   |      11       |    7 (86%)    |    7 (86%)    |    7 (86%)    |               |               |              
-mmap     |     787       |    55 (5%)    |   441 (8%)    |      55       |   16 (100%)   |      17       |      73      
-mprotect |     144       |   97 (68%)    |   98 (27%)    |       1       |               |               |              
-mremap   |      11       |      11       |       7       |      11       |       -       |       -       |              
-pwrite64 |     1270      |   1217 (3%)   |   741 (47%)   |   399 (19%)   |   506 (36%)   |               |              
-pwritev  |      10       |   10 (100%)   |   10 (10%)    |       -       |   10 (20%)    |               |              
+[4mSyscalls | Total covered |Total found where this arg has a dataflow from attacker data (% that are identity dataflows, if any)[0m
+execve   |      12       |    7 (86%)    |    8 (88%)    |    8 (75%)    |               |               |              
+mmap     |     1907      |   24 (25%)    |   1243 (7%)   |      23       |   53 (100%)   |   17 (94%)    |      47      
+mprotect |     119       |   39 (72%)    |   40 (48%)    |       1       |               |               |              
+mremap   |      11       |    6 (17%)    |   1 (100%)    |    6 (33%)    |       -       |       -       |              
+pwrite64 |     1286      |   1099 (3%)   |   676 (42%)   |   367 (4%)    |   473 (43%)   |               |              
+pwritev  |      12       |   11 (91%)    |    11 (9%)    |       -       |   10 (20%)    |               |              
 sendfile |      1        |       -       |       -       |       1       |       1       |               |              
-sendmmsg |      2        |       2       |       2       |       -       |       -       |               |              
-sendmsg  |      12       |   5 (100%)    |   3 (100%)    |       -       |               |               |              
-sendto   |     431       |   389 (7%)    |   410 (38%)   |   408 (6%)    |       -       |       -       |       -      
-write    |     3083      |   768 (74%)   |  2877 (91%)   |  1265 (10%)   |               |               |              
-writev   |     754       |   244 (18%)   |   742 (76%)   |       -       |               |               |              
+sendmmsg |      1        |       1       |       1       |       -       |       -       |               |              
+sendmsg  |      13       |   5 (100%)    |    4 (75%)    |       -       |               |               |              
+sendto   |     434       |   310 (7%)    |   330 (64%)   |   328 (8%)    |       -       |       -       |       -      
+write    |     3772      |   857 (79%)   |  3519 (85%)   |   1273 (9%)   |               |               |              
+writev   |     778       |   226 (17%)   |   766 (65%)   |       -       |               |               |              
 * Syscalls not covered: execveat pwritev2 remap_file_pages 
 
 Vulnerable gadgets found per target application:
-- apache: 1834 gadgets (97% with an iflow)
-- lighttpd: 92 gadgets (98% with an iflow)
-- nginx: 1623 gadgets (82% with an iflow)
-- postgres: 2105 gadgets (27% with an iflow)
-- redis: 218 gadgets (84% with an iflow)
-* TOTAL: 5872 gadgets (67% with an iflow)
+- apache: 3390 gadgets (69% with an iflow)
+- lighttpd: 93 gadgets (97% with an iflow)
+- memcached: 16 gadgets (81% with an iflow)
+- nginx: 1605 gadgets (69% with an iflow)
+- postgres: 2134 gadgets (29% with an iflow)
+- redis: 274 gadgets (83% with an iflow)
+* TOTAL: 7512 gadgets (58% with an iflow)
 
 =======================================================================
 
