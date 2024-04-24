@@ -35,17 +35,12 @@ def init_django():
         ],
         DATABASES={
             'default': {
-                'ENGINE': 'dj_db_conn_pool.backends.postgresql',
+                'ENGINE': 'django.db.backends.postgresql',
                 'NAME': 'einstein_db',
                 'USER': 'einstein_user',
                 'PASSWORD': 'einstein_password',
                 'HOST': '127.0.0.1',
-                'PORT': '5432',
-                'POOL_OPTIONS': {
-                    'POOL_SIZE': NUM_THREADS_PER_PROC,
-                    'MAX_OVERFLOW': -1,
-                    'RECYCLE': -1
-                }
+                'PORT': '5432'
             }
         },
         DEFAULT_AUTO_FIELD='django.db.models.AutoField'

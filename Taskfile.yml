@@ -39,7 +39,7 @@ tasks:
     cmds:
       - sudo apt-get update && sudo apt-get -y upgrade
       - sudo apt-get install -y cpanminus libpq-dev miller libldap2-dev libpam0g-dev libzstd-dev libbz2-dev libxxhash-dev libmaxminddb-dev liblua5.4-dev lldb gcovr smem gcc-9 g++-9 python3-pip postgresql prelink libpcre3-dev libxslt-dev libgeoip-dev libgd-dev libperl-dev libipc-run-perl bison flex libmemcached-tools libevent-dev gdb net-tools apache2-dev libcrypt-ssleay-perl
-      - pip install django tqdm pygdbmi psycopg2 django-db-connection-pool[postgresql]
+      - pip install django tqdm pygdbmi psycopg2
       - cpanm -S IPC::Run Time::Stopwatch Bundle::ApacheTest HTTP::DAV DateTime Time::HiRes Test::Harness Crypt::SSLeay Net::SSLeay IO::Socket::SSL IO::Socket::IP IO::Select LWP::Protocol::https AnyEvent AnyEvent::WebSocket::Client LWP::Protocol::AnyEvent::http FCGI
 
   init-submodule:
