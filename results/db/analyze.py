@@ -1,6 +1,5 @@
 from db_manage import NPROC, NUM_THREADS_PER_PROC
 from db.models import Report, RopReport, Limits
-from db.output import SYSCALLS_SECSENS, SYSCALLS_FDCONF
 from django.db.models import Count
 from django import db
 import struct
@@ -31,6 +30,20 @@ def terminate_all_processes():
     if ppool:
         print("Terminating all processes...")
         ppool.terminate()
+
+################################################################
+
+SYSARGCOUNTS_SECSENS = dict(sorted({'execve':3, 'execveat':5, 'mmap':6, 'mprotect':3, 'mremap':5,
+                                    'remap_file_pages':5, 'sendmmsg':4, 'sendmsg':3, 'sendto':6,
+                                    'write':3, 'pwrite64':4, 'pwritev':4, 'pwritev2':5,
+                                    'sendfile':4, 'writev':3}.items()))
+# NOTE: Update SYSARGCOUNTS_FDCONF whenever another arg is added to *_get_details in einstein_syscalls.cpp
+SYSARGCOUNTS_FDCONF = dict(sorted({'creat':2, 'open':3, 'openat':4, 'openat2':4, 'dup':1, 'dup2':2,
+                                   'dup3':3, 'bind':3, 'connect':3, 'setsockopt':5, 'socket':3,
+                                   'socketpair':4}.items()))
+
+SYSCALLS_SECSENS=list(SYSARGCOUNTS_SECSENS.keys()) # I.e., ['execve', 'execveat', 'mmap', ...]
+SYSCALLS_FDCONF=list(SYSARGCOUNTS_FDCONF.keys()) # I.e., ['creat', 'open', 'openat', ...]
 
 ################################################################
 ############################
