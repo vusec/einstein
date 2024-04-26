@@ -20,8 +20,13 @@ BASE_CONF = {"hook_writes": True, "do_rewrites": True}
 TIMEOUT_TEST = 120
 REPORTS_LIMIT = 10
 
+def print_flush(*args, **kwargs):
+    kwargs.setdefault('flush', True) # Set flush=True by default
+    print(*args, **kwargs) # Call the original print function with the modified arguments
+
+
 def EXIT_ERR(msg=""):
-    if msg: print(msg)
+    if msg: print_flush(msg)
     os._exit(1)
 
 ################################################################
@@ -36,17 +41,17 @@ def parse_testcase(testcase, application):
         # "./request.t:1304:LightyTest::handle_http" --> "request"
         return re.split(r'\.t|\.\/', testcase)[1]
     else:
-        print("WARNING: Application '" + application + "' not handled by parse_testcase()")
+        print_flush("WARNING: Application '" + application + "' not handled by parse_testcase()")
         return testcase
 
 def write_config(config):
     rewrites_no_bt = {'rewrites': [{i:tmpr[i] for i in tmpr if i!='backtrace'} for tmpr in config['rewrites']]}
-    print("Setting config to have rewrites (excluding backtrace): " + json.dumps(rewrites_no_bt))
+    print_flush("Setting config to have rewrites (excluding backtrace): " + json.dumps(rewrites_no_bt))
     with open(ROOT + PATH_CONFIG, "w") as f:
         f.write(json.dumps(config))
 
 def write_testcase(application, testcase):
-    print("Setting testcase: " + testcase)
+    print_flush("Setting testcase: " + testcase)
     with open(ROOT + PATHS[application] + "/runbench.tests.tmp", "w") as f:
         f.write(testcase + "\n")
 
@@ -54,7 +59,7 @@ def write_testcase(application, testcase):
 #### Running the test
 
 def run_test_killall(application, p):
-    print("Killing " + application + " tests and server...")
+    print_flush("Killing " + application + " tests and server...")
     try:
         os.killpg(os.getpgid(p.pid), signal.SIGTERM) # Kill the test suite
     except ProcessLookupError:
@@ -71,18 +76,18 @@ def run_test_check_grep(application, s):
 def run_test_check_success(application):
     rc,outp = run_test_check_grep(application, "REWRITE_EVAL_FINISHED:SUCCESS")
     if rc == 0:
-        print("Rewrite successful! Found: '" + outp + "'")
+        print_flush("Rewrite successful! Found: '" + outp + "'")
         return True
     return False
 
 def run_test_check_failure(application):
     rc,outp = run_test_check_grep(application, "REWRITE_EVAL_FINISHED:FAIL")
     if rc == 0:
-        print("Rewrite unsuccessful: failed to perform any rewrites. Found: '" + outp + "'")
+        print_flush("Rewrite unsuccessful: failed to perform any rewrites. Found: '" + outp + "'")
         outp2 = subprocess.run('grep -nrIv "Found syscall\|thread finished\|thread started\|process started\|process finished" ' + ROOT + PATHS[application] + '/.tmp/ | sort', shell=True, capture_output=True).stdout.decode()
-        print("***********")
-        print("Full output: " + outp2)
-        print("***********")
+        print_flush("***********")
+        print_flush("Full output: " + outp2)
+        print_flush("***********")
         return True
     return False
 
@@ -92,10 +97,10 @@ def run_test_finish(application, p):
         if run_test_check_success(application): return True
         if run_test_check_failure(application): return False
         if p.poll() is not None:
-            print("Rewrite unsuccessful: test finished.")
+            print_flush("Rewrite unsuccessful: test finished.")
             return False
         time.sleep(1)
-    print("Rewrite unsuccessful: test timed out.")
+    print_flush("Rewrite unsuccessful: test timed out.")
     return False
 
 def run_test(application):
@@ -110,7 +115,7 @@ def run_test(application):
 #### Helpers: Saving/reverting reports
 
 def reports_save():
-    print("Saving current reports...")
+    print_flush("Saving current reports...")
     cmdarr = ["task", "reports-save"]
     try:
         subprocess.run(cmdarr, cwd=ROOT, env=dict(os.environ, PWD=ROOT), check=True)
@@ -119,7 +124,7 @@ def reports_save():
     atexit.register(reports_revert) # Let's make sure to revert the reports if this eval is killed early
 
 def reports_revert():
-    print("Reverting reports to be current...")
+    print_flush("Reverting reports to be current...")
     subprocess.run(["task", "reports-revert"], cwd=ROOT, env=dict(os.environ, PWD=ROOT))
     atexit.unregister(reports_revert)
 
@@ -159,7 +164,7 @@ def rewrite_eval_report_argval(r, arg_num, debug_str, save_uflow):
     iflows = r.get_iflows_list(arg_num)
     if not iflows: return uflow_done(r, arg_num, None, save_uflow)
     for iflow_num,iflow in enumerate(iflows,1):
-        print("========================================")
+        print_flush("========================================")
         # TODO: Expand this to multiple simultaneous rewrites. For now, we'll just do one rewrite per conf.
         config = {  "rewrites": [{"type": iflow["type"], "application": r.application,
                         "syscall": r.syscall, "syscall_arg_num": arg_num,
@@ -175,11 +180,11 @@ def rewrite_eval_report_argval(r, arg_num, debug_str, save_uflow):
             elif get_done_iflows(config["rewrites"], testcase) == True: return config
         write_config(config)
         write_testcase(r.application, testcase)
-        print("Core: " + r.application_corepath)
-        print("Testing " + debug_str + ", iflow " + str(iflow_num) + "/" + str(len(iflows)))
+        print_flush("Core: " + r.application_corepath)
+        print_flush("Testing " + debug_str + ", iflow " + str(iflow_num) + "/" + str(len(iflows)))
         #input("======================================== Press enter to continue...")
         iflow_has_uflow = run_test(r.application)
-        print("Verified: " + str(iflow_has_uflow))
+        print_flush("Verified: " + str(iflow_has_uflow))
         add_to_done_iflows(config["rewrites"], testcase, iflow_has_uflow)
         #input("======================================== Press enter to continue...")
         if iflow_has_uflow: return uflow_done(r, arg_num, config, save_uflow) # No need to verify different iflows of the same report if we know it has one uflow
@@ -204,7 +209,7 @@ def rewrite_eval_report_arg(r, arg_num, debug_str):
         if all_uflow and ((all_uflow['results']['can_be_file_fd'] and fd_to_check['type'] == "FILE-FD") or \
            (all_uflow['results']['can_be_socket_fd'] and fd_to_check['type'] == "SOCKET-FD")):
             continue # No need to verify the same FD type multiple times if we already know this report has a uflow from that FD type
-        if fd_to_check['type'] == "DUP-FD": print("TODO: Handle DUP-FD...")
+        if fd_to_check['type'] == "DUP-FD": print_flush("TODO: Handle DUP-FD...")
         if fd_to_check['report_num'] == 0: continue
         fdc_r = get_report(fd_to_check['report_num'], r.application_corepath, (r.pid, r.ppid, r.tid, r.ptid))
         chain_arg_count = len(fdc_r.syscall_args)
@@ -236,13 +241,13 @@ def rewrite_eval(LROOT, app):
                 for r_num,r in enumerate(rs_appbt,1):
                     if r_num >= REPORTS_LIMIT: break # Let's only evaluate up REPORTS_LIMIT reports from the same appbt (some appbts have hundreds of reports)
                     debug_str = "(SEC-SENSITIVE SYSCALL) " + syscall + ": arg " + str(arg_num+1) + "/" + str(arg_count) + ", app+bt " + str(appbt_nr) + "/" + str(COUNT_APPBTS) + ", report " + str(r_num) + "/" + str(COUNT_THISAPPBT)
-                    print("**************** " + debug_str)
+                    print_flush("**************** " + debug_str)
                     appbt_has_uflow = rewrite_eval_report_arg(r, arg_num, debug_str)
                     #input("======================================== Press enter to continue...")
                     if appbt_has_uflow: break # No need to verify the same app+bt multiple times if we know it has a uflow
 
 def rewrite_reset():
-    print("Resetting candidates analysis...")
+    print_flush("Resetting candidates analysis...")
     Report.objects.filter(
             Q(arg0_done_uflow_eval=True) |
             Q(arg1_done_uflow_eval=True) |
