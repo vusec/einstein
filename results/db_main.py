@@ -30,7 +30,7 @@ if __name__ == "__main__":
         case 'analysis_reset': analysis_reset()
         case 'analyze_reports': analyze_reports(args.app)
         case 'analyze_rop_reports': analyze_rop_reports()
-        case 'analyze_candidates': rewrite_eval(args.root_path)
+        case 'analyze_candidates': rewrite_eval(args.root_path, args.app)
         case 'print_candidates': print_candidates()
         case 'print_rop_candidates': print_rop_candidates()
         case 'print_exploits': print_exploits()

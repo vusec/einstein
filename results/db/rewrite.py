@@ -1,6 +1,6 @@
 from db.models import Report, Limits
 from db.output import SYSARGCOUNTS_SECSENS
-from db.analyze import get_report
+from db.analyze import get_report, rs_in_app
 from django.db.models.fields.json import KT
 from django.db.models import Q
 import json
@@ -217,7 +217,7 @@ def rewrite_eval_report_arg(r, arg_num, debug_str):
     uflow_done(r, arg_num, all_uflow, True)
     return all_uflow is not None
 
-def rewrite_eval(LROOT):
+def rewrite_eval(LROOT, app):
     global ROOT
     ROOT=LROOT
     reports_save()
@@ -225,7 +225,7 @@ def rewrite_eval(LROOT):
     for syscall, arg_count in SYSARGCOUNTS_SECSENS.items():
         for arg_num in range(0,arg_count):
             # TODO: Format done_iflows differently then clear the 'done_iflows' for THIS syscall arg num (but keep the FD-configuring 'done_iflows')
-            rs_syscall = Report.objects.filter(syscall=syscall,**{Limits.liflow(arg_num,'match_len',Limits.MATCH_LEN_GET_IFLOWS):True})
+            rs_syscall = rs_in_app(Report.objects,app).filter(syscall=syscall,**{Limits.liflow(arg_num,'match_len',Limits.MATCH_LEN_GET_IFLOWS):True})
             appbts_todo = rs_syscall.filter(**{'arg'+str(arg_num)+'_done_uflow_eval':False}).values_list('application', 'backtrace').distinct()
             appbts_done = rs_syscall.filter(**{'has_arg'+str(arg_num)+'_uflow__isnull':False}).values_list('application', 'backtrace').distinct()
             COUNT_APPBTS = len(appbts_todo)
