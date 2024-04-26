@@ -243,16 +243,28 @@ def rewrite_eval(LROOT, app):
 
 def rewrite_reset():
     print("Resetting candidates analysis...")
-    Report.objects.update(
-            arg0_done_uflow_eval=False,
-            arg1_done_uflow_eval=False,
-            arg2_done_uflow_eval=False,
-            arg3_done_uflow_eval=False,
-            arg4_done_uflow_eval=False,
-            arg5_done_uflow_eval=False,
-            has_arg0_uflow=None,
-            has_arg1_uflow=None,
-            has_arg2_uflow=None,
-            has_arg3_uflow=None,
-            has_arg4_uflow=None,
-            has_arg5_uflow=None)
+    Report.objects.filter(
+            Q(arg0_done_uflow_eval=True) |
+            Q(arg1_done_uflow_eval=True) |
+            Q(arg2_done_uflow_eval=True) |
+            Q(arg3_done_uflow_eval=True) |
+            Q(arg4_done_uflow_eval=True) |
+            Q(arg5_done_uflow_eval=True) |
+            Q(has_arg0_uflow__isnull=False) |
+            Q(has_arg1_uflow__isnull=False) |
+            Q(has_arg2_uflow__isnull=False) |
+            Q(has_arg3_uflow__isnull=False) |
+            Q(has_arg4_uflow__isnull=False) |
+            Q(has_arg5_uflow__isnull=False)).update(
+                    arg0_done_uflow_eval=False,
+                    arg1_done_uflow_eval=False,
+                    arg2_done_uflow_eval=False,
+                    arg3_done_uflow_eval=False,
+                    arg4_done_uflow_eval=False,
+                    arg5_done_uflow_eval=False,
+                    has_arg0_uflow=None,
+                    has_arg1_uflow=None,
+                    has_arg2_uflow=None,
+                    has_arg3_uflow=None,
+                    has_arg4_uflow=None,
+                    has_arg5_uflow=None)
