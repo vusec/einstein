@@ -4,14 +4,14 @@ from db.add import add_reports, add_rop_reports
 from db.analyze import analysis_reset, analyze_reports, analyze_rop_reports
 from db.custom import custom
 from db.output import print_graphs, print_candidates, print_exploits, print_rop_candidates
-from db.rewrite import rewrite_eval
+from db.rewrite import rewrite_eval, rewrite_reset
 import argparse
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Process Einstein reports.')
     parser.add_argument('action', choices=['add_reports', 'add_rop_reports',
-                                           'analysis_reset',
                                            'analyze_reports', 'analyze_rop_reports', 'analyze_candidates',
+                                           'reset_reports_analysis', 'reset_candidates_analysis',
                                            'print_candidates', 'print_rop_candidates', 'print_exploits',
                                            'print_graphs', 'custom'],
                         help='action to perform')
@@ -27,10 +27,11 @@ if __name__ == "__main__":
     match args.action:
         case 'add_reports': add_reports(args.json_path)
         case 'add_rop_reports': add_rop_reports(args.json_path)
-        case 'analysis_reset': analysis_reset()
         case 'analyze_reports': analyze_reports(args.app)
         case 'analyze_rop_reports': analyze_rop_reports()
         case 'analyze_candidates': rewrite_eval(args.root_path, args.app)
+        case 'reset_reports_analysis': analysis_reset()
+        case 'reset_candidates_analysis': rewrite_reset()
         case 'print_candidates': print_candidates()
         case 'print_rop_candidates': print_rop_candidates()
         case 'print_exploits': print_exploits()

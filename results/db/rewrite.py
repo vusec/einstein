@@ -240,3 +240,19 @@ def rewrite_eval(LROOT, app):
                     appbt_has_uflow = rewrite_eval_report_arg(r, arg_num, debug_str)
                     #input("======================================== Press enter to continue...")
                     if appbt_has_uflow: break # No need to verify the same app+bt multiple times if we know it has a uflow
+
+def rewrite_reset():
+    print("Resetting candidates analysis...")
+    Report.objects.update(
+            arg0_done_uflow_eval=False,
+            arg1_done_uflow_eval=False,
+            arg2_done_uflow_eval=False,
+            arg3_done_uflow_eval=False,
+            arg4_done_uflow_eval=False,
+            arg5_done_uflow_eval=False,
+            has_arg0_uflow=None,
+            has_arg1_uflow=None,
+            has_arg2_uflow=None,
+            has_arg3_uflow=None,
+            has_arg4_uflow=None,
+            has_arg5_uflow=None)

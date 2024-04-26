@@ -292,10 +292,13 @@ tasks:
     cmds:
       - cd {{.RESULTS}} && ./db_main.py analyze_candidates --root_path {{.ROOT}} --app={{.CLI_ARGS}}
 
-  db-analysis-reset:
-    desc: Analyze candidate exploits to determine which are confirmed exploits
+  db-reset-reports-analysis:
     cmds:
-      - cd {{.RESULTS}} && ./db_main.py analysis_reset
+      - cd {{.RESULTS}} && ./db_main.py reset_reports_analysis
+
+  db-reset-candidates-analysis:
+    cmds:
+      - cd {{.RESULTS}} && ./db_main.py reset_candidates_analysis
 
   db-print-candidates:
     cmds:
