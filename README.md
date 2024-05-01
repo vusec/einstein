@@ -2,15 +2,8 @@
 
 We present Einstein, a data-only attack exploitation pipeline that uses dynamic taint analysis policies to: (i) scan for chains of vulnerable system calls (e.g., to execute code or corrupt the filesystem), and (ii) generate exploits for those that take unmodified attacker data as input.
 Einstein discovers thousands of vulnerable syscalls in common server applications.
-Using `nginx` as a case study, we use Einstein to generate 944 mitigation-bypassing exploits.
+Using `nginx` as a case study, we use Einstein to generate hundreds of mitigation-bypassing exploits.
 You can find the full paper [here](https://download.vusec.net/papers/einstein_sec24.pdf).
-
-<!---
-## Directory Structure ##
-
-This repository is structured as follows:
--  _**TODO**_
---->
 
 ## Description & Requirements ##
 
@@ -25,7 +18,7 @@ The files for the artifact evaluation are available at the [`ae` tag of the repo
 
 ### Hardware dependencies ###
 
-Einstein requires an x86-64 machine (Intel recommended), enough RAM to run the instrumented target programs (minimum 48 GB), and enough storage for hundreds of program snapshots (minimum 2 TB for this evaluation).
+Einstein requires an x86-64 machine (Intel recommended); enough RAM to simultaneously load multiple program snapshots into memory, so Einstein can post-process reports in parallel (recommended 100 GB RAM); and enough storage for hundreds of program snapshots (minimum 2 TB storage for this evaluation).
 We recommend using a machine with a high core count to speed up Einstein's report post-processing.
 
 ### Software dependencies ###
@@ -47,12 +40,15 @@ To build [libdft](https://github.com/vusec/libdft64-ng), the command server, the
 
 ### Basic Test ###
 
-Next, test that the different components work as follows[^1]:
-[^1]: For any commands that run the `db-analyze-reports` task: If it fails, try running the `db-analyze-reports-singleproc` task instead. It will be slower, but will avoid any load-related crashes.
+We first make a couple notes about running Einstein:
+- Due to the non-deterministic nature of dynamic analysis (from concurrency issues, system variability, etc.) [[1](https://www.usenix.org/legacy/event/osdi10/tech/full_papers/Bergan.pdf),[2](https://www3.cs.stonybrook.edu/~dongyoon/papers/EUROSYS-17-NodeFz.pdf)], the actual results may slightly deviate from the expected results.
+- If the `db-analyze-reports` task fails, try running the `db-analyze-reports-singleproc` task instead. It will be slower, but will avoid any system load-related crashes.
+
+Test that the different components work as follows:
 - **(T1)**: *libdft memory tainting [1 compute-second].*\
-*To test libdft's "taint all memory" functionality, run `task libdft-test -- memtaint` and compare its output to the [expected output](https://github.com/vusec/libdft64-ng/blob/master/tests/memtaint.expected.out). Note that the addresses in the actual output may differ from the addresses in the expected output.*
+*To test libdft's "taint all memory" functionality, run `task libdft-test -- memtaint` and compare its output to the [expected output](https://github.com/vusec/libdft64-ng/blob/master/tests/memtaint.expected.out).*
 - **(T2)**: *libdft instruction tainting [1 compute-second].*\
-*To test libdft's per-instruction taint policies, run `task libdft-test -- ins` and compare its output to the [expected output](https://github.com/vusec/libdft64-ng/blob/master/tests/ins.expected.out). Note that the addresses in the actual output may differ from the addresses in the expected output.*
+*To test libdft's per-instruction taint policies, run `task libdft-test -- ins` and compare its output to the [expected output](https://github.com/vusec/libdft64-ng/blob/master/tests/ins.expected.out).*
 - **(T3)**: *Einstein tool [1 compute-minute].*\
 *To test Einstein on a simple program, run `task einstein-test`. Then, compare the output of `task db-print-candidates` with the [expected output](apps/tests/src/tainted-syscall.expected.out).*
 - **(T4)**: *Target applications [4 compute-minutes].*\
