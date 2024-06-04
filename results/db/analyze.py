@@ -516,28 +516,22 @@ def analyze_sec_reports_from_core_internal(core, rs, COUNT):
 
 ################################################################
 
-def get_core_addrs_arg(sa):
-    if sa['type'] == 'none': return set()
-    s = set()
+def get_core_addrs_arg(obj):
+    taints = set()
 
-    found_taint_field = False # Just to make sure we don't miss any taint fields
-    try:
-        s.update({e for l in sa['dword_taint'] for e in l if l != "FULL"})
-        found_taint_field = True
-    except KeyError: pass
+    def get_core_addrs_arg_recursive(obj):
+        if isinstance(obj, dict):
+            for key, value in obj.items():
+                if key.endswith('_taint'):
+                    for taint in value:
+                        if taint != "FULL": taints.update(taint)
+                get_core_addrs_arg_recursive(value)
+        elif isinstance(obj, list):
+            for item in obj:
+                get_core_addrs_arg_recursive(item)
 
-    try:
-        s.update({e for l in sa['qword_taint'] for e in l if l != "FULL"})
-        found_taint_field = True
-    except KeyError: pass
-
-    try:
-        s.update({e for l in sa['buf_taint'] for e in l if l != "FULL"})
-        found_taint_field = True
-    except KeyError: pass
-
-    if not found_taint_field: EXIT_ERR("Error finding taint for syscall argument: " + str(sa))
-    return s
+    get_core_addrs_arg_recursive(obj)
+    return taints
 
 def get_core_addrs(rs):
     core_addrs = set()
