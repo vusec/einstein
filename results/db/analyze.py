@@ -10,6 +10,7 @@ from pygdbmi.constants import GdbTimeoutError
 import multiprocessing.pool as mpool
 import atexit
 from functools import cache
+from time import sleep
 
 DISABLE_PROGRESS_BAR_FOR_ANALYSIS = False
 DISABLE_PROGRESS_BAR_PER_CORE = True
@@ -50,6 +51,7 @@ SYSCALLS_FDCONF=list(SYSARGCOUNTS_FDCONF.keys()) # I.e., ['creat', 'open', 'open
 #### Core management
 
 ERR_VAL = float('inf')
+WAIT_VAL = float('-inf')
 PAGE_SIZE = 4096
 assert PAGE_SIZE > Limits.MATCH_LEN_MAX
 
@@ -139,13 +141,23 @@ def core_addr_prep(reg_tup):
     size = reg_tup['size']
     core = reg_tup['core']
     vals_list = make_gdb_query(core, "-data-read-memory-bytes " + hex(addr) + " " + str(size), size)
-    if vals_list == None: return
-    for i in range(0, size): add_to_corevals(addr + i, vals_list[i], core)
+    if vals_list == None:
+        for i in range(0, size): add_to_corevals(addr + i, ERR_VAL, core)
+    else:
+        for i in range(0, size): add_to_corevals(addr + i, vals_list[i], core)
 
 def core_addr_lookup(addr, core, size):
-    if core == "" or not is_in_corevals(addr, core, size): return ERR_VAL
+    if core == "": return ERR_VAL
+    while is_in_corevals(addr, core, size):
+        vals_list = get_corevals(addr, core, size)
+        if WAIT_VAL in vals_list: sleep(0.1) # TODO: A better way of checking this
+        else: return bytearray(vals_list)
+    core_addr_prep({'start': addr - addr % PAGE_SIZE, 'size': PAGE_SIZE, 'core': core})
     vals_list = get_corevals(addr, core, size)
-    #vals_list += [0] * (size - len(vals_list)) # Pad with zeros up to size
+    if ERR_VAL in vals_list: return ERR_VAL
+    if WAIT_VAL in vals_list:
+        print("Warning: WAIT_VAL is in vals_list. Something went wrong.")
+        return ERR_VAL
     return bytearray(vals_list)
 
 def core_addr_lookup_qword(addr, core): return struct.unpack('<Q', core_addr_lookup(addr, core, 8))[0]
