@@ -56,7 +56,7 @@ PAGE_SIZE = 4096
 assert PAGE_SIZE > Limits.MATCH_LEN_MAX
 
 corevals = {}
-def is_in_corevals(addr, core, size): return addr in corevals[core] and addr+size in corevals[core] # TODO: Check every single addr in range, rather than just the beginning/ending?
+def is_in_corevals(addr, core, size): return size > 0 and addr in corevals[core] and addr+size-1 in corevals[core] # TODO: Check every single addr in range, rather than just the beginning/ending?
 def get_corevals(addr, core, size): return [corevals[core][this_addr] for this_addr in range(addr,addr+size)]
 def add_to_corevals(addr, val, core): corevals[core][addr] = val
 
@@ -160,8 +160,14 @@ def core_addr_lookup(addr, core, size):
         return ERR_VAL
     return bytearray(vals_list)
 
-def core_addr_lookup_qword(addr, core): return struct.unpack('<Q', core_addr_lookup(addr, core, 8))[0]
-def core_addr_lookup_byte(addr, core): return struct.unpack('<B', core_addr_lookup(addr, core, 1))[0]
+def core_addr_lookup_qword(addr, core):
+    vals_list = core_addr_lookup(addr, core, 8)
+    if vals_list == ERR_VAL: return ERR_VAL
+    return struct.unpack('<Q', vals_list)[0]
+def core_addr_lookup_byte(addr, core):
+    vals_list = core_addr_lookup(addr, core, 1)
+    if vals_list == ERR_VAL: return ERR_VAL
+    return struct.unpack('<B', vals_list)[0]
 
 def core_addr_has_byte(addr, exp_val, core):
     found_val = core_addr_lookup_byte(addr, core)
@@ -170,7 +176,7 @@ def core_addr_has_byte(addr, exp_val, core):
 
 def core_addr_has_bytes(addr, exp_vals, core, ptr_depth_limit):
     if len(exp_vals) > Limits.MATCH_LEN_MAX: EXIT_ERR("Error: len(exp_vals) (" + str(len(exp_vals)) + ") should be less than or equal to Limits.MATCH_LEN_MAX (" + str(Limits.MATCH_LEN_MAX) + ")")
-    found_vals_all = core_addr_lookup(addr, core, Limits.MATCH_LEN_MAX)
+    found_vals_all = core_addr_lookup(addr, core, len(exp_vals))
     if found_vals_all == ERR_VAL: return False
 
     #print("Checking whether *" + hex(addr) + " == " + hex(int.from_bytes(found_vals_all[0:len(exp_vals)], 'little')) + " is equal to " + hex(int.from_bytes(exp_vals, 'little')))
