@@ -19,6 +19,9 @@ GDB_MAX_QUERY_FAILURES = 10
 GDB_MAX_TIMEOUTS = 50
 GDB_TIMEOUT_SECS = 5
 
+CORE_LOOKUP_WAIT_SECS = 0.5
+CORE_LOOKUP_MAX_WAITS = 40
+
 def EXIT_ERR(msg=""):
     if msg: print(msg)
     terminate_all_processes()
@@ -148,11 +151,20 @@ def core_addr_prep(reg_tup):
 
 def core_addr_lookup(addr, core, size):
     if core == "": return ERR_VAL
+    wait_count = 0
     while is_in_corevals(addr, core, size):
         vals_list = get_corevals(addr, core, size)
-        if WAIT_VAL in vals_list: sleep(0.1) # TODO: A better way of checking this
-        else: return bytearray(vals_list)
+        if WAIT_VAL in vals_list:
+            # TODO: A better way of checking this
+            if wait_count >= CORE_LOOKUP_MAX_WAITS: return ERR_VAL
+            sleep(CORE_LOOKUP_WAIT_SECS)
+            wait_count = wait_count + 1
+            continue
+        if ERR_VAL in vals_list: return ERR_VAL
+        return bytearray(vals_list)
+    for i in range(0, size): add_to_corevals(addr + i, WAIT_VAL, core)
     core_addr_prep({'start': addr - addr % PAGE_SIZE, 'size': PAGE_SIZE, 'core': core})
+    core_addr_prep({'start': (addr - addr % PAGE_SIZE) + PAGE_SIZE, 'size': PAGE_SIZE, 'core': core})
     vals_list = get_corevals(addr, core, size)
     if ERR_VAL in vals_list: return ERR_VAL
     if WAIT_VAL in vals_list:
