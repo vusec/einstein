@@ -3,24 +3,24 @@ Candidate exploit tables:
 
 Vulnerable gadgets found per syscall and argument type:
 Syscalls | Total covered |Total found where this arg has a dataflow from attacker data (% that are identity dataflows, if any)
-mmap     |     221       |       -       |      12       |       -       |       -       |       -       |       1      
-mprotect |      52       |   2 (100%)    |   2 (100%)    |       -       |               |               |              
+mmap     |     220       |       -       |    14 (7%)    |       -       |       -       |       -       |       1      
+mprotect |      52       |    3 (67%)    |   3 (100%)    |       1       |               |               |              
 pwrite64 |      13       |   2 (100%)    |   4 (100%)    |       -       |    4 (50%)    |               |              
 sendfile |      1        |       -       |       -       |       1       |       1       |               |              
 sendmsg  |      2        |       -       |       1       |       -       |               |               |              
-sendto   |      8        |       1       |   1 (100%)    |       1       |       -       |       -       |       -      
-write    |      89       |   20 (10%)    |   45 (67%)    |   39 (13%)    |               |               |              
-writev   |      3        |       -       |    3 (33%)    |       -       |               |               |              
+sendto   |      8        |       1       |       1       |       1       |       -       |       -       |       -      
+write    |      90       |   20 (10%)    |   46 (76%)    |   40 (18%)    |               |               |              
+writev   |      3        |       -       |   3 (100%)    |       -       |               |               |              
 * Syscalls not covered: execve execveat mremap pwritev pwritev2 remap_file_pages sendmmsg 
 
 Vulnerable gadgets found per target application:
-- apache: 12 gadgets (33% with an iflow)
-- lighttpd: 1 gadgets (0% with an iflow)
+- apache: 15 gadgets (47% with an iflow)
+- lighttpd: 1 gadgets (100% with an iflow)
 - memcached: 4 gadgets (50% with an iflow)
 - nginx: 3 gadgets (67% with an iflow)
-- postgres: 38 gadgets (61% with an iflow)
-- redis: 11 gadgets (100% with an iflow)
-* TOTAL: 69 gadgets (61% with an iflow)
+- postgres: 38 gadgets (58% with an iflow)
+- redis: 12 gadgets (100% with an iflow)
+* TOTAL: 73 gadgets (63% with an iflow)
 
 =======================================================================
 
